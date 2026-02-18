@@ -281,11 +281,11 @@
                 <div
                     class="flex h-full min-w-[300px] max-w-[350px] flex-col rounded-xl border p-4 {board ===
                     'done'
-                        ? 'bg-green-100/50 border-green-200'
+                        ? 'bg-green-100/50 border-green-200 dark:bg-green-900/20 dark:border-green-800'
                         : board === 'today'
-                          ? 'bg-blue-100/50 border-blue-200'
+                          ? 'bg-blue-100/50 border-blue-200 dark:bg-blue-900/20 dark:border-blue-800'
                           : board === 'todo'
-                            ? 'bg-orange-100/50 border-orange-200'
+                            ? 'bg-orange-100/50 border-orange-200 dark:bg-orange-900/20 dark:border-orange-800'
                             : 'bg-muted/50'}"
                     role="region"
                     aria-label="{board} column"
