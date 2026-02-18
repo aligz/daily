@@ -11,7 +11,12 @@ Route::get('/', function () {
 })->name('home');
 
 Route::get('dashboard', function () {
-    return Inertia::render('Dashboard');
+    return redirect()->route('tasks.index');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
-require __DIR__.'/settings.php';
+
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::resource('tasks', \App\Http\Controllers\TaskController::class);
+});
+
+require __DIR__ . '/settings.php';
