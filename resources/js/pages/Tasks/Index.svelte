@@ -1,13 +1,13 @@
 <script lang="ts">
     import AppLayout from '@/layouts/AppLayout.svelte';
     import AppHead from '@/components/AppHead.svelte';
-    import { useForm, router } from '@inertiajs/svelte';
+    import { useForm, router, page } from '@inertiajs/svelte';
     import type { BreadcrumbItem } from '@/types';
     import { Plus, GripVertical } from 'lucide-svelte';
     import { Button } from '@/components/ui/button';
     import { Input } from '@/components/ui/input';
     import { Label } from '@/components/ui/label';
-    import { store, update } from '@/routes/tasks';
+    import { store, update, destroy } from '@/routes/tasks';
     import {
         Dialog,
         DialogContent,
@@ -41,6 +41,12 @@
         created_at: string;
         completed_at: string | null;
         user: User;
+        history: {
+            id: number;
+            from_status: string | null;
+            to_status: string;
+            created_at: string;
+        }[];
     }
 
     export let tasks: Record<string, Task[]>;
@@ -72,6 +78,7 @@
     let draggedTask: Task | null = null;
 
     function handleDragStart(event: DragEvent, task: Task) {
+        if (task.user.id !== $page.props.auth.user.id) return;
         draggedTask = task;
         if (event.dataTransfer) {
             event.dataTransfer.effectAllowed = 'move';
@@ -100,6 +107,35 @@
             .slice(0, 2)
             .join('')
             .toUpperCase();
+    }
+
+    const userColors = [
+        'bg-red-500 text-white',
+        'bg-orange-500 text-white',
+        'bg-amber-500 text-white',
+        'bg-yellow-500 text-black',
+        'bg-lime-500 text-black',
+        'bg-green-500 text-white',
+        'bg-emerald-500 text-white',
+        'bg-teal-500 text-white',
+        'bg-cyan-500 text-black',
+        'bg-sky-500 text-white',
+        'bg-blue-500 text-white',
+        'bg-indigo-500 text-white',
+        'bg-violet-500 text-white',
+        'bg-purple-500 text-white',
+        'bg-fuchsia-500 text-white',
+        'bg-pink-500 text-white',
+        'bg-rose-500 text-white',
+    ];
+
+    function getUserColor(name: string) {
+        let hash = 0;
+        for (let i = 0; i < name.length; i++) {
+            hash = name.charCodeAt(i) + ((hash << 5) - hash);
+        }
+        const index = Math.abs(hash) % userColors.length;
+        return userColors[index];
     }
 
     function groupTasksByDate(tasks: Task[]) {
@@ -179,12 +215,31 @@
         }
     }
 
+    function deleteTask() {
+        if (
+            editingTask &&
+            confirm('Are you sure you want to delete this task?')
+        ) {
+            router.delete(destroy.url({ task: editingTask.id }), {
+                onSuccess: () => {
+                    isOpen = false;
+                    $form.reset();
+                    editingTask = null;
+                },
+            });
+        }
+    }
+
     // Watch for dialog close to reset state
     $: if (!isOpen) {
         // slight delay to check if it wasn't just a re-render or if we need this
         // actually better to just reset when opening new one or explicitly closing
         if (!editingTask) $form.reset();
     }
+
+    $: isOwner = editingTask
+        ? editingTask.user.id === $page.props.auth.user.id
+        : true;
 </script>
 
 <AppHead title="Tasks" />
@@ -227,6 +282,7 @@
                                 bind:value={$form.title}
                                 placeholder="Task title"
                                 autocomplete="off"
+                                disabled={!isOwner}
                             />
                             {#if $form.errors.title}
                                 <span class="text-sm text-destructive"
@@ -241,6 +297,7 @@
                                 bind:value={$form.reference}
                                 placeholder="e.g. JIRA-123"
                                 autocomplete="off"
+                                disabled={!isOwner}
                             />
                             {#if $form.errors.reference}
                                 <span class="text-sm text-destructive"
@@ -257,6 +314,7 @@
                                 bind:value={$form.description}
                                 class="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                                 placeholder="Task details..."
+                                disabled={!isOwner}
                             ></textarea>
                             {#if $form.errors.description}
                                 <span class="text-sm text-destructive"
@@ -264,12 +322,67 @@
                                 >
                             {/if}
                         </div>
-                        <DialogFooter>
-                            <Button type="submit" disabled={$form.processing}
-                                >{editingTask
-                                    ? 'Update Task'
-                                    : 'Save Task'}</Button
-                            >
+
+                        {#if editingTask && editingTask.history && editingTask.history.length > 0}
+                            <div class="grid gap-2">
+                                <Label>History</Label>
+                                <div
+                                    class="rounded-md border p-2 text-xs text-muted-foreground bg-muted/50 max-h-[150px] overflow-y-auto"
+                                >
+                                    {#each editingTask.history
+                                        .slice()
+                                        .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()) as history}
+                                        <div class="mb-1 last:mb-0">
+                                            <span class="font-mono"
+                                                >{new Date(
+                                                    history.created_at,
+                                                ).toLocaleString('id-ID', {
+                                                    day: 'numeric',
+                                                    month: 'short',
+                                                    hour: '2-digit',
+                                                    minute: '2-digit',
+                                                })}</span
+                                            >:
+                                            {#if history.from_status}
+                                                Changed from <span
+                                                    class="font-semibold capitalize"
+                                                    >{history.from_status}</span
+                                                >
+                                                to
+                                                <span
+                                                    class="font-semibold capitalize"
+                                                    >{history.to_status}</span
+                                                >
+                                            {:else}
+                                                Created in <span
+                                                    class="font-semibold capitalize"
+                                                    >{history.to_status}</span
+                                                >
+                                            {/if}
+                                        </div>
+                                    {/each}
+                                </div>
+                            </div>
+                        {/if}
+
+                        <DialogFooter class="sm:justify-between w-full mt-4">
+                            {#if editingTask && isOwner}
+                                <Button
+                                    type="button"
+                                    variant="destructive"
+                                    on:click={deleteTask}
+                                    disabled={$form.processing}>Delete</Button
+                                >
+                            {/if}
+                            {#if isOwner}
+                                <Button
+                                    type="submit"
+                                    disabled={$form.processing}
+                                    >{editingTask
+                                        ? 'Update Task'
+                                        : 'Save Task'}</Button
+                                >
+                            {/if}
                         </DialogFooter>
                     </form>
                 </DialogContent>
@@ -318,8 +431,12 @@
                                     <div
                                         role="button"
                                         tabindex="0"
-                                        class="cursor-grab active:cursor-grabbing"
-                                        draggable="true"
+                                        class={task.user.id ===
+                                        $page.props.auth.user.id
+                                            ? 'cursor-grab active:cursor-grabbing'
+                                            : 'cursor-pointer'}
+                                        draggable={task.user.id ===
+                                            $page.props.auth.user.id}
                                         on:dragstart={(e) =>
                                             handleDragStart(e, task)}
                                         on:click={() => openDialog(task)}
@@ -343,7 +460,9 @@
                                                     </CardTitle>
                                                     <Avatar class="h-5 w-5">
                                                         <AvatarFallback
-                                                            class="text-[9px]"
+                                                            class="text-[9px] {getUserColor(
+                                                                task.user.name,
+                                                            )}"
                                                         >
                                                             {getInitials(
                                                                 task.user.name,
@@ -377,8 +496,12 @@
                                 <div
                                     role="button"
                                     tabindex="0"
-                                    class="cursor-grab active:cursor-grabbing"
-                                    draggable="true"
+                                    class={task.user.id ===
+                                    $page.props.auth.user.id
+                                        ? 'cursor-grab active:cursor-grabbing'
+                                        : 'cursor-pointer'}
+                                    draggable={task.user.id ===
+                                        $page.props.auth.user.id}
                                     on:dragstart={(e) =>
                                         handleDragStart(e, task)}
                                     on:click={() => openDialog(task)}
@@ -399,7 +522,9 @@
                                                 </CardTitle>
                                                 <Avatar class="h-5 w-5">
                                                     <AvatarFallback
-                                                        class="text-[9px]"
+                                                        class="text-[9px] {getUserColor(
+                                                            task.user.name,
+                                                        )}"
                                                     >
                                                         {getInitials(
                                                             task.user.name,

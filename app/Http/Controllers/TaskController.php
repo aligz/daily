@@ -12,7 +12,7 @@ class TaskController extends Controller
 {
     public function index()
     {
-        $tasks = Task::with('user')
+        $tasks = Task::with(['user', 'history'])
             ->get()
             ->sortByDesc(function ($task) {
                 return $task->status === 'done' ? $task->completed_at : $task->created_at;
@@ -52,6 +52,10 @@ class TaskController extends Controller
 
     public function update(Request $request, Task $task)
     {
+        if ($task->user_id !== auth()->id()) {
+            abort(403, 'Unauthorized action.');
+        }
+
         $validated = $request->validate([
             'title' => 'sometimes|string|max:255',
             'description' => 'nullable|string',
@@ -71,6 +75,7 @@ class TaskController extends Controller
 
             if ($newStatus === 'today' && $oldStatus !== 'today') {
                 // Find existing today task and move to todo
+                /** @var \App\Models\Task|null $existingTodayTask */
                 $existingTodayTask = auth()->user()->tasks()
                     ->where('status', 'today')
                     ->where('id', '!=', $task->id)
@@ -102,6 +107,10 @@ class TaskController extends Controller
 
     public function destroy(Task $task)
     {
+        if ($task->user_id !== auth()->id()) {
+            abort(403, 'Unauthorized action.');
+        }
+
         $task->delete();
         return redirect()->back();
     }
