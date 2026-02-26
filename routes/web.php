@@ -5,6 +5,10 @@ use Inertia\Inertia;
 use Laravel\Fortify\Features;
 
 Route::get('/', function () {
+    if (auth()->check()) {
+        return redirect()->route('tasks.index');
+    }
+
     return Inertia::render('Welcome', [
         'canRegister' => Features::enabled(Features::registration()),
     ]);
@@ -14,9 +18,8 @@ Route::get('dashboard', function () {
     return redirect()->route('tasks.index');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
-
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('tasks', \App\Http\Controllers\TaskController::class);
 });
 
-require __DIR__ . '/settings.php';
+require __DIR__.'/settings.php';
