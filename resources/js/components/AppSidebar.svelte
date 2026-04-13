@@ -17,8 +17,8 @@
         SidebarMenuButton,
         SidebarMenuItem,
     } from '@/components/ui/sidebar';
-    import tasks from '@/routes/tasks';
     import { toUrl } from '@/lib/utils';
+    import tasks from '@/routes/tasks';
     import type { NavItem } from '@/types';
 
     let {

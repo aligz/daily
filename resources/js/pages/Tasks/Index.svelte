@@ -1,13 +1,16 @@
 <script lang="ts">
-    import AppLayout from '@/layouts/AppLayout.svelte';
-    import AppHead from '@/components/AppHead.svelte';
     import { useForm, router, page } from '@inertiajs/svelte';
-    import type { BreadcrumbItem } from '@/types';
     import { Plus, GripVertical } from 'lucide-svelte';
+    import AppHead from '@/components/AppHead.svelte';
+    import { Avatar, AvatarFallback } from '@/components/ui/avatar';
     import { Button } from '@/components/ui/button';
-    import { Input } from '@/components/ui/input';
-    import { Label } from '@/components/ui/label';
-    import { store, update, destroy } from '@/routes/tasks';
+    import {
+        Card,
+        CardContent,
+        CardDescription,
+        CardHeader,
+        CardTitle,
+    } from '@/components/ui/card';
     import {
         Dialog,
         DialogContent,
@@ -17,14 +20,11 @@
         DialogTitle,
         DialogTrigger,
     } from '@/components/ui/dialog';
-    import {
-        Card,
-        CardContent,
-        CardDescription,
-        CardHeader,
-        CardTitle,
-    } from '@/components/ui/card';
-    import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+    import { Input } from '@/components/ui/input';
+    import { Label } from '@/components/ui/label';
+    import AppLayout from '@/layouts/AppLayout.svelte';
+    import { store, update, destroy } from '@/routes/tasks';
+    import type { BreadcrumbItem } from '@/types';
 
     interface User {
         id: number;
@@ -392,13 +392,13 @@
         <div class="flex h-full gap-6 overflow-x-auto pb-4">
             {#each boards as board}
                 <div
-                    class="flex h-full min-w-[300px] max-w-[350px] flex-col rounded-xl border p-4 {board ===
+                    class="flex h-full min-w-[300px] max-w-[350px] flex-col rounded-xl p-4 {board ===
                     'done'
-                        ? 'bg-green-100/50 border-green-200 dark:bg-green-900/20 dark:border-green-800'
+                        ? 'bg-green-100 border-green-200 dark:bg-green-900/20 dark:border-green-800'
                         : board === 'today'
-                          ? 'bg-blue-100/50 border-blue-200 dark:bg-blue-900/20 dark:border-blue-800'
+                          ? 'bg-blue-100 border-blue-200 dark:bg-blue-900/20 dark:border-blue-800'
                           : board === 'todo'
-                            ? 'bg-orange-100/50 border-orange-200 dark:bg-orange-900/20 dark:border-orange-800'
+                            ? 'bg-orange-100 border-orange-200 dark:bg-orange-900/20 dark:border-orange-800'
                             : 'bg-muted/50'}"
                     role="region"
                     aria-label="{board} column"
@@ -445,7 +445,7 @@
                                             openDialog(task)}
                                     >
                                         <Card
-                                            class="shadow-none hover:shadow-md transition-shadow py-2 gap-2"
+                                            class="shadow-none hover:shadow-md border-none transition-shadow py-2 gap-2"
                                         >
                                             <CardHeader
                                                 class="p-3 pb-1 space-y-0"
@@ -478,7 +478,7 @@
                                                     </CardDescription>
                                                 {/if}
                                             </CardHeader>
-                                            {#if task.description}
+                                            <!-- {#if task.description}
                                                 <CardContent class="p-3 pt-1">
                                                     <p
                                                         class="text-[11px] text-muted-foreground line-clamp-2"
@@ -486,7 +486,7 @@
                                                         {task.description}
                                                     </p>
                                                 </CardContent>
-                                            {/if}
+                                            {/if} -->
                                         </Card>
                                     </div>
                                 {/each}
@@ -509,7 +509,7 @@
                                         e.key === 'Enter' && openDialog(task)}
                                 >
                                     <Card
-                                        class="shadow-none hover:shadow-md transition-shadow py-2 gap-0"
+                                        class="shadow-none hover:shadow-md border-none transition-shadow py-2 gap-0"
                                     >
                                         <CardHeader class="p-3 pb-1 space-y-0">
                                             <div
