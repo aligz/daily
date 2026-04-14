@@ -3,6 +3,7 @@
     import BookOpen from 'lucide-svelte/icons/book-open';
     import Folder from 'lucide-svelte/icons/folder';
     import LayoutGrid from 'lucide-svelte/icons/layout-grid';
+    import BarChart3 from 'lucide-svelte/icons/bar-chart-3';
     import type { Snippet } from 'svelte';
     import AppLogo from '@/components/AppLogo.svelte';
     import NavFooter from '@/components/NavFooter.svelte';
@@ -32,6 +33,11 @@
             title: 'Tasks',
             href: tasks.index(),
             icon: LayoutGrid,
+        },
+        {
+            title: 'Reports',
+            href: '/reports',
+            icon: BarChart3,
         },
     ];
 

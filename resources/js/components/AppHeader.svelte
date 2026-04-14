@@ -3,6 +3,7 @@
     import BookOpen from 'lucide-svelte/icons/book-open';
     import Folder from 'lucide-svelte/icons/folder';
     import LayoutGrid from 'lucide-svelte/icons/layout-grid';
+    import BarChart3 from 'lucide-svelte/icons/bar-chart-3';
     import Menu from 'lucide-svelte/icons/menu';
     import Search from 'lucide-svelte/icons/search';
     import AppLogo from '@/components/AppLogo.svelte';
@@ -54,9 +55,14 @@
 
     const mainNavItems: NavItem[] = [
         {
-            title: 'Dashboard',
-            href: dashboard(),
+            title: 'Tasks',
+            href: '/tasks',
             icon: LayoutGrid,
+        },
+        {
+            title: 'Reports',
+            href: '/reports',
+            icon: BarChart3,
         },
     ];
 
