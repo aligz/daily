@@ -2,7 +2,6 @@
     import AppLayout from '@/layouts/AppLayout.svelte';
     import AppHead from '@/components/AppHead.svelte';
     import { useForm, router, page } from '@inertiajs/svelte';
-    import type { BreadcrumbItem } from '@/types';
     import { Plus, GripVertical } from 'lucide-svelte';
     import { Button } from '@/components/ui/button';
     import { Input } from '@/components/ui/input';
@@ -50,13 +49,6 @@
     }
 
     export let tasks: Record<string, Task[]>;
-
-    const breadcrumbs: BreadcrumbItem[] = [
-        {
-            title: 'Tasks',
-            href: '/tasks',
-        },
-    ];
 
     const boards = ['backlog', 'todo', 'today', 'done'];
 
@@ -244,8 +236,8 @@
 
 <AppHead title="Tasks" />
 
-<AppLayout {breadcrumbs}>
-    <div class="flex h-full flex-col gap-4 p-4">
+<AppLayout>
+    <div class="flex h-full flex-col p-4">
         <div class="flex items-center justify-between">
             <h1 class="text-2xl font-bold tracking-tight">Task Board</h1>
             <Dialog bind:open={isOpen}>
@@ -389,24 +381,26 @@
             </Dialog>
         </div>
 
-        <div class="flex h-full gap-6 overflow-x-auto pb-4">
+        <div class="flex flex-1 min-h-0 gap-6 overflow-x-auto pb-4">
             {#each boards as board}
                 <div
-                    class="flex h-full min-w-[300px] max-w-[350px] flex-col rounded-xl border p-4 {board ===
-                    'done'
-                        ? 'bg-green-100/50 border-green-200 dark:bg-green-900/20 dark:border-green-800'
-                        : board === 'today'
-                          ? 'bg-blue-100/50 border-blue-200 dark:bg-blue-900/20 dark:border-blue-800'
-                          : board === 'todo'
-                            ? 'bg-orange-100/50 border-orange-200 dark:bg-orange-900/20 dark:border-orange-800'
-                            : 'bg-muted/50'}"
+                    class="flex min-h-0 flex-1 min-w-[300px] max-w-[350px] flex-col rounded border border-muted/50 p-4 bg-muted/50"
                     role="region"
                     aria-label="{board} column"
                     on:drop={(e) => handleDrop(e, board)}
                     on:dragover={handleDragOver}
                 >
-                    <div class="mb-4 flex items-center justify-between">
-                        <h3 class="font-semibold capitalize text-foreground">
+                    <div class="mb-4 flex items-center justify-between px-4 py-2 rounded border
+                        {board ===
+                        'done'
+                            ? 'bg-neon-green/5  border-neon-green/20 text-neon-green'
+                            : board === 'today'
+                              ? 'bg-blue-100/50 border-blue-200 dark:bg-blue-900/20 dark:border-blue-800 text-blue-800'
+                              : board === 'todo'
+                                ? 'bg-orange-100/50 border-orange-200 dark:bg-orange-900/20 dark:border-orange-800 text-orange-800'
+                                : 'bg-muted/50'}
+                        ">
+                        <h3 class="font-semibold capitalize">
                             {board}
                         </h3>
                         <span
@@ -445,7 +439,7 @@
                                             openDialog(task)}
                                     >
                                         <Card
-                                            class="shadow-none hover:shadow-md transition-shadow py-2 gap-2"
+                                            class="shadow-none hover:shadow-md transition-shadow py-2 gap-2 border-transparent"
                                         >
                                             <CardHeader
                                                 class="p-3 pb-1 space-y-0"
@@ -509,7 +503,7 @@
                                         e.key === 'Enter' && openDialog(task)}
                                 >
                                     <Card
-                                        class="shadow-none hover:shadow-md transition-shadow py-2 gap-0"
+                                        class="shadow-none hover:shadow-md transition-shadow border-transparent py-2 gap-0"
                                     >
                                         <CardHeader class="p-3 pb-1 space-y-0">
                                             <div
