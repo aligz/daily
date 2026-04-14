@@ -12,6 +12,8 @@ class TaskController extends Controller
 {
     public function index()
     {
+        $users = \App\Models\User::select('id', 'name', 'email')->get();
+        
         $tasks = Task::with(['user', 'history'])
             ->get()
             ->sortByDesc(function ($task) {
@@ -20,7 +22,8 @@ class TaskController extends Controller
             ->groupBy('status');
 
         return Inertia::render('Tasks/Index', [
-            'tasks' => $tasks
+            'tasks' => $tasks,
+            'users' => $users
         ]);
     }
 

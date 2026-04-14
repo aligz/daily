@@ -48,9 +48,33 @@
         }[];
     }
 
-    export let tasks: Record<string, Task[]>;
+    let { tasks, users }: { tasks: Record<string, Task[]>; users: User[] } =
+        $props();
 
     const boards = ['backlog', 'todo', 'today', 'done'];
+
+    // Filter State
+    let selectedUserId = $state<number | null>(null);
+    let showUserDropdown = $state(false);
+
+    // Filtered Tasks
+    let filteredTasks = $derived.by(() => {
+        if (!selectedUserId) {
+            return tasks;
+        }
+        const filtered: Record<string, Task[]> = {};
+        for (const board of boards) {
+            filtered[board] = (tasks[board] || []).filter(
+                (task) => task.user.id === selectedUserId,
+            );
+        }
+        return filtered;
+    });
+
+    function getSelectedUser(): User | null {
+        if (!selectedUserId) return null;
+        return users.find((u) => u.id === selectedUserId) || null;
+    }
 
     // Move Task Logic
     function moveTask(task: Task, newStatus: string) {
@@ -67,7 +91,7 @@
     }
 
     // Drag and Drop Logic
-    let draggedTask: Task | null = null;
+    let draggedTask = $state<Task | null>(null);
 
     function handleDragStart(event: DragEvent, task: Task) {
         if (task.user.id !== $page.props.auth.user.id) return;
@@ -164,8 +188,8 @@
     }
 
     // Create/Edit Task Logic
-    let isOpen = false;
-    let editingTask: Task | null = null;
+    let isOpen = $state(false);
+    let editingTask = $state<Task | null>(null);
 
     const form = useForm({
         title: '',
@@ -193,8 +217,8 @@
             $form.put(update.url({ task: editingTask.id }), {
                 onSuccess: () => {
                     isOpen = false;
-                    $form.reset();
                     editingTask = null;
+                    $form.reset();
                 },
             });
         } else {
@@ -215,170 +239,263 @@
             router.delete(destroy.url({ task: editingTask.id }), {
                 onSuccess: () => {
                     isOpen = false;
-                    $form.reset();
                     editingTask = null;
+                    $form.reset();
                 },
             });
         }
     }
 
-    // Watch for dialog close to reset state
-    $: if (!isOpen) {
-        // slight delay to check if it wasn't just a re-render or if we need this
-        // actually better to just reset when opening new one or explicitly closing
-        if (!editingTask) $form.reset();
-    }
-
-    $: isOwner = editingTask
-        ? editingTask.user.id === $page.props.auth.user.id
-        : true;
+    let isOwner = $derived.by(() =>
+        editingTask ? editingTask.user.id === $page.props.auth.user.id : true,
+    );
 </script>
 
 <AppHead title="Tasks" />
 
 <AppLayout>
     <div class="flex h-full flex-col p-4">
-        <div class="flex items-center justify-between">
+        <div class="mb-4 flex items-center justify-between">
             <h1 class="text-2xl font-bold tracking-tight">Task Board</h1>
-            <Dialog bind:open={isOpen}>
-                <DialogTrigger asChild>
-                    {#snippet children(params)}
-                        <Button {...params} onclick={() => openDialog()}>
-                            <Plus class="mr-2 h-4 w-4" />
-                            New Task
-                        </Button>
-                    {/snippet}
-                </DialogTrigger>
-                <DialogContent class="sm:max-w-[425px]">
-                    <DialogHeader>
-                        <DialogTitle
-                            >{editingTask
-                                ? 'Edit Task'
-                                : 'Create Task'}</DialogTitle
-                        >
-                        <DialogDescription>
-                            {editingTask
-                                ? 'Edit the details of your task.'
-                                : 'Add a new task to your board.'} Click save when
-                            you're done.
-                        </DialogDescription>
-                    </DialogHeader>
-                    <form
-                        on:submit|preventDefault={submit}
-                        class="grid gap-4 py-4"
-                    >
-                        <div class="grid gap-2">
-                            <Label for="title">Title</Label>
-                            <Input
-                                id="title"
-                                bind:value={$form.title}
-                                placeholder="Task title"
-                                autocomplete="off"
-                                disabled={!isOwner}
-                            />
-                            {#if $form.errors.title}
-                                <span class="text-sm text-destructive"
-                                    >{$form.errors.title}</span
-                                >
-                            {/if}
-                        </div>
-                        <div class="grid gap-2">
-                            <Label for="reference">Reference (Optional)</Label>
-                            <Input
-                                id="reference"
-                                bind:value={$form.reference}
-                                placeholder="e.g. JIRA-123"
-                                autocomplete="off"
-                                disabled={!isOwner}
-                            />
-                            {#if $form.errors.reference}
-                                <span class="text-sm text-destructive"
-                                    >{$form.errors.reference}</span
-                                >
-                            {/if}
-                        </div>
-                        <div class="grid gap-2">
-                            <Label for="description"
-                                >Description (Optional)</Label
-                            >
-                            <textarea
-                                id="description"
-                                bind:value={$form.description}
-                                class="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                                placeholder="Task details..."
-                                disabled={!isOwner}
-                            ></textarea>
-                            {#if $form.errors.description}
-                                <span class="text-sm text-destructive"
-                                    >{$form.errors.description}</span
-                                >
-                            {/if}
-                        </div>
 
-                        {#if editingTask && editingTask.history && editingTask.history.length > 0}
-                            <div class="grid gap-2">
-                                <Label>History</Label>
-                                <div
-                                    class="rounded-md border p-2 text-xs text-muted-foreground bg-muted/50 max-h-[150px] overflow-y-auto"
+            <div class="flex gap-4">
+                <!-- User Filter Dropdown -->
+                <div class="mb-4 flex items-center gap-2">
+                    <div class="relative">
+                        <button
+                            type="button"
+                            class="inline-flex items-center gap-2 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
+                            onclick={() =>
+                                (showUserDropdown = !showUserDropdown)}
+                        >
+                            {#if selectedUserId}
+                                {#if getSelectedUser()}
+                                    <Avatar class="h-5 w-5">
+                                        <AvatarFallback
+                                            class="text-[9px] {getUserColor(
+                                                getSelectedUser()!.name,
+                                            )}"
+                                        >
+                                            {getInitials(
+                                                getSelectedUser()!.name,
+                                            )}
+                                        </AvatarFallback>
+                                    </Avatar>
+                                {/if}
+                                <span class="max-w-[120px] truncate">
+                                    {getSelectedUser()?.name}
+                                </span>
+                            {:else}
+                                <span>All Users</span>
+                            {/if}
+                            <svg
+                                class="h-4 w-4 opacity-50"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M19 9l-7 7-7-7"
+                                />
+                            </svg>
+                        </button>
+
+                        {#if showUserDropdown}
+                            <div
+                                class="absolute left-0 z-50 mt-2 min-w-[200px] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md"
+                                onclickoutside={() =>
+                                    (showUserDropdown = false)}
+                            >
+                                <button
+                                    type="button"
+                                    class="relative flex w-full cursor-pointer select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none hover:bg-accent hover:text-accent-foreground"
+                                    onclick={() => {
+                                        selectedUserId = null;
+                                        showUserDropdown = false;
+                                    }}
                                 >
-                                    {#each editingTask.history
-                                        .slice()
-                                        .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()) as history}
-                                        <div class="mb-1 last:mb-0">
-                                            <span class="font-mono"
-                                                >{new Date(
-                                                    history.created_at,
-                                                ).toLocaleString('id-ID', {
-                                                    day: 'numeric',
-                                                    month: 'short',
-                                                    hour: '2-digit',
-                                                    minute: '2-digit',
-                                                })}</span
-                                            >:
-                                            {#if history.from_status}
-                                                Changed from <span
-                                                    class="font-semibold capitalize"
-                                                    >{history.from_status}</span
-                                                >
-                                                to
-                                                <span
-                                                    class="font-semibold capitalize"
-                                                    >{history.to_status}</span
-                                                >
-                                            {:else}
-                                                Created in <span
-                                                    class="font-semibold capitalize"
-                                                    >{history.to_status}</span
-                                                >
-                                            {/if}
-                                        </div>
-                                    {/each}
-                                </div>
+                                    <span class="text-muted-foreground">All Users</span>
+                                </button>
+                                <div class="h-px bg-border"></div>
+                                {#each users as user}
+                                    <button
+                                        type="button"
+                                        class="relative flex w-full cursor-pointer select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none hover:bg-accent hover:text-accent-foreground {selectedUserId ===
+                                        user.id
+                                            ? 'bg-accent'
+                                            : ''}"
+                                        onclick={() => {
+                                            selectedUserId = user.id;
+                                            showUserDropdown = false;
+                                        }}
+                                    >
+                                        <Avatar class="h-5 w-5">
+                                            <AvatarFallback
+                                                class="text-[9px] {getUserColor(
+                                                    user.name,
+                                                )}"
+                                            >
+                                                {getInitials(user.name)}
+                                            </AvatarFallback>
+                                        </Avatar>
+                                        <span>{user.name}</span>
+                                    </button>
+                                {/each}
                             </div>
                         {/if}
+                    </div>
+                </div>
+                <Dialog bind:open={isOpen}>
+                    <DialogTrigger asChild>
+                        {#snippet children(params)}
+                            <Button {...params} onclick={() => openDialog()}>
+                                <Plus class="mr-2 h-4 w-4" />
+                                New Task
+                            </Button>
+                        {/snippet}
+                    </DialogTrigger>
+                    <DialogContent class="sm:max-w-[425px]">
+                        <DialogHeader>
+                            <DialogTitle
+                                >{editingTask
+                                    ? 'Edit Task'
+                                    : 'Create Task'}</DialogTitle
+                            >
+                            <DialogDescription>
+                                {editingTask
+                                    ? 'Edit the details of your task.'
+                                    : 'Add a new task to your board.'} Click save
+                                when you're done.
+                            </DialogDescription>
+                        </DialogHeader>
+                        <form
+                            onsubmit={(e) => {
+                                e.preventDefault();
+                                submit();
+                            }}
+                            class="grid gap-4 py-4"
+                        >
+                            <div class="grid gap-2">
+                                <Label for="title">Title</Label>
+                                <Input
+                                    id="title"
+                                    bind:value={$form.title}
+                                    placeholder="Task title"
+                                    autocomplete="off"
+                                    disabled={!isOwner}
+                                />
+                                {#if $form.errors.title}
+                                    <span class="text-sm text-destructive"
+                                        >{$form.errors.title}</span
+                                    >
+                                {/if}
+                            </div>
+                            <div class="grid gap-2">
+                                <Label for="reference"
+                                    >Reference (Optional)</Label
+                                >
+                                <Input
+                                    id="reference"
+                                    bind:value={$form.reference}
+                                    placeholder="e.g. JIRA-123"
+                                    autocomplete="off"
+                                    disabled={!isOwner}
+                                />
+                                {#if $form.errors.reference}
+                                    <span class="text-sm text-destructive"
+                                        >{$form.errors.reference}</span
+                                    >
+                                {/if}
+                            </div>
+                            <div class="grid gap-2">
+                                <Label for="description"
+                                    >Description (Optional)</Label
+                                >
+                                <textarea
+                                    id="description"
+                                    bind:value={$form.description}
+                                    class="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                    placeholder="Task details..."
+                                    disabled={!isOwner}
+                                ></textarea>
+                                {#if $form.errors.description}
+                                    <span class="text-sm text-destructive"
+                                        >{$form.errors.description}</span
+                                    >
+                                {/if}
+                            </div>
 
-                        <DialogFooter class="sm:justify-between w-full mt-4">
-                            {#if editingTask && isOwner}
-                                <Button
-                                    type="button"
-                                    variant="destructive"
-                                    on:click={deleteTask}
-                                    disabled={$form.processing}>Delete</Button
-                                >
+                            {#if editingTask && editingTask.history && editingTask.history.length > 0}
+                                <div class="grid gap-2">
+                                    <Label>History</Label>
+                                    <div
+                                        class="rounded-md border p-2 text-xs text-muted-foreground bg-muted/50 max-h-[150px] overflow-y-auto"
+                                    >
+                                        {#each editingTask.history
+                                            .slice()
+                                            .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()) as history}
+                                            <div class="mb-1 last:mb-0">
+                                                <span class="font-mono"
+                                                    >{new Date(
+                                                        history.created_at,
+                                                    ).toLocaleString('id-ID', {
+                                                        day: 'numeric',
+                                                        month: 'short',
+                                                        hour: '2-digit',
+                                                        minute: '2-digit',
+                                                    })}</span
+                                                >:
+                                                {#if history.from_status}
+                                                    Changed from <span
+                                                        class="font-semibold capitalize"
+                                                        >{history.from_status}</span
+                                                    >
+                                                    to
+                                                    <span
+                                                        class="font-semibold capitalize"
+                                                        >{history.to_status}</span
+                                                    >
+                                                {:else}
+                                                    Created in <span
+                                                        class="font-semibold capitalize"
+                                                        >{history.to_status}</span
+                                                    >
+                                                {/if}
+                                            </div>
+                                        {/each}
+                                    </div>
+                                </div>
                             {/if}
-                            {#if isOwner}
-                                <Button
-                                    type="submit"
-                                    disabled={$form.processing}
-                                    >{editingTask
-                                        ? 'Update Task'
-                                        : 'Save Task'}</Button
-                                >
-                            {/if}
-                        </DialogFooter>
-                    </form>
-                </DialogContent>
-            </Dialog>
+
+                            <DialogFooter
+                                class="sm:justify-between w-full mt-4"
+                            >
+                                {#if editingTask && isOwner}
+                                    <Button
+                                        type="button"
+                                        variant="destructive"
+                                        onclick={deleteTask}
+                                        disabled={$form.processing}
+                                        >Delete</Button
+                                    >
+                                {/if}
+                                {#if isOwner}
+                                    <Button
+                                        type="submit"
+                                        disabled={$form.processing}
+                                        >{editingTask
+                                            ? 'Update Task'
+                                            : 'Save Task'}</Button
+                                    >
+                                {/if}
+                            </DialogFooter>
+                        </form>
+                    </DialogContent>
+                </Dialog>
+            </div>
         </div>
 
         <div class="flex flex-1 min-h-0 gap-6 overflow-x-auto pb-4">
@@ -387,26 +504,27 @@
                     class="flex min-h-0 flex-1 min-w-[300px] max-w-[350px] flex-col rounded border border-muted/50 p-4 bg-muted/50"
                     role="region"
                     aria-label="{board} column"
-                    on:drop={(e) => handleDrop(e, board)}
-                    on:dragover={handleDragOver}
+                    ondrop={(e) => handleDrop(e, board)}
+                    ondragover={handleDragOver}
                 >
-                    <div class="mb-4 flex items-center justify-between px-4 py-2 rounded border
-                        {board ===
-                        'done'
+                    <div
+                        class="mb-4 flex items-center justify-between px-4 py-2 rounded border
+                        {board === 'done'
                             ? 'bg-neon-green/5  border-neon-green/20 text-neon-green'
                             : board === 'today'
                               ? 'bg-blue-100/50 border-blue-200 dark:bg-blue-900/20 dark:border-blue-800 text-blue-800'
                               : board === 'todo'
                                 ? 'bg-orange-100/50 border-orange-200 dark:bg-orange-900/20 dark:border-orange-800 text-orange-800'
                                 : 'bg-muted/50'}
-                        ">
+                        "
+                    >
                         <h3 class="font-semibold capitalize">
                             {board}
                         </h3>
                         <span
                             class="rounded-full bg-background px-2 py-0.5 text-xs font-medium text-muted-foreground border"
                         >
-                            {tasks[board]?.length || 0}
+                            {filteredTasks[board]?.length || 0}
                         </span>
                     </div>
 
@@ -414,7 +532,7 @@
                         class="flex flex-1 flex-col gap-3 overflow-y-auto pr-1"
                     >
                         {#if board === 'done'}
-                            {#each Object.entries(groupTasksByDate(tasks[board] || [])) as [date, groupTasks]}
+                            {#each Object.entries(groupTasksByDate(filteredTasks[board] || [])) as [date, groupTasks]}
                                 <div
                                     class="text-xs font-semibold text-muted-foreground mt-2 mb-1"
                                 >
@@ -431,10 +549,10 @@
                                             : 'cursor-pointer'}
                                         draggable={task.user.id ===
                                             $page.props.auth.user.id}
-                                        on:dragstart={(e) =>
+                                        ondragstart={(e) =>
                                             handleDragStart(e, task)}
-                                        on:click={() => openDialog(task)}
-                                        on:keydown={(e) =>
+                                        onclick={() => openDialog(task)}
+                                        onkeydown={(e) =>
                                             e.key === 'Enter' &&
                                             openDialog(task)}
                                     >
@@ -486,7 +604,7 @@
                                 {/each}
                             {/each}
                         {:else}
-                            {#each tasks[board] || [] as task (task.id)}
+                            {#each filteredTasks[board] || [] as task (task.id)}
                                 <div
                                     role="button"
                                     tabindex="0"
@@ -496,10 +614,10 @@
                                         : 'cursor-pointer'}
                                     draggable={task.user.id ===
                                         $page.props.auth.user.id}
-                                    on:dragstart={(e) =>
+                                    ondragstart={(e) =>
                                         handleDragStart(e, task)}
-                                    on:click={() => openDialog(task)}
-                                    on:keydown={(e) =>
+                                    onclick={() => openDialog(task)}
+                                    onkeydown={(e) =>
                                         e.key === 'Enter' && openDialog(task)}
                                 >
                                     <Card
@@ -548,7 +666,7 @@
                             {/each}
                         {/if}
 
-                        {#if (tasks[board]?.length || 0) === 0}
+                        {#if (filteredTasks[board]?.length || 0) === 0}
                             <div
                                 class="flex h-24 flex-col items-center justify-center rounded-lg border border-dashed text-sm text-muted-foreground"
                             >

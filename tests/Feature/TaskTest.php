@@ -32,6 +32,7 @@ test('user can view tasks page', function () {
             fn($page) => $page
                 ->component('Tasks/Index')
                 ->has('tasks')
+                ->has('users')
         );
 });
 
