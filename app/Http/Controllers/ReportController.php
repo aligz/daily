@@ -80,7 +80,7 @@ class ReportController extends Controller
         // Sort by completed tasks (descending)
         $userReports = $userReports->sortByDesc('completed_tasks')->values();
 
-        return Inertia::render('Report/Index', [
+        return Inertia::render('report/Index', [
             'userReports' => $userReports,
             'dateRange' => (int) $dateRange,
         ]);
