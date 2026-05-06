@@ -28,3 +28,4 @@ yarn-error.log
 /.vscode
 /.zed
 .worktrees/
+/.claude/settings.local.json
