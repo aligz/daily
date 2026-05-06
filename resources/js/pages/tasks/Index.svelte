@@ -646,69 +646,67 @@
                                     .slice()
                                     .sort((a, b) => (a.position ?? 0) - (b.position ?? 0))}
                                 {@const myIdx = myBoardTasks.findIndex((t) => t.id === task.id)}
-                                <div class="flex items-start gap-1 group">
-                                    {#if task.user.id === $page.props.auth.user.id && (board === 'backlog' || board === 'todo')}
-                                        <div class="flex flex-col gap-0.5 pt-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                            <button
-                                                type="button"
-                                                disabled={myIdx === 0}
-                                                onclick={(e) => { e.stopPropagation(); reorderTask(task, 'up'); }}
-                                                class="flex h-5 w-5 items-center justify-center rounded text-xs text-muted-foreground hover:bg-accent hover:text-accent-foreground disabled:pointer-events-none disabled:opacity-30"
-                                                aria-label="Move up"
-                                            >↑</button>
-                                            <button
-                                                type="button"
-                                                disabled={myIdx === myBoardTasks.length - 1}
-                                                onclick={(e) => { e.stopPropagation(); reorderTask(task, 'down'); }}
-                                                class="flex h-5 w-5 items-center justify-center rounded text-xs text-muted-foreground hover:bg-accent hover:text-accent-foreground disabled:pointer-events-none disabled:opacity-30"
-                                                aria-label="Move down"
-                                            >↓</button>
-                                        </div>
-                                    {:else}
-                                        <div class="w-6 shrink-0"></div>
-                                    {/if}
-                                    <div
-                                        role="button"
-                                        tabindex="0"
-                                        class="flex-1 {task.user.id === $page.props.auth.user.id
-                                            ? 'cursor-grab active:cursor-grabbing'
-                                            : 'cursor-pointer'}"
-                                        draggable={task.user.id === $page.props.auth.user.id}
-                                        ondragstart={(e) => handleDragStart(e, task)}
-                                        onclick={() => openDialog(task)}
-                                        onkeydown={(e) => e.key === 'Enter' && openDialog(task)}
+                                <div
+                                    role="button"
+                                    tabindex="0"
+                                    class="group {task.user.id === $page.props.auth.user.id
+                                        ? 'cursor-grab active:cursor-grabbing'
+                                        : 'cursor-pointer'}"
+                                    draggable={task.user.id === $page.props.auth.user.id}
+                                    ondragstart={(e) => handleDragStart(e, task)}
+                                    onclick={() => openDialog(task)}
+                                    onkeydown={(e) => e.key === 'Enter' && openDialog(task)}
+                                >
+                                    <Card
+                                        class="shadow-none hover:shadow-md transition-shadow border-transparent py-2 gap-0"
                                     >
-                                        <Card
-                                            class="shadow-none hover:shadow-md transition-shadow border-transparent py-2 gap-0"
-                                        >
-                                            <CardHeader class="p-3 pb-1 space-y-0">
-                                                <div class="flex items-start justify-between gap-2">
+                                        <CardHeader class="p-3 pb-1 space-y-0">
+                                            <div class="flex items-start justify-between gap-2">
+                                                <div class="flex items-start gap-1 min-w-0">
+                                                    {#if task.user.id === $page.props.auth.user.id && (board === 'backlog' || board === 'todo')}
+                                                        <div class="flex flex-col shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                            <button
+                                                                type="button"
+                                                                disabled={myIdx === 0}
+                                                                onclick={(e) => { e.stopPropagation(); reorderTask(task, 'up'); }}
+                                                                class="flex h-4 w-4 items-center justify-center rounded text-[10px] text-muted-foreground hover:bg-accent hover:text-accent-foreground disabled:pointer-events-none disabled:opacity-30"
+                                                                aria-label="Move up"
+                                                            >↑</button>
+                                                            <button
+                                                                type="button"
+                                                                disabled={myIdx === myBoardTasks.length - 1}
+                                                                onclick={(e) => { e.stopPropagation(); reorderTask(task, 'down'); }}
+                                                                class="flex h-4 w-4 items-center justify-center rounded text-[10px] text-muted-foreground hover:bg-accent hover:text-accent-foreground disabled:pointer-events-none disabled:opacity-30"
+                                                                aria-label="Move down"
+                                                            >↓</button>
+                                                        </div>
+                                                    {/if}
                                                     <CardTitle class="text-sm font-medium leading-snug">
                                                         {task.title}
                                                     </CardTitle>
-                                                    <Avatar class="h-5 w-5">
-                                                        <AvatarFallback
-                                                            class="text-[9px] {getUserColor(task.user.name)}"
-                                                        >
-                                                            {getInitials(task.user.name)}
-                                                        </AvatarFallback>
-                                                    </Avatar>
                                                 </div>
-                                                {#if task.reference}
-                                                    <CardDescription class="text-[10px] font-mono">
-                                                        {task.reference}
-                                                    </CardDescription>
-                                                {/if}
-                                            </CardHeader>
-                                            {#if task.description}
-                                                <CardContent class="p-3 pt-1">
-                                                    <p class="text-[11px] text-muted-foreground line-clamp-2">
-                                                        {task.description}
-                                                    </p>
-                                                </CardContent>
+                                                <Avatar class="h-5 w-5 shrink-0">
+                                                    <AvatarFallback
+                                                        class="text-[9px] {getUserColor(task.user.name)}"
+                                                    >
+                                                        {getInitials(task.user.name)}
+                                                    </AvatarFallback>
+                                                </Avatar>
+                                            </div>
+                                            {#if task.reference}
+                                                <CardDescription class="text-[10px] font-mono">
+                                                    {task.reference}
+                                                </CardDescription>
                                             {/if}
-                                        </Card>
-                                    </div>
+                                        </CardHeader>
+                                        {#if task.description}
+                                            <CardContent class="p-3 pt-1">
+                                                <p class="text-[11px] text-muted-foreground line-clamp-2">
+                                                    {task.description}
+                                                </p>
+                                            </CardContent>
+                                        {/if}
+                                    </Card>
                                 </div>
                             {/each}
                         {/if}
