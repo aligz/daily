@@ -649,7 +649,7 @@
                                 <div
                                     role="button"
                                     tabindex="0"
-                                    class="group {task.user.id === $page.props.auth.user.id
+                                    class="group relative {task.user.id === $page.props.auth.user.id
                                         ? 'cursor-grab active:cursor-grabbing'
                                         : 'cursor-pointer'}"
                                     draggable={task.user.id === $page.props.auth.user.id}
@@ -662,29 +662,9 @@
                                     >
                                         <CardHeader class="p-3 pb-1 space-y-0">
                                             <div class="flex items-start justify-between gap-2">
-                                                <div class="flex items-start gap-1 min-w-0">
-                                                    {#if task.user.id === $page.props.auth.user.id && (board === 'backlog' || board === 'todo')}
-                                                        <div class="flex flex-col shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                            <button
-                                                                type="button"
-                                                                disabled={myIdx === 0}
-                                                                onclick={(e) => { e.stopPropagation(); reorderTask(task, 'up'); }}
-                                                                class="flex h-4 w-4 items-center justify-center rounded text-[10px] text-muted-foreground hover:bg-accent hover:text-accent-foreground disabled:pointer-events-none disabled:opacity-30"
-                                                                aria-label="Move up"
-                                                            >↑</button>
-                                                            <button
-                                                                type="button"
-                                                                disabled={myIdx === myBoardTasks.length - 1}
-                                                                onclick={(e) => { e.stopPropagation(); reorderTask(task, 'down'); }}
-                                                                class="flex h-4 w-4 items-center justify-center rounded text-[10px] text-muted-foreground hover:bg-accent hover:text-accent-foreground disabled:pointer-events-none disabled:opacity-30"
-                                                                aria-label="Move down"
-                                                            >↓</button>
-                                                        </div>
-                                                    {/if}
-                                                    <CardTitle class="text-sm font-medium leading-snug">
-                                                        {task.title}
-                                                    </CardTitle>
-                                                </div>
+                                                <CardTitle class="text-sm font-medium leading-snug">
+                                                    {task.title}
+                                                </CardTitle>
                                                 <Avatar class="h-5 w-5 shrink-0">
                                                     <AvatarFallback
                                                         class="text-[9px] {getUserColor(task.user.name)}"
@@ -707,6 +687,24 @@
                                             </CardContent>
                                         {/if}
                                     </Card>
+                                    {#if task.user.id === $page.props.auth.user.id && (board === 'backlog' || board === 'todo')}
+                                        <div class="absolute right-1 top-1/2 -translate-y-1/2 flex flex-col gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                                            <button
+                                                type="button"
+                                                disabled={myIdx === 0}
+                                                onclick={(e) => { e.stopPropagation(); reorderTask(task, 'up'); }}
+                                                class="flex h-5 w-5 items-center justify-center rounded bg-background/80 text-xs text-muted-foreground shadow-sm hover:bg-accent hover:text-accent-foreground disabled:pointer-events-none disabled:opacity-30"
+                                                aria-label="Move up"
+                                            >↑</button>
+                                            <button
+                                                type="button"
+                                                disabled={myIdx === myBoardTasks.length - 1}
+                                                onclick={(e) => { e.stopPropagation(); reorderTask(task, 'down'); }}
+                                                class="flex h-5 w-5 items-center justify-center rounded bg-background/80 text-xs text-muted-foreground shadow-sm hover:bg-accent hover:text-accent-foreground disabled:pointer-events-none disabled:opacity-30"
+                                                aria-label="Move down"
+                                            >↓</button>
+                                        </div>
+                                    {/if}
                                 </div>
                             {/each}
                         {/if}
