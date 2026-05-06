@@ -1,11 +1,11 @@
 <script lang="ts">
-    import type { Snippet } from 'svelte';
     import { Link, page } from '@inertiajs/svelte';
-    import LayoutGrid from 'lucide-svelte/icons/layout-grid';
     import BarChart3 from 'lucide-svelte/icons/bar-chart-3';
+    import LayoutGrid from 'lucide-svelte/icons/layout-grid';
+    import type { Snippet } from 'svelte';
+    import AppContent from '@/components/AppContent.svelte';
     import AppLogo from '@/components/AppLogo.svelte';
     import AppLogoIcon from '@/components/AppLogoIcon.svelte';
-    import AppContent from '@/components/AppContent.svelte';
     import AppShell from '@/components/AppShell.svelte';
     import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
     import { Button } from '@/components/ui/button';
@@ -15,11 +15,11 @@
         DropdownMenuTrigger,
     } from '@/components/ui/dropdown-menu';
     import UserMenuContent from '@/components/UserMenuContent.svelte';
+    import { currentUrlState } from '@/lib/currentUrl';
     import { getInitials } from '@/lib/initials';
     import { toUrl } from '@/lib/utils';
     import { dashboard } from '@/routes';
     import type { BreadcrumbItem, NavItem } from '@/types';
-    import { currentUrlState } from '@/lib/currentUrl';
 
     let {
         breadcrumbs = [],

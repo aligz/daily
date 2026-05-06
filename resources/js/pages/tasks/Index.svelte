@@ -1,12 +1,16 @@
 <script lang="ts">
-    import AppLayout from '@/layouts/AppLayout.svelte';
-    import AppHead from '@/components/AppHead.svelte';
     import { useForm, router, page } from '@inertiajs/svelte';
     import { Plus, GripVertical } from 'lucide-svelte';
+    import AppHead from '@/components/AppHead.svelte';
+    import { Avatar, AvatarFallback } from '@/components/ui/avatar';
     import { Button } from '@/components/ui/button';
-    import { Input } from '@/components/ui/input';
-    import { Label } from '@/components/ui/label';
-    import { store, update, destroy } from '@/routes/tasks';
+    import {
+        Card,
+        CardContent,
+        CardDescription,
+        CardHeader,
+        CardTitle,
+    } from '@/components/ui/card';
     import {
         Dialog,
         DialogContent,
@@ -16,14 +20,10 @@
         DialogTitle,
         DialogTrigger,
     } from '@/components/ui/dialog';
-    import {
-        Card,
-        CardContent,
-        CardDescription,
-        CardHeader,
-        CardTitle,
-    } from '@/components/ui/card';
-    import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+    import { Input } from '@/components/ui/input';
+    import { Label } from '@/components/ui/label';
+    import AppLayout from '@/layouts/AppLayout.svelte';
+    import { store, update, destroy } from '@/routes/tasks';
 
     interface User {
         id: number;
@@ -37,6 +37,7 @@
         description: string | null;
         reference: string | null;
         status: 'backlog' | 'todo' | 'today' | 'done';
+        position: number | null;
         created_at: string;
         completed_at: string | null;
         user: User;
@@ -87,6 +88,41 @@
             {
                 preserveScroll: true,
             },
+        );
+    }
+
+    function reorderTask(task: Task, direction: 'up' | 'down') {
+        const board = task.status as 'backlog' | 'todo';
+        const myTasks = (filteredTasks[board] || [])
+            .filter((t) => t.user.id === $page.props.auth.user.id)
+            .slice()
+            .sort((a, b) => (a.position ?? 0) - (b.position ?? 0));
+
+        const idx = myTasks.findIndex((t) => t.id === task.id);
+        if (idx === -1) return;
+
+        let newPosition: number;
+
+        if (direction === 'up') {
+            if (idx === 0) return;
+            const prev = myTasks[idx - 1];
+            const prevPrev = myTasks[idx - 2];
+            newPosition = prevPrev
+                ? (prevPrev.position! + prev.position!) / 2
+                : prev.position! / 2;
+        } else {
+            if (idx === myTasks.length - 1) return;
+            const next = myTasks[idx + 1];
+            const nextNext = myTasks[idx + 2];
+            newPosition = nextNext
+                ? (next.position! + nextNext.position!) / 2
+                : next.position! + 1.0;
+        }
+
+        router.patch(
+            `/tasks/${task.id}/reorder`,
+            { position: newPosition },
+            { preserveScroll: true },
         );
     }
 
@@ -605,63 +641,70 @@
                             {/each}
                         {:else}
                             {#each filteredTasks[board] || [] as task (task.id)}
+                                {@const myBoardTasks = (filteredTasks[board] || [])
+                                    .filter((t) => t.user.id === $page.props.auth.user.id)
+                                    .slice()
+                                    .sort((a, b) => (a.position ?? 0) - (b.position ?? 0))}
+                                {@const myIdx = myBoardTasks.findIndex((t) => t.id === task.id)}
                                 <div
                                     role="button"
                                     tabindex="0"
-                                    class={task.user.id ===
-                                    $page.props.auth.user.id
+                                    class="group relative {task.user.id === $page.props.auth.user.id
                                         ? 'cursor-grab active:cursor-grabbing'
-                                        : 'cursor-pointer'}
-                                    draggable={task.user.id ===
-                                        $page.props.auth.user.id}
-                                    ondragstart={(e) =>
-                                        handleDragStart(e, task)}
+                                        : 'cursor-pointer'}"
+                                    draggable={task.user.id === $page.props.auth.user.id}
+                                    ondragstart={(e) => handleDragStart(e, task)}
                                     onclick={() => openDialog(task)}
-                                    onkeydown={(e) =>
-                                        e.key === 'Enter' && openDialog(task)}
+                                    onkeydown={(e) => e.key === 'Enter' && openDialog(task)}
                                 >
                                     <Card
                                         class="shadow-none hover:shadow-md transition-shadow border-transparent py-2 gap-0"
                                     >
                                         <CardHeader class="p-3 pb-1 space-y-0">
-                                            <div
-                                                class="flex items-start justify-between gap-2"
-                                            >
-                                                <CardTitle
-                                                    class="text-sm font-medium leading-snug"
-                                                >
+                                            <div class="flex items-start justify-between gap-2">
+                                                <CardTitle class="text-sm font-medium leading-snug">
                                                     {task.title}
                                                 </CardTitle>
-                                                <Avatar class="h-5 w-5">
+                                                <Avatar class="h-5 w-5 shrink-0">
                                                     <AvatarFallback
-                                                        class="text-[9px] {getUserColor(
-                                                            task.user.name,
-                                                        )}"
+                                                        class="text-[9px] {getUserColor(task.user.name)}"
                                                     >
-                                                        {getInitials(
-                                                            task.user.name,
-                                                        )}
+                                                        {getInitials(task.user.name)}
                                                     </AvatarFallback>
                                                 </Avatar>
                                             </div>
                                             {#if task.reference}
-                                                <CardDescription
-                                                    class="text-[10px] font-mono"
-                                                >
+                                                <CardDescription class="text-[10px] font-mono">
                                                     {task.reference}
                                                 </CardDescription>
                                             {/if}
                                         </CardHeader>
                                         {#if task.description}
                                             <CardContent class="p-3 pt-1">
-                                                <p
-                                                    class="text-[11px] text-muted-foreground line-clamp-2"
-                                                >
+                                                <p class="text-[11px] text-muted-foreground line-clamp-2">
                                                     {task.description}
                                                 </p>
                                             </CardContent>
                                         {/if}
                                     </Card>
+                                    {#if task.user.id === $page.props.auth.user.id && (board === 'backlog' || board === 'todo')}
+                                        <div class="absolute right-1 top-1/2 -translate-y-1/2 flex flex-col gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                                            <button
+                                                type="button"
+                                                disabled={myIdx === 0}
+                                                onclick={(e) => { e.stopPropagation(); reorderTask(task, 'up'); }}
+                                                class="flex h-5 w-5 items-center justify-center rounded bg-background/80 text-xs text-muted-foreground shadow-sm hover:bg-accent hover:text-accent-foreground disabled:pointer-events-none disabled:opacity-30"
+                                                aria-label="Move up"
+                                            >↑</button>
+                                            <button
+                                                type="button"
+                                                disabled={myIdx === myBoardTasks.length - 1}
+                                                onclick={(e) => { e.stopPropagation(); reorderTask(task, 'down'); }}
+                                                class="flex h-5 w-5 items-center justify-center rounded bg-background/80 text-xs text-muted-foreground shadow-sm hover:bg-accent hover:text-accent-foreground disabled:pointer-events-none disabled:opacity-30"
+                                                aria-label="Move down"
+                                            >↓</button>
+                                        </div>
+                                    {/if}
                                 </div>
                             {/each}
                         {/if}

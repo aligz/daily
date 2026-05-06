@@ -14,12 +14,14 @@ class Task extends Model
         'reference',
         'status',
         'completed_at',
+        'position',
     ];
 
     protected $casts = [
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
         'completed_at' => 'datetime',
+        'position' => 'float',
     ];
 
     public function user(): \Illuminate\Database\Eloquent\Relations\BelongsTo

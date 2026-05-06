@@ -1,9 +1,9 @@
 <script lang="ts">
     import { Link } from '@inertiajs/svelte';
+    import BarChart3 from 'lucide-svelte/icons/bar-chart-3';
     import BookOpen from 'lucide-svelte/icons/book-open';
     import Folder from 'lucide-svelte/icons/folder';
     import LayoutGrid from 'lucide-svelte/icons/layout-grid';
-    import BarChart3 from 'lucide-svelte/icons/bar-chart-3';
     import type { Snippet } from 'svelte';
     import AppLogo from '@/components/AppLogo.svelte';
     import NavFooter from '@/components/NavFooter.svelte';
@@ -18,8 +18,8 @@
         SidebarMenuButton,
         SidebarMenuItem,
     } from '@/components/ui/sidebar';
-    import tasks from '@/routes/tasks';
     import { toUrl } from '@/lib/utils';
+    import tasks from '@/routes/tasks';
     import type { NavItem } from '@/types';
 
     let {
