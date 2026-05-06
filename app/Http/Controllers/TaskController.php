@@ -26,7 +26,7 @@ class TaskController extends Controller
                 })->values();
             });
 
-        return Inertia::render('Tasks/Index', [
+        return Inertia::render('tasks/Index', [
             'tasks' => $tasks,
             'users' => $users
         ]);

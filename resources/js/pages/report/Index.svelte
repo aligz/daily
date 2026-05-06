@@ -1,7 +1,8 @@
 <script lang="ts">
-    import AppLayout from '@/layouts/AppLayout.svelte';
-    import AppHead from '@/components/AppHead.svelte';
     import { router } from '@inertiajs/svelte';
+    import { Clock, CheckCircle, Timer, BarChart3 } from 'lucide-svelte';
+    import AppHead from '@/components/AppHead.svelte';
+    import { Avatar, AvatarFallback } from '@/components/ui/avatar';
     import { Badge } from '@/components/ui/badge';
     import {
         Card,
@@ -10,8 +11,7 @@
         CardHeader,
         CardTitle,
     } from '@/components/ui/card';
-    import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-    import { Clock, CheckCircle, Timer, BarChart3 } from 'lucide-svelte';
+    import AppLayout from '@/layouts/AppLayout.svelte';
 
     interface UserReport {
         user: {

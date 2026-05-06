@@ -1,12 +1,16 @@
 <script lang="ts">
-    import AppLayout from '@/layouts/AppLayout.svelte';
-    import AppHead from '@/components/AppHead.svelte';
     import { useForm, router, page } from '@inertiajs/svelte';
     import { Plus, GripVertical } from 'lucide-svelte';
+    import AppHead from '@/components/AppHead.svelte';
+    import { Avatar, AvatarFallback } from '@/components/ui/avatar';
     import { Button } from '@/components/ui/button';
-    import { Input } from '@/components/ui/input';
-    import { Label } from '@/components/ui/label';
-    import { store, update, destroy } from '@/routes/tasks';
+    import {
+        Card,
+        CardContent,
+        CardDescription,
+        CardHeader,
+        CardTitle,
+    } from '@/components/ui/card';
     import {
         Dialog,
         DialogContent,
@@ -16,14 +20,10 @@
         DialogTitle,
         DialogTrigger,
     } from '@/components/ui/dialog';
-    import {
-        Card,
-        CardContent,
-        CardDescription,
-        CardHeader,
-        CardTitle,
-    } from '@/components/ui/card';
-    import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+    import { Input } from '@/components/ui/input';
+    import { Label } from '@/components/ui/label';
+    import AppLayout from '@/layouts/AppLayout.svelte';
+    import { store, update, destroy } from '@/routes/tasks';
 
     interface User {
         id: number;
