@@ -15,7 +15,7 @@ class GetTaskTool extends Tool
     /**
      * The tool's description.
      */
-    protected string $description = 'Retrieve tasks from the database. Supports filtering by ID, status, keyword search, and limiting results.';
+    protected string $description = 'Retrieve tasks from the database. Supports filtering by ID, status (backlog, todo, today, done), keyword search, and limiting results.';
 
     /**
      * Handle the tool request.
@@ -53,14 +53,24 @@ class GetTaskTool extends Tool
             });
         }
 
-        $limit = $validated['limit'] ?? 15;
+        $isDone = ($validated['status'] ?? '') === 'done';
+        $limit = $isDone ? 15 : ($validated['limit'] ?? 15);
 
-        $tasks = $query
-            ->with(['user', 'history'])
-            ->orderBy('position')
-            ->orderByDesc('created_at')
-            ->limit($limit)
-            ->get();
+        if ($isDone) {
+            $tasks = $query
+                ->with(['user', 'history'])
+                ->whereNotNull('completed_at')
+                ->orderByDesc('completed_at')
+                ->limit($limit)
+                ->get();
+        } else {
+            $tasks = $query
+                ->with(['user', 'history'])
+                ->orderBy('position')
+                ->orderByDesc('created_at')
+                ->limit($limit)
+                ->get();
+        }
 
         return Response::json($tasks->toArray());
     }
@@ -77,7 +87,8 @@ class GetTaskTool extends Tool
                 ->description('Filter by a specific task ID. When provided, other filters are ignored.')
                 ->nullable(),
             'status' => $schema->string()
-                ->description('Filter tasks by their status value.')
+                ->enum(['backlog', 'todo', 'today', 'done'])
+                ->description('Filter tasks by status. Available values: backlog, todo, today, done.')
                 ->nullable(),
             'search' => $schema->string()
                 ->description('Search keyword that matches title, description, or reference.')
