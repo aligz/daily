@@ -20,7 +20,7 @@ class TaskFactory extends Factory
             'user_id' => \App\Models\User::factory(),
             'title' => $this->faker->sentence(),
             'description' => $this->faker->paragraph(),
-            'reference' => 'TASK-' . $this->faker->randomNumber(4),
+            'reference' => 'TASK-'.$this->faker->randomNumber(4),
             'status' => $this->faker->randomElement(['backlog', 'todo', 'today', 'done']),
         ];
     }

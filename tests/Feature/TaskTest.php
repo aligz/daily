@@ -1,16 +1,14 @@
 <?php
 
-use App\Models\User;
 use App\Models\Task;
 use App\Models\TaskHistory;
-use Illuminate\Support\Facades\Schedule;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Schedule;
+
 use function Pest\Laravel\actingAs;
-use function Pest\Laravel\get;
-use function Pest\Laravel\post;
-use function Pest\Laravel\put;
-use function Pest\Laravel\assertDatabaseHas;
 use function Pest\Laravel\artisan;
+use function Pest\Laravel\assertDatabaseHas;
 
 uses(RefreshDatabase::class);
 
@@ -29,7 +27,7 @@ test('user can view tasks page', function () {
         ->get(route('tasks.index'))
         ->assertOk()
         ->assertInertia(
-            fn($page) => $page
+            fn ($page) => $page
                 ->component('Tasks/Index')
                 ->has('tasks')
                 ->has('users')
@@ -159,12 +157,12 @@ test('daily schedule resets today tasks to todo', function () {
 
     // Run the schedule callback logic manually or via artisan if we registered a command.
     // Since it's a closure in console.php, we invoke the logic directly or fire the schedule run?
-    // Testing specific schedule callback is tricky without a command. 
-    // Best practice: Extract to a job or command. 
-    // For now, I'll simulate the logic as if the schedule ran, 
+    // Testing specific schedule callback is tricky without a command.
+    // Best practice: Extract to a job or command.
+    // For now, I'll simulate the logic as if the schedule ran,
     // OR easier: I can just run the logic inside the test to verify IT works, assuming Schedule::call works.
 
-    // Actually, let's just trigger the code inside the closure. 
+    // Actually, let's just trigger the code inside the closure.
     // Or better, let's verify the logic itself.
 
     $tasks = Task::where('status', 'today')->get();

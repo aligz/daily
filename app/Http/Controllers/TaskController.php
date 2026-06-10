@@ -21,6 +21,7 @@ class TaskController extends Controller
                 if (in_array($status, ['backlog', 'todo'])) {
                     return $statusTasks->sortBy('position')->values();
                 }
+
                 return $statusTasks->sortByDesc(function ($task) {
                     return $task->completed_at ?? $task->created_at;
                 })->values();
@@ -28,7 +29,7 @@ class TaskController extends Controller
 
         return Inertia::render('tasks/Index', [
             'tasks' => $tasks,
-            'users' => $users
+            'users' => $users,
         ]);
     }
 
@@ -141,7 +142,7 @@ class TaskController extends Controller
             abort(403, 'Unauthorized action.');
         }
 
-        if (!in_array($task->status, ['backlog', 'todo'])) {
+        if (! in_array($task->status, ['backlog', 'todo'])) {
             abort(422, 'Cannot reorder tasks with this status.');
         }
 
@@ -166,7 +167,7 @@ class TaskController extends Controller
 
         if ($needsRebalance) {
             foreach ($tasks as $index => $t) {
-                $t->update(['position' => (float)($index + 1)]);
+                $t->update(['position' => (float) ($index + 1)]);
             }
         }
 
@@ -180,6 +181,7 @@ class TaskController extends Controller
         }
 
         $task->delete();
+
         return redirect()->back();
     }
 }

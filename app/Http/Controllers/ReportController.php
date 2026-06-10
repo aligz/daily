@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
 class ReportController extends Controller
@@ -23,7 +22,7 @@ class ReportController extends Controller
 
         $userReports = $users->map(function ($user) use ($startDate) {
             $tasks = $user->tasks()->where('created_at', '>=', $startDate)->get();
-            
+
             // Get tasks that were completed in the date range
             $completedTasks = $user->tasks()
                 ->where('status', 'done')
@@ -50,8 +49,8 @@ class ReportController extends Controller
                 }
             }
 
-            $avgCompletionTime = count($completionTimes) > 0 
-                ? round(array_sum($completionTimes) / count($completionTimes), 2) 
+            $avgCompletionTime = count($completionTimes) > 0
+                ? round(array_sum($completionTimes) / count($completionTimes), 2)
                 : null;
 
             // Tasks by status

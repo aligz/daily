@@ -3,14 +3,13 @@
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
 
-
 Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
 
-use Illuminate\Support\Facades\Schedule;
 use App\Models\Task;
 use App\Models\TaskHistory;
+use Illuminate\Support\Facades\Schedule;
 
 Schedule::call(function () {
     $tasks = Task::where('status', 'today')->get();
