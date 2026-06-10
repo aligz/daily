@@ -1,6 +1,8 @@
 <script lang="ts">
     import { Link, page } from '@inertiajs/svelte';
     import BarChart3 from 'lucide-svelte/icons/bar-chart-3';
+    import Building2 from 'lucide-svelte/icons/building-2';
+    import ClipboardList from 'lucide-svelte/icons/clipboard-list';
     import LayoutGrid from 'lucide-svelte/icons/layout-grid';
     import type { Snippet } from 'svelte';
     import AppContent from '@/components/AppContent.svelte';
@@ -41,9 +43,19 @@
             icon: LayoutGrid,
         },
         {
+            title: 'Feature Requests',
+            href: '/feature-requests',
+            icon: ClipboardList,
+        },
+        {
             title: 'Reports',
             href: '/reports',
             icon: BarChart3,
+        },
+        {
+            title: 'Divisions',
+            href: '/divisions',
+            icon: Building2,
         },
     ];
 </script>
