@@ -62,10 +62,29 @@ class FeatureRequestController extends Controller
         ]);
     }
 
+    public function edit(FeatureRequest $featureRequest)
+    {
+        $featureRequest->load(['division']);
+        $divisions = Division::all();
+
+        return Inertia::render('feature-requests/Edit', [
+            'featureRequest' => $featureRequest,
+            'divisions' => $divisions,
+        ]);
+    }
+
     public function update(Request $request, FeatureRequest $featureRequest)
     {
         $validated = $request->validate([
+            'division_id' => 'sometimes|exists:divisions,id',
+            'requester_name' => 'sometimes|string|max:255',
+            'requester_email' => 'nullable|email|max:255',
+            'requester_phone' => 'nullable|string|max:50',
+            'title' => 'sometimes|string|max:255',
+            'description' => 'nullable|string',
+            'priority' => 'sometimes|in:low,medium,high,urgent',
             'status' => 'sometimes|in:baru,review,diacc,diproses,selesai',
+            'deadline' => 'sometimes|date|after_or_equal:today',
             'notes' => 'nullable|string',
         ]);
 

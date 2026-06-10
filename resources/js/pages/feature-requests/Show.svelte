@@ -1,6 +1,6 @@
 <script lang="ts">
     import { useForm, Link, router } from '@inertiajs/svelte';
-    import { ArrowLeft, Save, Trash2, Calendar, User, Building2, Mail, Phone } from 'lucide-svelte';
+    import { ArrowLeft, Pencil, Save, Trash2, Calendar, User, Building2, Mail, Phone } from 'lucide-svelte';
     import AppHead from '@/components/AppHead.svelte';
     import { Badge } from '@/components/ui/badge';
     import { Button } from '@/components/ui/button';
@@ -13,7 +13,7 @@
     } from '@/components/ui/card';
     import { Label } from '@/components/ui/label';
     import AppLayout from '@/layouts/AppLayout.svelte';
-    import { index as featureRequestsIndex } from '@/routes/feature-requests';
+    import { index as featureRequestsIndex, edit as featureRequestsEdit } from '@/routes/feature-requests';
 
     interface User {
         id: number;
@@ -124,10 +124,18 @@
                     Created by {featureRequest.user.name} on {formatDateTime(featureRequest.created_at)}
                 </p>
             </div>
-            <Button variant="destructive" onclick={deleteRequest}>
-                <Trash2 class="mr-2 h-4 w-4" />
-                Delete
-            </Button>
+            <div class="flex gap-2">
+                <Link href={featureRequestsEdit.url({ feature_request: featureRequest.id })}>
+                    <Button variant="outline">
+                        <Pencil class="mr-2 h-4 w-4" />
+                        Edit
+                    </Button>
+                </Link>
+                <Button variant="destructive" onclick={deleteRequest}>
+                    <Trash2 class="mr-2 h-4 w-4" />
+                    Delete
+                </Button>
+            </div>
         </div>
 
         <div class="grid gap-6 md:grid-cols-3">
