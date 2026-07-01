@@ -21,12 +21,14 @@ class FeatureRequest extends Model
         'status',
         'deadline',
         'notes',
+        'released_at',
     ];
 
     protected $casts = [
         'deadline' => 'date',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
+        'released_at' => 'datetime',
     ];
 
     public function user(): \Illuminate\Database\Eloquent\Relations\BelongsTo

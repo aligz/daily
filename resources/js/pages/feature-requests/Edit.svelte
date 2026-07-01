@@ -31,6 +31,7 @@
         status: 'new' | 'planning' | 'development' | 'done' | 'released';
         deadline: string;
         division_id: number;
+        released_at: string | null;
     }
 
     let { featureRequest, divisions }: { featureRequest: FeatureRequest; divisions: Division[] } = $props();
@@ -48,6 +49,7 @@
         priority: featureRequest.priority,
         status: featureRequest.status,
         deadline: featureRequest.deadline.split('T')[0],
+        released_at: featureRequest.released_at ? featureRequest.released_at.split('T')[0] : '',
     });
 
     function submit() {
@@ -224,6 +226,20 @@
                             {/if}
                         </div>
                     </div>
+
+                    {#if $form.status === 'released'}
+                        <div class="grid gap-2">
+                            <Label for="released_at">Released Date</Label>
+                            <Input
+                                id="released_at"
+                                type="date"
+                                bind:value={$form.released_at}
+                            />
+                            {#if $form.errors.released_at}
+                                <span class="text-sm text-destructive">{$form.errors.released_at}</span>
+                            {/if}
+                        </div>
+                    {/if}
 
                     <div class="flex justify-end gap-4 mt-4">
                         <Link href={featureRequestsShow.url({ feature_request: featureRequest.id })}>

@@ -86,7 +86,21 @@ class FeatureRequestController extends Controller
             'status' => 'sometimes|in:new,planning,development,done,released',
             'deadline' => 'sometimes|date|after_or_equal:today',
             'notes' => 'nullable|string',
+            'released_at' => 'nullable|date',
         ]);
+
+        // Auto-fill released_at when status changes to released
+        if (isset($validated['status'])) {
+            if ($validated['status'] === 'released' && $featureRequest->status !== 'released') {
+                // Moving to released — auto fill if not provided
+                if (empty($validated['released_at'])) {
+                    $validated['released_at'] = now();
+                }
+            } elseif ($validated['status'] !== 'released' && $featureRequest->status === 'released') {
+                // Moving away from released — clear released_at
+                $validated['released_at'] = null;
+            }
+        }
 
         $featureRequest->update($validated);
 

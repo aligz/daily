@@ -37,6 +37,7 @@
         status: 'new' | 'planning' | 'development' | 'done' | 'released';
         deadline: string;
         notes: string | null;
+        released_at: string | null;
         created_at: string;
         updated_at: string;
         user: User;
@@ -298,6 +299,12 @@
                             <span class="text-muted-foreground">Updated</span>
                             <span>{formatDateTime(featureRequest.updated_at)}</span>
                         </div>
+                        {#if featureRequest.released_at}
+                            <div class="flex justify-between">
+                                <span class="text-muted-foreground">Released</span>
+                                <span>{formatDateTime(featureRequest.released_at)}</span>
+                            </div>
+                        {/if}
                     </CardContent>
                 </Card>
             </div>
