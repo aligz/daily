@@ -20,7 +20,7 @@
     import { currentUrlState } from '@/lib/currentUrl';
     import { getInitials } from '@/lib/initials';
     import { toUrl } from '@/lib/utils';
-    import { dashboard } from '@/routes';
+    import { login, register, home, dashboard } from '@/routes';
     import type { BreadcrumbItem, NavItem } from '@/types';
 
     let {
@@ -36,35 +36,45 @@
 
     const activeItemStyles = 'bg-accent text-accent-foreground';
 
-    const mainNavItems: NavItem[] = [
-        {
-            title: 'Tasks',
-            href: '/tasks',
-            icon: LayoutGrid,
-        },
-        {
-            title: 'Feature Requests',
-            href: '/feature-requests',
-            icon: ClipboardList,
-        },
-        {
-            title: 'Reports',
-            href: '/reports',
-            icon: BarChart3,
-        },
-        {
-            title: 'Divisions',
-            href: '/divisions',
-            icon: Building2,
-        },
-    ];
+    const mainNavItems: NavItem[] = $derived(
+        auth.user
+            ? [
+                {
+                    title: 'Tasks',
+                    href: '/tasks',
+                    icon: LayoutGrid,
+                },
+                {
+                    title: 'Feature Requests',
+                    href: '/feature-requests',
+                    icon: ClipboardList,
+                },
+                {
+                    title: 'Reports',
+                    href: '/reports',
+                    icon: BarChart3,
+                },
+                {
+                    title: 'Divisions',
+                    href: '/divisions',
+                    icon: Building2,
+                },
+            ]
+            : [
+                {
+                    title: 'Feature Requests',
+                    href: '/feature-requests',
+                    icon: ClipboardList,
+                },
+            ]
+    );
 </script>
 
 <AppShell variant="header" class="flex-col">
     <!-- Header -->
     <div class="border-b border-border/80">
         <div class="flex h-16 items-center px-4 md:px-6">
-            <Link href={toUrl(dashboard())} class="flex items-center gap-x-2">
+            <Link href={toUrl(auth.user ? dashboard() : home())} class="flex items-center gap-x-2">
                 <AppLogo />
             </Link>
 
@@ -84,32 +94,41 @@
             </nav>
 
             <div class="ml-auto flex items-center space-x-2">
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        {#snippet children(props)}
-                            <Button
-                                variant="ghost"
-                                size="icon"
-                                class="relative size-10 w-auto rounded-full p-1 focus-within:ring-2 focus-within:ring-primary"
-                                onclick={props.onclick}
-                                aria-expanded={props['aria-expanded']}
-                                data-state={props['data-state']}
-                            >
-                                <Avatar class="size-8 overflow-hidden rounded-full">
-                                    {#if auth.user.avatar}
-                                        <AvatarImage src={auth.user.avatar} alt={auth.user.name} />
-                                    {/if}
-                                    <AvatarFallback class="rounded-lg bg-neutral-200 font-semibold text-black dark:bg-neutral-700 dark:text-white">
-                                        {getInitials(auth.user?.name)}
-                                    </AvatarFallback>
-                                </Avatar>
-                            </Button>
-                        {/snippet}
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" class="w-56">
-                        <UserMenuContent user={auth.user} />
-                    </DropdownMenuContent>
-                </DropdownMenu>
+                {#if auth.user}
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            {#snippet children(props)}
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    class="relative size-10 w-auto rounded-full p-1 focus-within:ring-2 focus-within:ring-primary"
+                                    onclick={props.onclick}
+                                    aria-expanded={props['aria-expanded']}
+                                    data-state={props['data-state']}
+                                >
+                                    <Avatar class="size-8 overflow-hidden rounded-full">
+                                        {#if auth.user.avatar}
+                                            <AvatarImage src={auth.user.avatar} alt={auth.user.name} />
+                                        {/if}
+                                        <AvatarFallback class="rounded-lg bg-neutral-200 font-semibold text-black dark:bg-neutral-700 dark:text-white">
+                                            {getInitials(auth.user?.name)}
+                                        </AvatarFallback>
+                                    </Avatar>
+                                </Button>
+                            {/snippet}
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" class="w-56">
+                            <UserMenuContent user={auth.user} />
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                {:else}
+                    <Link href={toUrl(login())}>
+                        <Button variant="ghost" size="sm">Log in</Button>
+                    </Link>
+                    <Link href={toUrl(register())}>
+                        <Button variant="default" size="sm">Register</Button>
+                    </Link>
+                {/if}
             </div>
         </div>
     </div>

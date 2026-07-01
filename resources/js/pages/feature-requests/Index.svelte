@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { router } from '@inertiajs/svelte';
+    import { page, router } from '@inertiajs/svelte';
     import { Plus, Calendar, Building2, User } from 'lucide-svelte';
     import AppHead from '@/components/AppHead.svelte';
     import { Avatar, AvatarFallback } from '@/components/ui/avatar';
@@ -43,6 +43,8 @@
     }
 
     let { featureRequests, divisions }: { featureRequests: FeatureRequest[]; divisions: Division[] } = $props();
+
+    const auth = $derived($page.props.auth);
 
     let searchQuery = $state('');
     let selectedDivisionId = $state<number | null>(null);
@@ -199,12 +201,14 @@
             <h1 class="text-2xl font-bold tracking-tight">Feature Requests</h1>
 
             <div class="flex gap-4">
-                <a href={featureRequestsCreate.url()}>
-                    <Button>
-                        <Plus class="mr-2 h-4 w-4" />
-                        New Request
-                    </Button>
-                </a>
+                {#if auth.user}
+                    <a href={featureRequestsCreate.url()}>
+                        <Button>
+                            <Plus class="mr-2 h-4 w-4" />
+                            New Request
+                        </Button>
+                    </a>
+                {/if}
             </div>
         </div>
 
@@ -256,8 +260,8 @@
                     class="flex min-h-0 flex-1 min-w-[280px] max-w-[350px] flex-col rounded border border-muted/50 p-3 bg-muted/30"
                     role="region"
                     aria-label="{board} column"
-                    ondrop={(e) => handleDrop(e, board)}
-                    ondragover={handleDragOver}
+                    ondrop={auth.user ? (e) => handleDrop(e, board) : undefined}
+                    ondragover={auth.user ? handleDragOver : undefined}
                 >
                     <div class="mb-3 flex items-center justify-between px-3 py-2 rounded border {getBoardHeaderStyle(board)}">
                         <h3 class="font-semibold capitalize text-sm">
@@ -273,9 +277,9 @@
                             <div
                                 role="button"
                                 tabindex="0"
-                                class="cursor-grab active:cursor-grabbing"
-                                draggable="true"
-                                ondragstart={(e) => handleDragStart(e, request)}
+                                class={auth.user ? "cursor-grab active:cursor-grabbing" : "cursor-pointer"}
+                                draggable={auth.user ? "true" : "false"}
+                                ondragstart={auth.user ? (e) => handleDragStart(e, request) : undefined}
                                 onclick={() => goToDetail(request)}
                                 onkeydown={(e) => e.key === 'Enter' && goToDetail(request)}
                             >

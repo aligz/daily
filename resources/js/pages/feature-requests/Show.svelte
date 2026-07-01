@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { useForm, Link, router } from '@inertiajs/svelte';
+    import { page, useForm, Link, router } from '@inertiajs/svelte';
     import { ArrowLeft, Pencil, Save, Trash2, Calendar, User, Building2, Mail, Phone } from 'lucide-svelte';
     import AppHead from '@/components/AppHead.svelte';
     import { Badge } from '@/components/ui/badge';
@@ -43,7 +43,10 @@
         division: Division;
     }
 
+
     let { featureRequest }: { featureRequest: FeatureRequest } = $props();
+
+    const auth = $derived($page.props.auth);
 
     const statuses = ['baru', 'review', 'diacc', 'diproses', 'selesai'];
 
@@ -125,16 +128,18 @@
                 </p>
             </div>
             <div class="flex gap-2">
-                <Link href={featureRequestsEdit.url({ feature_request: featureRequest.id })}>
-                    <Button variant="outline">
-                        <Pencil class="mr-2 h-4 w-4" />
-                        Edit
+                {#if auth.user}
+                    <Link href={featureRequestsEdit.url({ feature_request: featureRequest.id })}>
+                        <Button variant="outline">
+                            <Pencil class="mr-2 h-4 w-4" />
+                            Edit
+                        </Button>
+                    </Link>
+                    <Button variant="destructive" onclick={deleteRequest}>
+                        <Trash2 class="mr-2 h-4 w-4" />
+                        Delete
                     </Button>
-                </Link>
-                <Button variant="destructive" onclick={deleteRequest}>
-                    <Trash2 class="mr-2 h-4 w-4" />
-                    Delete
-                </Button>
+                {/if}
             </div>
         </div>
 
@@ -228,6 +233,7 @@
 
             <!-- Sidebar -->
             <div class="space-y-6">
+                {#if auth.user}
                 <!-- Status Update -->
                 <Card>
                     <CardHeader>
@@ -272,6 +278,7 @@
                         </form>
                     </CardContent>
                 </Card>
+                {/if}
 
                 <!-- Request Info -->
                 <Card>
