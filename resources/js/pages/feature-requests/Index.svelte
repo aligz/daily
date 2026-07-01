@@ -37,6 +37,7 @@
         status: 'new' | 'planning' | 'development' | 'done' | 'released';
         deadline: string;
         notes: string | null;
+        released_at: string | null;
         created_at: string;
         user: User;
         division: Division;
@@ -305,6 +306,13 @@
                                         </div>
 
                                         <!-- Deadline -->
+
+                                        {#if request.status === "released" && request.released_at}
+                                            <div class="flex items-center gap-1.5 text-xs text-green-600 dark:text-green-400">
+                                                <svg class="h-3 w-3 shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg>
+                                                <span>Released {formatDate(request.released_at)}</span>
+                                            </div>
+                                        {/if}
                                         <div class="flex items-center gap-1.5 text-xs {isOverdue(request.deadline, request.status) ? 'text-destructive font-medium' : 'text-muted-foreground'}">
                                             <Calendar class="h-3 w-3 shrink-0" />
                                             <span>{formatDate(request.deadline)}</span>
