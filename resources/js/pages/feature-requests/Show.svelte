@@ -34,7 +34,7 @@
         requester_email: string | null;
         requester_phone: string | null;
         priority: 'low' | 'medium' | 'high' | 'urgent';
-        status: 'baru' | 'review' | 'diacc' | 'diproses' | 'selesai';
+        status: 'new' | 'planning' | 'development' | 'done' | 'released';
         deadline: string;
         notes: string | null;
         created_at: string;
@@ -48,7 +48,7 @@
 
     const auth = $derived($page.props.auth);
 
-    const statuses = ['baru', 'review', 'diacc', 'diproses', 'selesai'];
+    const statuses = ['new', 'planning', 'development', 'done', 'released'];
 
     const form = useForm({
         status: featureRequest.status,
@@ -69,11 +69,11 @@
 
     function getStatusBadgeColor(status: string): string {
         const colors: Record<string, string> = {
-            baru: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
-            review: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
-            diacc: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200',
-            diproses: 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200',
-            selesai: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
+            new: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
+            planning: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
+            development: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200',
+            done: 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200',
+            released: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
         };
         return colors[status] || 'bg-gray-100 text-gray-800';
     }
@@ -192,10 +192,10 @@
                             </div>
                             <div>
                                 <Label class="text-sm text-muted-foreground">Deadline</Label>
-                                <p class="font-medium flex items-center gap-2 {isOverdue(featureRequest.deadline) && featureRequest.status !== 'selesai' ? 'text-destructive' : ''}">
+                                <p class="font-medium flex items-center gap-2 {isOverdue(featureRequest.deadline) && featureRequest.status !== 'released' ? 'text-destructive' : ''}">
                                     <Calendar class="h-4 w-4" />
                                     {formatDate(featureRequest.deadline)}
-                                    {#if isOverdue(featureRequest.deadline) && featureRequest.status !== 'selesai'}
+                                    {#if isOverdue(featureRequest.deadline) && featureRequest.status !== 'released'}
                                         <Badge variant="destructive" class="text-xs">Overdue</Badge>
                                     {/if}
                                 </p>

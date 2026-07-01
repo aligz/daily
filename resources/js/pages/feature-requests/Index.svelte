@@ -34,7 +34,7 @@
         requester_email: string | null;
         requester_phone: string | null;
         priority: 'low' | 'medium' | 'high' | 'urgent';
-        status: 'baru' | 'review' | 'diacc' | 'diproses' | 'selesai';
+        status: 'new' | 'planning' | 'development' | 'done' | 'released';
         deadline: string;
         notes: string | null;
         created_at: string;
@@ -50,7 +50,7 @@
     let selectedDivisionId = $state<number | null>(null);
     let selectedPriority = $state<string | null>(null);
 
-    const boards = ['baru', 'review', 'diacc', 'diproses', 'selesai'];
+    const boards = ['new', 'planning', 'development', 'done', 'released'];
     const priorities = ['low', 'medium', 'high', 'urgent'];
 
     let filteredRequests = $derived.by(() => {
@@ -99,11 +99,11 @@
 
     function getBoardHeaderStyle(board: string): string {
         const styles: Record<string, string> = {
-            baru: 'bg-blue-100/50 border-blue-200 dark:bg-blue-900/20 dark:border-blue-800 text-blue-800 dark:text-blue-200',
-            review: 'bg-yellow-100/50 border-yellow-200 dark:bg-yellow-900/20 dark:border-yellow-800 text-yellow-800 dark:text-yellow-200',
-            diacc: 'bg-purple-100/50 border-purple-200 dark:bg-purple-900/20 dark:border-purple-800 text-purple-800 dark:text-purple-200',
-            diproses: 'bg-orange-100/50 border-orange-200 dark:bg-orange-900/20 dark:border-orange-800 text-orange-800 dark:text-orange-200',
-            selesai: 'bg-green-100/50 border-green-200 dark:bg-green-900/20 dark:border-green-800 text-green-800 dark:text-green-200',
+            new: 'bg-blue-100/50 border-blue-200 dark:bg-blue-900/20 dark:border-blue-800 text-blue-800 dark:text-blue-200',
+            planning: 'bg-yellow-100/50 border-yellow-200 dark:bg-yellow-900/20 dark:border-yellow-800 text-yellow-800 dark:text-yellow-200',
+            development: 'bg-purple-100/50 border-purple-200 dark:bg-purple-900/20 dark:border-purple-800 text-purple-800 dark:text-purple-200',
+            done: 'bg-orange-100/50 border-orange-200 dark:bg-orange-900/20 dark:border-orange-800 text-orange-800 dark:text-orange-200',
+            released: 'bg-green-100/50 border-green-200 dark:bg-green-900/20 dark:border-green-800 text-green-800 dark:text-green-200',
         };
         return styles[board] || 'bg-muted/50';
     }
@@ -147,7 +147,7 @@
     }
 
     function isOverdue(deadline: string, status: string): boolean {
-        if (status === 'selesai') return false;
+        if (status === 'released') return false;
         return new Date(deadline) < new Date();
     }
 

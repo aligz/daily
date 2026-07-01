@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('title');
             $table->text('description')->nullable();
             $table->enum('priority', ['low', 'medium', 'high', 'urgent'])->default('medium');
-            $table->enum('status', ['baru', 'review', 'diacc', 'diproses', 'selesai'])->default('baru');
+            $table->enum('status', ['new', 'planning', 'development', 'done', 'released'])->default('new');
             $table->date('deadline');
             $table->text('notes')->nullable();
             $table->timestamps();

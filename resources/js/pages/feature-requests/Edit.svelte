@@ -28,7 +28,7 @@
         requester_email: string | null;
         requester_phone: string | null;
         priority: 'low' | 'medium' | 'high' | 'urgent';
-        status: 'baru' | 'review' | 'diacc' | 'diproses' | 'selesai';
+        status: 'new' | 'planning' | 'development' | 'done' | 'released';
         deadline: string;
         division_id: number;
     }
@@ -36,7 +36,7 @@
     let { featureRequest, divisions }: { featureRequest: FeatureRequest; divisions: Division[] } = $props();
 
     const priorities = ['low', 'medium', 'high', 'urgent'];
-    const statuses = ['baru', 'review', 'diacc', 'diproses', 'selesai'];
+    const statuses = ['new', 'planning', 'development', 'done', 'released'];
 
     const form = useForm({
         division_id: featureRequest.division_id,

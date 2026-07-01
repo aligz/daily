@@ -46,7 +46,7 @@ class FeatureRequestController extends Controller
         ]);
 
         $validated['user_id'] = auth()->id();
-        $validated['status'] = 'baru';
+        $validated['status'] = 'new';
 
         FeatureRequest::create($validated);
 
@@ -83,7 +83,7 @@ class FeatureRequestController extends Controller
             'title' => 'sometimes|string|max:255',
             'description' => 'nullable|string',
             'priority' => 'sometimes|in:low,medium,high,urgent',
-            'status' => 'sometimes|in:baru,review,diacc,diproses,selesai',
+            'status' => 'sometimes|in:new,planning,development,done,released',
             'deadline' => 'sometimes|date|after_or_equal:today',
             'notes' => 'nullable|string',
         ]);

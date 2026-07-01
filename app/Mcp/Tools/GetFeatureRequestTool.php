@@ -18,7 +18,7 @@ class GetFeatureRequestTool extends Tool
     {
         $validated = $request->validate([
             'id' => ['sometimes', 'integer', 'min:1'],
-            'status' => ['sometimes', 'string', 'in:baru,review,diacc,diproses,selesai'],
+            'status' => ['sometimes', 'string', 'in:new,planning,development,done,released'],
             'division_id' => ['sometimes', 'integer', 'min:1'],
             'priority' => ['sometimes', 'string', 'in:low,medium,high,urgent'],
             'search' => ['sometimes', 'string', 'max:255'],
@@ -34,7 +34,7 @@ class GetFeatureRequestTool extends Tool
             }
 
             $data = $request->toArray();
-            $data['is_overdue'] = $request->deadline->isPast() && $request->status !== 'selesai';
+            $data['is_overdue'] = $request->deadline->isPast() && $request->status !== 'released';
 
             return Response::json($data);
         }
@@ -64,7 +64,7 @@ class GetFeatureRequestTool extends Tool
 
         if (isset($validated['overdue']) && $validated['overdue'] === true) {
             $query->where('deadline', '<', now())
-                ->where('status', '!=', 'selesai');
+                ->where('status', '!=', 'released');
         }
 
         $limit = $validated['limit'] ?? 15;
@@ -76,7 +76,7 @@ class GetFeatureRequestTool extends Tool
             ->get()
             ->map(function ($item) {
                 $data = $item->toArray();
-                $data['is_overdue'] = $item->deadline->isPast() && $item->status !== 'selesai';
+                $data['is_overdue'] = $item->deadline->isPast() && $item->status !== 'released';
 
                 return $data;
             });
@@ -91,7 +91,7 @@ class GetFeatureRequestTool extends Tool
                 ->description('Filter by a specific feature request ID. When provided, other filters are ignored.')
                 ->nullable(),
             'status' => $schema->string()
-                ->description('Filter by status: baru, review, diacc, diproses, selesai.')
+                ->description('Filter by status: new, planning, development, done, released.')
                 ->nullable(),
             'division_id' => $schema->integer()
                 ->description('Filter by division ID.')
@@ -103,7 +103,7 @@ class GetFeatureRequestTool extends Tool
                 ->description('Search keyword that matches title, description, or requester name.')
                 ->nullable(),
             'overdue' => $schema->boolean()
-                ->description('Filter only overdue requests (deadline passed and not yet selesai).')
+                ->description('Filter only overdue requests (deadline passed and not yet released).')
                 ->nullable(),
             'limit' => $schema->integer()
                 ->description('Maximum number of feature requests to return (1-100). Defaults to 15.')

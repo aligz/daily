@@ -42,11 +42,11 @@ class FeatureRequest extends Model
     public function getStatusBadgeColorAttribute(): string
     {
         return match ($this->status) {
-            'baru' => 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
-            'review' => 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
-            'diacc' => 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200',
-            'diproses' => 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200',
-            'selesai' => 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
+            'new' => 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
+            'planning' => 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
+            'development' => 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200',
+            'done' => 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200',
+            'released' => 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
             default => 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200',
         };
     }
