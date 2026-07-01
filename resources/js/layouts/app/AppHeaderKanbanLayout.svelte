@@ -20,7 +20,7 @@
     import { currentUrlState } from '@/lib/currentUrl';
     import { getInitials } from '@/lib/initials';
     import { toUrl } from '@/lib/utils';
-    import { login, register, home, dashboard } from '@/routes';
+    import { login, home, dashboard } from '@/routes';
     import type { BreadcrumbItem, NavItem } from '@/types';
 
     let {
@@ -124,9 +124,6 @@
                 {:else}
                     <Link href={toUrl(login())}>
                         <Button variant="ghost" size="sm">Log in</Button>
-                    </Link>
-                    <Link href={toUrl(register())}>
-                        <Button variant="default" size="sm">Register</Button>
                     </Link>
                 {/if}
             </div>

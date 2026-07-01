@@ -9,14 +9,14 @@
     import { Spinner } from '@/components/ui/spinner';
     import AuthBase from '@/layouts/AuthLayout.svelte';
     import { login } from '@/routes';
-    import { store } from '@/routes/register';
 </script>
 
 <AppHead title="Register" />
 
 <AuthBase title="Create an account" description="Enter your details below to create your account">
     <Form
-        {...store.form()}
+        action="/register"
+        method="post"
         resetOnSuccess={['password', 'password_confirmation']}
         class="flex flex-col gap-6"
     >

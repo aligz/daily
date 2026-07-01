@@ -2,7 +2,7 @@
     import { Link, page } from '@inertiajs/svelte';
     import AppHead from '@/components/AppHead.svelte';
     import { toUrl } from '@/lib/utils';
-    import { dashboard, login, register } from '@/routes';
+    import { dashboard, login } from '@/routes';
 
     let {
         canRegister = true,
@@ -36,12 +36,9 @@
                     Log in
                 </Link>
                 {#if canRegister}
-                    <Link
-                        href={toUrl(register())}
-                        class="inline-block rounded-sm border border-[#19140035] px-5 py-1.5 text-sm leading-normal text-[#1b1b18] hover:border-[#1915014a] dark:border-[#3E3E3A] dark:text-[#EDEDEC] dark:hover:border-[#62605b]"
-                    >
-                        Register
-                    </Link>
+                    <span class="inline-block rounded-sm border border-[#19140035] px-5 py-1.5 text-sm leading-normal text-muted-foreground opacity-50 cursor-not-allowed">
+                        Register (closed)
+                    </span>
                 {/if}
             {/if}
         </nav>
