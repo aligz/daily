@@ -1,0 +1,37 @@
+services:
+  # App Laravel (nginx + php-fpm all-in-one).
+  # Base ini generik: nama container, bind mount, network, dan uid/gid mesin
+  # ini semuanya ada di compose.override.yml (gitignored).
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: daily/app:dev
+    depends_on:
+      - db
+    env_file:
+      - .env
+    expose:
+      - "80"
+
+  # Frontend assets (Vite + wayfinder). Base = dev server; di server ini
+  # dioverride jadi one-shot `npm ci && npm run build` (lihat override).
+  vite:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: daily/app:dev
+    working_dir: /var/www/html
+    depends_on:
+      - app
+    command: npm run dev -- --host 0.0.0.0
+
+  # DB stub buat mesin tanpa MySQL external. Di server ini service ini
+  # dimatikan lewat override karena sudah ada mysql-8 di network db-net.
+  db:
+    image: mysql:8.4
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE:-daily}
+      MYSQL_USER: ${DB_USERNAME:-daily}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-secret}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-secret}

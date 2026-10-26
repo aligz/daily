@@ -13,8 +13,12 @@
 .DS_Store
 .env
 .env.backup
+.env.local
+.env.prod
 .env.production
 .env.testing
+/compose.override.yml
+/LOCAL.md
 .phpactor.json
 .phpunit.result.cache
 Homestead.json
