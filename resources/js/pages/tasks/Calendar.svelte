@@ -5,6 +5,7 @@
     import CalendarMonth from '@/components/tasks/CalendarMonth.svelte';
     import CalendarStats from '@/components/tasks/CalendarStats.svelte';
     import DayDetail from '@/components/tasks/DayDetail.svelte';
+    import RoutineBar from '@/components/checklist/RoutineBar.svelte';
     import TaskViewToggle from '@/components/tasks/TaskViewToggle.svelte';
     import AppLayout from '@/layouts/AppLayout.svelte';
     import { todayInAppTimezone } from '@/lib/date';
@@ -15,6 +16,8 @@
         grid,
         days,
         summary,
+        checklist,
+        checklist_by_date,
         molorTasks,
         users,
         filters,
@@ -63,6 +66,8 @@
                     'grid',
                     'days',
                     'summary',
+                    'checklist',
+                    'checklist_by_date',
                     'molorTasks',
                     'users',
                     'filters',
@@ -135,6 +140,8 @@
             </div>
         </div>
 
+        <RoutineBar {checklist} />
+
         <CalendarStats {summary} />
 
         {#if summary.completed + summary.today_entries + summary.rollbacks + summary.planned === 0}
@@ -151,6 +158,7 @@
                 {month}
                 {grid}
                 {days}
+                checklistByDate={checklist_by_date}
                 {selectedDate}
                 {today}
                 onChangeMonth={changeMonth}
@@ -162,13 +170,14 @@
                 <DayDetail
                     date={selectedDate}
                     day={selectedDay}
+                    checklistDay={checklist_by_date[selectedDate] ?? null}
                     {molorTasks}
                     {thresholds}
                 />
             </div>
         </div>
 
-        <CalendarAgenda {month} {days} />
+        <CalendarAgenda {month} {days} checklistByDate={checklist_by_date} />
 
         <p class="flex items-center gap-1.5 text-[10px] text-muted-foreground">
             <span aria-hidden="true">i</span>

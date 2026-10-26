@@ -1,12 +1,16 @@
 <script lang="ts">
     import CalendarDay from '@/components/tasks/CalendarDay.svelte';
-    import type { CalendarDay as CalendarDayData } from '@/types/tasks';
+    import type {
+        CalendarDay as CalendarDayData,
+        ChecklistDay,
+    } from '@/types/tasks';
     import { addMonths, formatMonth } from '@/lib/date';
 
     let {
         month,
         grid,
         days,
+        checklistByDate,
         selectedDate,
         today,
         onChangeMonth,
@@ -16,6 +20,7 @@
         month: string;
         grid: { start: string; end: string };
         days: Record<string, CalendarDayData>;
+        checklistByDate: Record<string, ChecklistDay>;
         selectedDate: string;
         today: string;
         onChangeMonth: (month: string) => void;
@@ -122,6 +127,7 @@
                 {date}
                 {month}
                 day={dayFor(date)}
+                checklistDay={checklistByDate[date] ?? null}
                 selected={date === selectedDate}
                 {today}
                 {onSelect}

@@ -79,6 +79,55 @@ export type TaskMetric = {
 
 export type TaskMetrics = Record<number, TaskMetric>;
 
+export type ChecklistStatus = 'done' | 'skipped' | 'pending';
+
+export type ChecklistItem = {
+    id: number;
+    title: string;
+    position: number;
+    status: ChecklistStatus;
+    checked_at: string | null;
+};
+
+export type ChecklistStats = {
+    total: number;
+    done: number;
+    skipped: number;
+    pending: number;
+    percent: number;
+};
+
+export type ArchivedRoutine = {
+    id: number;
+    title: string;
+    archived_on: string;
+};
+
+export type ChecklistDayItem = {
+    id: number;
+    title: string;
+    status: ChecklistStatus;
+};
+
+export type ChecklistDay = {
+    total: number;
+    done: number;
+    skipped: number;
+    pending: number;
+    note: string | null;
+    items: ChecklistDayItem[];
+};
+
+export type ChecklistProps = {
+    owner: CalendarUser;
+    read_only: boolean;
+    date: string;
+    items: ChecklistItem[];
+    note: { body: string; updated_at: string | null } | null;
+    stats: ChecklistStats;
+    archived: ArchivedRoutine[];
+};
+
 export type CalendarProps = {
     month: string;
     grid: {
@@ -87,6 +136,8 @@ export type CalendarProps = {
     };
     days: Record<string, CalendarDay>;
     summary: CalendarSummary;
+    checklist: ChecklistProps;
+    checklist_by_date: Record<string, ChecklistDay>;
     molorTasks: MolorTask[];
     users: CalendarUser[];
     filters: {

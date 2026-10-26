@@ -5,14 +5,16 @@
         formatTime,
         formatWeekday,
     } from '@/lib/date';
-    import type { CalendarDay } from '@/types/tasks';
+    import type { CalendarDay, ChecklistDay } from '@/types/tasks';
 
     let {
         month,
         days,
+        checklistByDate = {},
     }: {
         month: string;
         days: Record<string, CalendarDay>;
+        checklistByDate?: Record<string, ChecklistDay>;
     } = $props();
 
     const agendaDays = $derived.by(() =>
@@ -20,11 +22,12 @@
             .filter(
                 ([date, day]) =>
                     date.startsWith(month) &&
-                    day.today.length +
+                    (day.today.length +
                         day.done.length +
                         day.rollback.length +
                         day.planned.length >
-                        0,
+                        0 ||
+                        Boolean(checklistByDate[date])),
             )
             .sort(([first], [second]) => first.localeCompare(second)),
     );
@@ -59,6 +62,27 @@
                         </span>
                     {/if}
                 </div>
+
+                {#if checklistByDate[date]}
+                    <div
+                        class="mb-1 flex items-center gap-1.5 text-[9.5px] text-violet-600 dark:text-violet-300"
+                    >
+                        <span aria-hidden="true">▣</span>
+                        <span class="shrink-0 tabular-nums">
+                            {checklistByDate[date].done +
+                                checklistByDate[date].skipped}/{checklistByDate[
+                                date
+                            ].total}
+                        </span>
+                        {#if checklistByDate[date].note}
+                            <span
+                                class="min-w-0 truncate text-[9px] text-muted-foreground italic"
+                            >
+                                “{checklistByDate[date].note}”
+                            </span>
+                        {/if}
+                    </div>
+                {/if}
 
                 <div class="flex flex-col gap-1">
                     {#each day.today as event (event.at + event.id)}

@@ -3,6 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Actions\Tasks\ComputeTaskMetrics;
+use App\Models\Routine;
+use App\Models\RoutineEntry;
+use App\Models\RoutineNote;
 use App\Models\Task;
 use App\Models\TaskHistory;
 use App\Models\User;
@@ -99,6 +102,8 @@ class TaskCalendarController extends Controller
             'top_molor' => $molorTasks[0] ?? null,
         ];
 
+        $checklistOwnerId = $this->resolveChecklistOwnerId($userId);
+
         return Inertia::render('tasks/Calendar', [
             'month' => $monthStart->format('Y-m'),
             'grid' => [
@@ -107,6 +112,8 @@ class TaskCalendarController extends Controller
             ],
             'days' => $days,
             'summary' => $summary,
+            'checklist' => $this->buildChecklist($checklistOwnerId, $timezone),
+            'checklist_by_date' => $this->buildChecklistByDate($checklistOwnerId, $gridStart, $gridEnd),
             'molorTasks' => $molorTasks,
             'users' => User::query()->select('id', 'name')->orderBy('name')->get(),
             'filters' => ['user_id' => $userId],
@@ -197,5 +204,161 @@ class TaskCalendarController extends Controller
             ->take(3)
             ->values()
             ->all();
+    }
+
+    /**
+     * The routine bar always belongs to the signed-in user, unless a head is
+     * filtering the calendar by someone else.
+     */
+    private function resolveChecklistOwnerId(?int $userId): int
+    {
+        $authId = (int) auth()->id();
+
+        if ($userId === null || $userId === $authId) {
+            return $authId;
+        }
+
+        return auth()->user()->isHead() ? $userId : $authId;
+    }
+
+    /**
+     * Per-day routine summary (and items) for every date in the grid.
+     *
+     * @return array<string, array<string, mixed>>
+     */
+    private function buildChecklistByDate(int $ownerId, CarbonImmutable $gridStart, CarbonImmutable $gridEnd): array
+    {
+        $routines = Routine::query()
+            ->where('user_id', $ownerId)
+            ->orderBy('position')
+            ->orderBy('id')
+            ->get();
+
+        if ($routines->isEmpty()) {
+            return [];
+        }
+
+        $entries = RoutineEntry::query()
+            ->whereIn('routine_id', $routines->pluck('id'))
+            ->whereBetween('check_date', [$gridStart->toDateString(), $gridEnd->toDateString()])
+            ->get()
+            ->groupBy(fn (RoutineEntry $entry) => $entry->check_date->toDateString());
+
+        $notes = RoutineNote::query()
+            ->where('user_id', $ownerId)
+            ->whereBetween('note_date', [$gridStart->toDateString(), $gridEnd->toDateString()])
+            ->get()
+            ->keyBy(fn (RoutineNote $note) => $note->note_date->toDateString());
+
+        $byDate = [];
+
+        for ($date = $gridStart; $date->lte($gridEnd); $date = $date->addDay()) {
+            $key = $date->toDateString();
+            $active = $routines->filter(fn (Routine $routine) => $routine->isActiveOn($key));
+
+            if ($active->isEmpty()) {
+                continue;
+            }
+
+            $dayEntries = $entries->get($key, collect())->keyBy('routine_id');
+
+            $items = $active
+                ->map(fn (Routine $routine): array => [
+                    'id' => $routine->id,
+                    'title' => $routine->title,
+                    'status' => $dayEntries->get($routine->id)?->status ?? 'pending',
+                ])
+                ->values()
+                ->all();
+
+            $done = count(array_filter($items, fn (array $item) => $item['status'] === 'done'));
+            $skipped = count(array_filter($items, fn (array $item) => $item['status'] === 'skipped'));
+            $total = count($items);
+
+            $byDate[$key] = [
+                'total' => $total,
+                'done' => $done,
+                'skipped' => $skipped,
+                'pending' => $total - $done - $skipped,
+                'note' => $notes->get($key)?->body,
+                'items' => $items,
+            ];
+        }
+
+        return $byDate;
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function buildChecklist(int $ownerId, string $timezone): array
+    {
+        $today = CarbonImmutable::now($timezone)->toDateString();
+        $owner = User::query()->select('id', 'name')->findOrFail($ownerId);
+
+        $routines = Routine::query()
+            ->where('user_id', $ownerId)
+            ->orderBy('position')
+            ->orderBy('id')
+            ->get();
+
+        $entries = RoutineEntry::query()
+            ->whereIn('routine_id', $routines->pluck('id'))
+            ->whereDate('check_date', $today)
+            ->get()
+            ->keyBy('routine_id');
+
+        $items = $routines
+            ->filter(fn (Routine $routine) => $routine->isActiveOn($today))
+            ->values()
+            ->map(function (Routine $routine) use ($entries): array {
+                $entry = $entries->get($routine->id);
+
+                return [
+                    'id' => $routine->id,
+                    'title' => $routine->title,
+                    'position' => $routine->position,
+                    'status' => $entry?->status ?? 'pending',
+                    'checked_at' => $entry?->checked_at?->toIso8601String(),
+                ];
+            })
+            ->all();
+
+        $done = count(array_filter($items, fn (array $item) => $item['status'] === 'done'));
+        $skipped = count(array_filter($items, fn (array $item) => $item['status'] === 'skipped'));
+        $total = count($items);
+
+        $note = RoutineNote::query()
+            ->where('user_id', $ownerId)
+            ->whereDate('note_date', $today)
+            ->first();
+
+        return [
+            'owner' => ['id' => $owner->id, 'name' => $owner->name],
+            'read_only' => $owner->id !== (int) auth()->id(),
+            'date' => $today,
+            'items' => $items,
+            'note' => $note === null ? null : [
+                'body' => $note->body,
+                'updated_at' => $note->updated_at?->toIso8601String(),
+            ],
+            'stats' => [
+                'total' => $total,
+                'done' => $done,
+                'skipped' => $skipped,
+                'pending' => $total - $done - $skipped,
+                'percent' => $total === 0 ? 0 : (int) round((($done + $skipped) / $total) * 100),
+            ],
+            'archived' => $routines
+                ->filter(fn (Routine $routine) => $routine->archived_on !== null
+                    && $routine->archived_on->toDateString() <= $today)
+                ->map(fn (Routine $routine): array => [
+                    'id' => $routine->id,
+                    'title' => $routine->title,
+                    'archived_on' => $routine->archived_on->toDateString(),
+                ])
+                ->values()
+                ->all(),
+        ];
     }
 }

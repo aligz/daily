@@ -24,6 +24,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('tasks/calendar', [\App\Http\Controllers\TaskCalendarController::class, 'index'])->name('tasks.calendar');
     Route::resource('tasks', \App\Http\Controllers\TaskController::class)->except(['show', 'create', 'edit']);
     Route::patch('tasks/{task}/reorder', [\App\Http\Controllers\TaskController::class, 'reorder'])->name('tasks.reorder');
+
+    Route::post('routines', [\App\Http\Controllers\RoutineController::class, 'store'])->name('routines.store');
+    Route::patch('routines/{routine}', [\App\Http\Controllers\RoutineController::class, 'update'])->name('routines.update');
+    Route::delete('routines/{routine}', [\App\Http\Controllers\RoutineController::class, 'archive'])->name('routines.destroy');
+    Route::put('checklist/note', [\App\Http\Controllers\ChecklistController::class, 'saveNote'])->name('checklist.note.update');
+    Route::patch('checklist/{routine}', [\App\Http\Controllers\ChecklistController::class, 'check'])->name('checklist.check');
+
     Route::get('reports', [\App\Http\Controllers\ReportController::class, 'index'])->name('reports.index');
     Route::resource('divisions', \App\Http\Controllers\DivisionController::class)->except(['create', 'show']);
     Route::get('feature-requests/create', [\App\Http\Controllers\FeatureRequestController::class, 'create'])->name('feature-requests.create');
