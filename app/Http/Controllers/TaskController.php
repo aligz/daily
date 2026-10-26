@@ -44,6 +44,7 @@ class TaskController extends Controller
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
             'reference' => 'nullable|string|max:50',
+            'planned_on' => 'nullable|date',
             'status' => 'required|in:backlog,todo,today,done',
         ]);
 
@@ -85,6 +86,7 @@ class TaskController extends Controller
             'title' => 'sometimes|string|max:255',
             'description' => 'nullable|string',
             'reference' => 'nullable|string|max:50',
+            'planned_on' => 'nullable|date',
             'status' => 'sometimes|in:backlog,todo,today,done',
         ]);
 

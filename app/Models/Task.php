@@ -16,6 +16,7 @@ class Task extends Model
         'description',
         'reference',
         'status',
+        'planned_on',
         'completed_at',
         'position',
     ];
@@ -23,6 +24,7 @@ class Task extends Model
     protected $casts = [
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
+        'planned_on' => 'date:Y-m-d',
         'completed_at' => 'datetime',
         'position' => 'float',
     ];

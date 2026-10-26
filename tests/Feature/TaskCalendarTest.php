@@ -180,3 +180,42 @@ test('tasks without history do not break the metrics', function () {
             ->where('summary.top_molor', null)
             ->has('molorTasks', 0));
 });
+
+test('planned tasks appear on their planned date', function () {
+    $user = User::factory()->create();
+    $task = Task::factory()->create([
+        'user_id' => $user->id,
+        'status' => 'todo',
+        'planned_on' => '2026-10-23',
+    ]);
+
+    actingAs($user)
+        ->get(route('tasks.calendar', ['month' => '2026-10']))
+        ->assertInertia(fn (AssertableInertia $page) => $page
+            ->where('days.2026-10-23.planned.0.id', $task->id)
+            ->where('summary.planned', 1));
+});
+
+test('planned tasks respect the user filter', function () {
+    $first = User::factory()->create();
+    $second = User::factory()->create();
+
+    Task::factory()->create(['user_id' => $first->id, 'status' => 'todo', 'planned_on' => '2026-10-23']);
+    Task::factory()->create(['user_id' => $second->id, 'status' => 'todo', 'planned_on' => '2026-10-23']);
+
+    actingAs($first)
+        ->get(route('tasks.calendar', ['month' => '2026-10', 'user_id' => $first->id]))
+        ->assertInertia(fn (AssertableInertia $page) => $page
+            ->has('days.2026-10-23.planned', 1)
+            ->where('summary.planned', 1));
+});
+
+test('a task without a planned date does not appear as planned', function () {
+    $user = User::factory()->create();
+    Task::factory()->create(['user_id' => $user->id, 'status' => 'todo', 'planned_on' => null]);
+
+    actingAs($user)
+        ->get(route('tasks.calendar', ['month' => '2026-10']))
+        ->assertInertia(fn (AssertableInertia $page) => $page
+            ->where('summary.planned', 0));
+});

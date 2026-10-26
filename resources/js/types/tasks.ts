@@ -16,6 +16,7 @@ export type CalendarDay = {
     today: CalendarEvent[];
     done: CalendarEvent[];
     rollback: CalendarEvent[];
+    planned: CalendarEvent[];
 };
 
 export type MolorTask = {
@@ -31,6 +32,7 @@ export type CalendarSummary = {
     completed: number;
     today_entries: number;
     rollbacks: number;
+    planned: number;
     top_molor: MolorTask | null;
 };
 
@@ -55,6 +57,7 @@ export type BoardTask = {
     reference: string | null;
     status: TaskStatus;
     position: number | null;
+    planned_on: string | null;
     created_at: string;
     completed_at: string | null;
     user: BoardUser;

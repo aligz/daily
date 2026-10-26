@@ -1,11 +1,11 @@
 # Task Calendar — Implementation Plan
 
-> **Status:** disetujui 26 Okt 2026. **Phase 0–2 selesai & terverifikasi** (76 passed, 2 skipped). Phase 3 (`planned_on`) ditunda.
+> **Status:** disetujui 26 Okt 2026. **Phase 0–3 selesai & terverifikasi** (82 passed, 2 skipped).
 > **Mockup:** [`docs/mockups/task-calendar.html`](../../mockups/task-calendar.html) · screenshot di [`docs/mockups/screenshots/`](../../mockups/screenshots)
 
 **Goal:** Menambah tampilan kalender di samping board kanban untuk menjawab dua pertanyaan: *"per hari gue ngerjain apa?"* dan *"task mana yang molor?"* — tanpa mengubah default board dan tanpa kolom deadline.
 
-**Architecture:** Satu route baru `GET /tasks/calendar` (`TaskCalendarController`) yang mengembalikan DTO ringkas per tanggal (hasil bucket `task_histories` per zona Asia/Jakarta) + agregat metrik per task. Halaman Svelte baru `tasks/Calendar` menampilkan grid bulanan, panel detail harian, dan agenda untuk mobile. Metrik molor/stagnan dihitung dari `task_histories`, lalu dipakai ulang sebagai badge di kartu kanban. Rencana (`planned_on`) **ditunda** ke iterasi berikutnya setelah kalender retrospektif dipakai.
+**Architecture:** Satu route baru `GET /tasks/calendar` (`TaskCalendarController`) yang mengembalikan DTO ringkas per tanggal (hasil bucket `task_histories` per zona Asia/Jakarta) + agregat metrik per task. Halaman Svelte baru `tasks/Calendar` menampilkan grid bulanan, panel detail harian, dan agenda untuk mobile. Metrik molor/stagnan dihitung dari `task_histories`, lalu dipakai ulang sebagai badge di kartu kanban. Rencana (`planned_on`) menjadi tanggal kerja lembut di Phase 3 — bukan deadline.
 
 **Tech Stack:** Laravel 12, PHP 8.2+, Inertia v2, Svelte 5 (runes), TypeScript, Tailwind v4, Pest 4, Wayfinder.
 
@@ -18,7 +18,7 @@
 | 1 | Copy UI | **English** — konsisten dengan app; format tanggal `id-ID` |
 | 2 | Task terhapus | **Tetap muncul** di riwayat dengan label `(deleted)`; soft delete |
 | 3 | Awal minggu | **Senin** |
-| 4 | `planned_on` | **Ditunda** — kerjakan kalender dulu |
+| 4 | `planned_on` | Dikerjakan 26 Okt 2026 setelah Phase 2 selesai |
 | 5 | Urutan agenda mobile | **Naik** (tanggal terlama → terbaru), sesuai mockup |
 
 ---
@@ -31,7 +31,7 @@
 | 2 | **Kalender bukan pengganti kanban** | Kanban = status, kalender = waktu. Board tetap default. |
 | 3 | **Zona waktu tampilan `Asia/Jakarta`**, storage tetap UTC | Menghindari migrasi ulang semua timestamp. Reset harian dijadwalkan 00:00 WIB. |
 | 4 | **Soft delete diaktifkan** | Tanpa ini, hapus task = riwayat kerja hilang (FK cascade), kalender retrospektif bolong. |
-| 5 | **Tidak ada due date / overdue merah** | Di luar keputusan produk. `planned_on` ditunda ke iterasi berikutnya. |
+| 5 | **Tidak ada due date / overdue merah** | Di luar keputusan produk. `planned_on` hanya rencana, bukan deadline. |
 | 6 | **Semua user, bisa difilter** | Konsisten dengan board yang sudah menampilkan task semua user. |
 
 ### Definisi metrik (final)
@@ -55,7 +55,7 @@ stagnan        = status IN (backlog, todo) AND stuck_days >= 14
 - Phase 0: fondasi (soft delete, timezone, index, route cleanup, command reset).
 - Phase 1: halaman kalender bulanan + panel detail harian + agenda mobile + filter user.
 - Phase 2: agregasi metrik + badge di kartu kanban + daftar "paling molor".
-- Phase 3 (ditunda): `planned_on` + chip rencana di kalender.
+- Phase 3: `planned_on` + chip rencana di kalender.
 
 ### Out (sengaja tidak dikerjakan)
 
@@ -277,11 +277,11 @@ return [
 | File | Perubahan |
 |---|---|
 | `database/migrations/2026_10_24_000000_add_task_calendar_indexes.php` | Create — index `task_histories(created_at)`, `(task_id, created_at)`, `tasks(user_id, status)` |
-| `database/migrations/2026_10_24_000001_add_planned_on_to_tasks_table.php` | Create (Phase 3, **ditunda**) — `planned_on` date nullable + index `(user_id, planned_on)` |
-| `app/Models/Task.php` | Modify — `SoftDeletes` (done); `planned_on` ditunda |
+| `database/migrations/2026_10_26_000001_add_planned_on_to_tasks_table.php` | Create — `planned_on` date nullable + index `(user_id, planned_on)` |
+| `app/Models/Task.php` | Modify — `SoftDeletes`, `planned_on` fillable + cast |
 | `app/Models/TaskHistory.php` | Tidak berubah |
 | `app/Http/Controllers/TaskCalendarController.php` | Create |
-| `app/Http/Controllers/TaskController.php` | Modify — props `metrics` (validasi `planned_on` ditunda) |
+| `app/Http/Controllers/TaskController.php` | Modify — props `metrics`, validasi `planned_on` |
 | `app/Actions/Tasks/ComputeTaskMetrics.php` | Create — agregasi today/rollback/stuck |
 | `app/Console/Commands/ResetTodayTasks.php` | Create — extract dari closure `console.php`, sekaligus set `position` |
 | `routes/web.php` | Modify — route calendar + resource `except` |
@@ -508,7 +508,7 @@ svelte-check ..................... file baru bersih
   - `is_molor` → `3× today · 2↩` (merah) + tooltip penjelasan
   - `is_stale` → `Stale 20d` (amber)
   - today (jika bukan molor) → `▶ Focus today` (cyan)
-  - `planned_on` → tidak ada (Phase 3 ditunda)
+  - `planned_on` → `◇ Plan 26 Oct` (dashed)
 - [x] `lib/users.ts` menyatukan `getUserColor`; `getInitials` dari `lib/initials`.
 - [x] Tombol ↑/↓ reorder tetap berfungsi (`stopPropagation` dipertahankan).
 - [x] Drag & drop tidak berubah.
@@ -562,37 +562,55 @@ Data demo untuk screenshot sudah dihapus kembali setelah verifikasi.
 
 ---
 
-## 9. Phase 3 — Ditunda: Rencana / `planned_on`
+## 9. Phase 3 — Rencana / `planned_on` — ✅ SELESAI
 
-> **Keputusan review #4:** tidak dikerjakan sekarang. Section ini disimpan sebagai referensi saat kalender retrospektif sudah dipakai. Jangan implementasi sebelum ada keputusan baru.
+> Rencana adalah tanggal kerja yang lembut, bukan deadline. Tidak ada status merah/overdue dari `planned_on`.
 
 ### Task 3.1 — Migration & model
 
-- [ ] `planned_on` date nullable, index `['user_id', 'planned_on']`.
-- [ ] `Task::$fillable` + cast `'planned_on' => 'date'`.
+- [x] `planned_on` date nullable, index `['user_id', 'planned_on']`.
+- [x] `Task::$fillable` + cast `'planned_on' => 'date:Y-m-d'` (serialisasi tanggal polos ke frontend).
 
 ### Task 3.2 — Validasi & form
 
-- [ ] `TaskController@store/update`: `'planned_on' => ['nullable', 'date']` (boleh masa lalu untuk backfill; UI membatasi min hari ini).
-- [ ] Dialog task: input `type="date"` + tombol clear; ikut di `useForm`.
-- [ ] Tampilkan `planned_on` di history? Tidak.
+- [x] `TaskController@store/update`: `'planned_on' => ['nullable', 'date']`.
+- [x] Dialog task: input `type="date"`, `min` = hari ini, ikut `useForm`; update mengosongkan lewat input kosong.
+- [x] Tidak mengubah history (rencana bukan perubahan status).
 
 ### Task 3.3 — Kalender
 
-- [ ] Query task dengan `planned_on` di rentang grid, filter user, `withTrashed(false)`.
-- [ ] Masukkan ke bucket `planned` per tanggal.
-- [ ] Chip dashed + ikon `◇`.
-- [ ] (Opsional) drag chip ke tanggal lain → `router.patch(update.url({task}), { planned_on })` dengan optimistic UI sederhana; kalau gagal, revert.
+- [x] Query task dengan `planned_on` di rentang grid + filter user; task terhapus tidak muncul.
+- [x] Bucket `planned` per tanggal, cap 50/hari seperti bucket lain.
+- [x] Chip dashed + ikon `◇`, section **Planned** di panel detail, baris planned di agenda mobile.
+- [x] Badge `◇ Plan 26 Oct` di kartu board.
+- [ ] Drag chip ke tanggal lain — **tidak** dikerjakan (belum dibutuhkan).
 
 ### Task 3.4 — Test
 
-- [ ] Task dengan `planned_on` muncul di tanggal yang benar (batas WIB: `2026-10-23` tetap 23, bukan 22).
-- [ ] `planned_on = null` tidak error dan tidak muncul.
-- [ ] Update `planned_on` lewat `tasks.update` mempertahankan field lain.
+- [x] Task dengan `planned_on` muncul di tanggal yang benar (`2026-10-23` → 23).
+- [x] `planned_on = null` tidak error dan tidak muncul.
+- [x] Filter user berlaku untuk planned.
+- [x] Create/update/clear `planned_on` lewat `tasks.store` & `tasks.update` tanpa mengubah field lain.
+- [x] Board mengirim `planned_on` untuk badge.
 
 **Acceptance Phase 3**
-- Bisa melihat rencana ke depan tanpa mengubah arti "molor".
-- Tidak ada overdue/merah dari `planned_on`.
+- [x] Bisa melihat rencana ke depan tanpa mengubah arti "molor".
+- [x] Tidak ada overdue/merah dari `planned_on`.
+
+**Verifikasi Phase 3 (26 Okt 2026, container `daily-app`):**
+
+```
+php artisan test ............... 82 passed, 2 skipped (466 assertions)
+docker compose run --rm vite ... exit 0
+npm run check .................. 0 errors, 13 warning lama
+
+browser /tasks/calendar ........ chip ◇ pada 28 Okt, section Planned terisi
+browser /tasks ................. 2 badge "◇ Plan 26/28", dialog punya input date (min hari ini)
+0 console error, tidak overflow
+```
+
+Screenshot: `docs/mockups/screenshots/implemented-calendar-planned.png`, `implemented-board-planned.png`.
+Data demo untuk screenshot sudah dihapus setelah verifikasi.
 
 ---
 
@@ -619,7 +637,7 @@ Manual QA checklist:
 
 ## 11. Rollout
 
-1. `php artisan migrate` (index; `planned_on` ditunda).
+1. `php artisan migrate` (index + `planned_on`).
 2. `php artisan wayfinder:generate && npm run build` (route baru butuh Wayfinder).
 3. Deploy.
 4. Smoke test: `/tasks` (board), `/tasks/calendar`, filter, reset command manual (`php artisan tasks:reset-today` di staging).
@@ -656,9 +674,9 @@ Manual QA checklist:
 | 0 | 0.5–1 hari | ✅ selesai — fondasi + test hijau |
 | 1 | 2–2.5 hari | ✅ selesai — kalender + panel + mobile |
 | 2 | 1–1.5 hari | ✅ selesai — metrik + badge board |
-| ~~3~~ | ~~1–1.5 hari~~ | ditunda (`planned_on`) |
+| 3 | 1–1.5 hari | ✅ selesai — `planned_on` + chip rencana |
 | QA/polish | 1 hari | a11y, responsive, screenshot review |
-| **Total** | **4.5–6 hari** | Phase 0–2 selesai |
+| **Total** | **5.5–7.5 hari** | Phase 0–3 selesai |
 
 ---
 

@@ -52,6 +52,12 @@
                 items: day.done,
             },
             {
+                key: 'planned',
+                label: 'Planned',
+                dot: 'bg-muted-foreground',
+                items: day.planned,
+            },
+            {
                 key: 'rollback',
                 label: 'Rolled back',
                 dot: 'bg-destructive',
@@ -82,12 +88,17 @@
                     ✓ {day.done.length} done
                 </span>
             {/if}
+            {#if day.planned.length > 0}
+                <span class="rounded-sm border border-dashed border-muted-foreground/50 px-1.5 py-0.5 text-[9px] text-muted-foreground">
+                    ◇ {day.planned.length} planned
+                </span>
+            {/if}
             {#if day.rollback.length > 0}
                 <span class="rounded-sm border border-destructive/40 bg-destructive/10 px-1.5 py-0.5 text-[9px] text-destructive">
                     ↩ {day.rollback.length} rolled back
                 </span>
             {/if}
-            {#if day.today.length + day.done.length + day.rollback.length === 0}
+            {#if day.today.length + day.done.length + day.rollback.length + day.planned.length === 0}
                 <span class="rounded-sm border border-border px-1.5 py-0.5 text-[9px] text-muted-foreground">
                     No activity
                 </span>
@@ -125,7 +136,7 @@
                                     <span class="font-mono">{event.reference ?? '—'}</span>
                                     <span aria-hidden="true">·</span>
                                     <span>{event.user.name}</span>
-                                    {#if section.key !== 'rollback' && isMolor(event.id)}
+                                    {#if section.key !== 'rollback' && section.key !== 'planned' && isMolor(event.id)}
                                         <span class="ml-1 rounded-sm border border-destructive/40 bg-destructive/10 px-1 text-[8px] text-destructive">
                                             delayed
                                         </span>
@@ -133,7 +144,11 @@
                                 </div>
                             </div>
                             <span class="pt-0.5 text-[9px] tabular-nums text-muted-foreground">
-                                {formatTime(event.at)}
+                                {#if section.key === 'planned'}
+                                    ◇
+                                {:else}
+                                    {formatTime(event.at)}
+                                {/if}
                             </span>
                         </div>
                     {/each}

@@ -26,6 +26,7 @@
     import TaskCard from '@/components/tasks/TaskCard.svelte';
     import TaskViewToggle from '@/components/tasks/TaskViewToggle.svelte';
     import { clickOutside } from '@/lib/clickOutside';
+    import { todayInAppTimezone } from '@/lib/date';
     import { getInitials } from '@/lib/initials';
     import { getUserColor } from '@/lib/users';
     import { store, update, destroy } from '@/routes/tasks';
@@ -46,6 +47,7 @@
     } = $props();
 
     const boards = ['backlog', 'todo', 'today', 'done'];
+    const today = todayInAppTimezone();
 
     // Filter State
     let selectedUserId = $state<number | null>(null);
@@ -203,6 +205,7 @@
         title: '',
         description: '',
         reference: '',
+        planned_on: '',
         status: 'backlog' as Task['status'],
     });
 
@@ -212,6 +215,7 @@
             $form.title = task.title;
             $form.description = task.description || '';
             $form.reference = task.reference || '';
+            $form.planned_on = task.planned_on ?? '';
             $form.status = task.status;
         } else {
             editingTask = null;
@@ -431,6 +435,23 @@
                                 {#if $form.errors.reference}
                                     <span class="text-sm text-destructive"
                                         >{$form.errors.reference}</span
+                                    >
+                                {/if}
+                            </div>
+                            <div class="grid gap-2">
+                                <Label for="planned_on"
+                                    >Planned for (Optional)</Label
+                                >
+                                <Input
+                                    id="planned_on"
+                                    type="date"
+                                    min={today}
+                                    bind:value={$form.planned_on}
+                                    disabled={!isOwner}
+                                />
+                                {#if $form.errors.planned_on}
+                                    <span class="text-sm text-destructive"
+                                        >{$form.errors.planned_on}</span
                                     >
                                 {/if}
                             </div>

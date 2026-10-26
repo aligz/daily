@@ -46,7 +46,12 @@
 
     const cells = $derived(weeks.flat());
 
-    const emptyDay = (): CalendarDayData => ({ today: [], done: [], rollback: [] });
+    const emptyDay = (): CalendarDayData => ({
+        today: [],
+        done: [],
+        rollback: [],
+        planned: [],
+    });
     const dayFor = (date: string): CalendarDayData => days[date] ?? emptyDay();
 
 </script>

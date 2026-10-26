@@ -224,3 +224,59 @@ test('creating a today task without an existing one keeps it on today', function
 
     expect(Task::query()->where('title', 'First focus')->firstOrFail()->status)->toBe('today');
 });
+
+test('a task can be created with a planned date', function () {
+    $user = User::factory()->create();
+
+    actingAs($user)
+        ->post(route('tasks.store'), [
+            'title' => 'Planned task',
+            'status' => 'todo',
+            'planned_on' => '2026-10-30',
+        ])
+        ->assertRedirect();
+
+    assertDatabaseHas('tasks', [
+        'title' => 'Planned task',
+        'planned_on' => '2026-10-30',
+    ]);
+});
+
+test('the planned date can be updated and cleared', function () {
+    $user = User::factory()->create();
+    $task = Task::factory()->create([
+        'user_id' => $user->id,
+        'title' => 'Keep my title',
+        'status' => 'todo',
+        'planned_on' => '2026-10-30',
+    ]);
+
+    actingAs($user)
+        ->put(route('tasks.update', $task), ['planned_on' => '2026-11-02'])
+        ->assertRedirect();
+
+    $task->refresh();
+    expect($task->planned_on->toDateString())->toBe('2026-11-02');
+    expect($task->title)->toBe('Keep my title');
+
+    actingAs($user)
+        ->put(route('tasks.update', $task), ['planned_on' => ''])
+        ->assertRedirect();
+
+    expect($task->refresh()->planned_on)->toBeNull();
+});
+
+test('the board exposes the planned date for card badges', function () {
+    $user = User::factory()->create();
+    $task = Task::factory()->create([
+        'user_id' => $user->id,
+        'status' => 'todo',
+        'planned_on' => '2026-10-30',
+    ]);
+
+    actingAs($user)
+        ->get(route('tasks.index'))
+        ->assertInertia(fn ($page) => $page
+            ->where('tasks.todo.0.id', $task->id)
+            ->where('tasks.todo.0.planned_on', '2026-10-30'));
+});

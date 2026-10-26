@@ -46,6 +46,35 @@ class TaskCalendarController extends Controller
 
         $days = $this->buildDays($gridStart, $gridEnd, $histories, $timezone);
 
+        $plannedTasks = Task::query()
+            ->with('user:id,name')
+            ->whereNotNull('planned_on')
+            ->whereBetween('planned_on', [$gridStart->toDateString(), $gridEnd->toDateString()])
+            ->when($userId, fn ($query) => $query->where('user_id', $userId))
+            ->orderBy('planned_on')
+            ->get(['id', 'user_id', 'title', 'reference', 'status', 'planned_on']);
+
+        foreach ($plannedTasks as $plannedTask) {
+            $date = $plannedTask->planned_on->toDateString();
+
+            if (! isset($days[$date])) {
+                continue;
+            }
+
+            $days[$date]['planned'][] = [
+                'id' => $plannedTask->id,
+                'title' => $plannedTask->title,
+                'reference' => $plannedTask->reference,
+                'user' => ['id' => $plannedTask->user->id, 'name' => $plannedTask->user->name],
+                'at' => $date,
+                'deleted' => false,
+            ];
+        }
+
+        foreach (array_keys($days) as $date) {
+            $days[$date]['planned'] = array_slice($days[$date]['planned'], 0, self::MAX_EVENTS_PER_DAY);
+        }
+
         $monthKey = $monthStart->format('Y-m');
         $monthHistories = $histories->filter(
             fn (TaskHistory $history) => $history->created_at->setTimezone($timezone)->format('Y-m') === $monthKey
@@ -63,6 +92,9 @@ class TaskCalendarController extends Controller
             'today_entries' => $monthHistories->where('to_status', 'today')->count(),
             'rollbacks' => $monthHistories->filter(
                 fn (TaskHistory $history) => $history->from_status === 'today' && $history->to_status === 'todo'
+            )->count(),
+            'planned' => $plannedTasks->filter(
+                fn (Task $task) => $task->planned_on->format('Y-m') === $monthKey
             )->count(),
             'top_molor' => $molorTasks[0] ?? null,
         ];
@@ -87,7 +119,7 @@ class TaskCalendarController extends Controller
     }
 
     /**
-     * @return array<string, array{today: array<int, array<string, mixed>>, done: array<int, array<string, mixed>>, rollback: array<int, array<string, mixed>>}>
+     * @return array<string, array{today: array<int, array<string, mixed>>, done: array<int, array<string, mixed>>, rollback: array<int, array<string, mixed>>, planned: array<int, array<string, mixed>>}>
      */
     private function buildDays(
         CarbonImmutable $gridStart,
@@ -98,7 +130,7 @@ class TaskCalendarController extends Controller
         $days = [];
 
         for ($date = $gridStart; $date->lte($gridEnd); $date = $date->addDay()) {
-            $days[$date->toDateString()] = ['today' => [], 'done' => [], 'rollback' => []];
+            $days[$date->toDateString()] = ['today' => [], 'done' => [], 'rollback' => [], 'planned' => []];
         }
 
         foreach ($histories as $history) {

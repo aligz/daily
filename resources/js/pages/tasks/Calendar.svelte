@@ -22,7 +22,12 @@
     }: CalendarProps = $props();
 
     const today = todayInAppTimezone();
-    const emptyDay: CalendarDay = { today: [], done: [], rollback: [] };
+    const emptyDay: CalendarDay = {
+        today: [],
+        done: [],
+        rollback: [],
+        planned: [],
+    };
 
     let selectedDate = $state(today);
     let userId = $state<number | null>(null);
@@ -132,7 +137,7 @@
 
         <CalendarStats {summary} />
 
-        {#if summary.completed + summary.today_entries + summary.rollbacks === 0}
+        {#if summary.completed + summary.today_entries + summary.rollbacks + summary.planned === 0}
             <p
                 class="rounded border border-dashed border-border px-3 py-2 text-[11px] text-muted-foreground"
             >

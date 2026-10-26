@@ -20,7 +20,11 @@
             .filter(
                 ([date, day]) =>
                     date.startsWith(month) &&
-                    day.today.length + day.done.length + day.rollback.length > 0,
+                    day.today.length +
+                        day.done.length +
+                        day.rollback.length +
+                        day.planned.length >
+                        0,
             )
             .sort(([first], [second]) => first.localeCompare(second)),
     );
@@ -82,6 +86,19 @@
                                 class="ml-auto shrink-0 text-[9px] tabular-nums text-muted-foreground"
                             >
                                 {formatTime(event.at)}
+                            </span>
+                        </div>
+                    {/each}
+                    {#each day.planned as event (event.at + event.id)}
+                        <div
+                            class="flex items-center gap-1.5 text-[11px] text-muted-foreground"
+                        >
+                            <span class="shrink-0" aria-hidden="true">◇</span>
+                            <span class="truncate">{event.title}</span>
+                            <span
+                                class="ml-auto shrink-0 text-[9px] text-muted-foreground"
+                            >
+                                planned
                             </span>
                         </div>
                     {/each}

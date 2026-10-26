@@ -29,13 +29,22 @@
                 kind: 'done' as const,
                 ...event,
             })),
+            ...day.planned.map((event) => ({
+                kind: 'planned' as const,
+                ...event,
+            })),
         ].slice(0, 3),
     );
 
     const total = $derived(
-        day.today.length + day.done.length + day.rollback.length,
+        day.today.length +
+            day.done.length +
+            day.rollback.length +
+            day.planned.length,
     );
-    const extra = $derived(day.today.length + day.done.length - chips.length);
+    const extra = $derived(
+        day.today.length + day.done.length + day.planned.length - chips.length,
+    );
     const inMonth = $derived(date.slice(0, 7) === month);
     const weekend = $derived(isWeekend(date));
     const isToday = $derived(date === today);
@@ -80,7 +89,7 @@
         weekend && inMonth && 'bg-muted/30',
         selected && 'bg-primary/5 ring-1 ring-primary ring-inset',
     )}
-    aria-label={`${formatDay(date)}: ${day.today.length} today entries, ${day.done.length} completed, ${day.rollback.length} rolled back`}
+    aria-label={`${formatDay(date)}: ${day.today.length} today entries, ${day.done.length} completed, ${day.rollback.length} rolled back, ${day.planned.length} planned`}
     aria-pressed={selected}
 >
     {#if day.rollback.length > 0}
@@ -112,13 +121,17 @@
     {#each chips as event (event.kind + event.id + event.at)}
         <span
             class={cn(
-                'flex w-full items-center gap-1 truncate rounded-sm border-l-2 px-1 py-0.5 text-[10px]',
-                chipClass(event.kind),
+                'flex w-full items-center gap-1 truncate rounded-sm px-1 py-0.5 text-[10px]',
+                event.kind === 'planned'
+                    ? 'border border-dashed border-muted-foreground/50 text-muted-foreground'
+                    : cn('border-l-2', chipClass(event.kind)),
                 event.deleted && 'line-through opacity-60',
             )}
-            title={`${event.title} — ${event.user.name}`}
+            title={`${event.title} — ${event.user.name}${event.kind === 'planned' ? ' (planned)' : ''}`}
         >
-            <span class="truncate">{event.title}</span>
+            <span class="truncate">
+                {event.kind === 'planned' ? '◇ ' : ''}{event.title}
+            </span>
         </span>
     {/each}
 

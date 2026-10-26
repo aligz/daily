@@ -21,6 +21,8 @@
         red: 'border-destructive/40 bg-destructive/10 text-destructive',
         amber: 'border-amber-500/40 bg-amber-500/10 text-amber-700 dark:text-amber-300',
         cyan: 'border-sky-500/40 bg-sky-500/10 text-sky-700 dark:text-sky-300',
+        planned:
+            'border-dashed border-muted-foreground/50 bg-transparent text-muted-foreground',
     };
 
     const badges = $derived.by(() => {
@@ -55,6 +57,16 @@
                 label: `Stale ${metric.stuck_days}d`,
                 className: styles.amber,
                 title: `No status change for ${metric.stuck_days} days.`,
+            });
+        }
+
+        if (task.planned_on) {
+            const planned = formatDateShort(task.planned_on);
+
+            list.push({
+                label: `◇ Plan ${planned}`,
+                className: styles.planned,
+                title: `Planned for ${planned}.`,
             });
         }
 
