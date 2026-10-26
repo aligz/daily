@@ -31,36 +31,40 @@
     } = $props();
 </script>
 
-<header
-    class="mb-4 flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between"
->
-    <div class="min-w-0">
-        <div
-            class="text-[10px] uppercase tracking-[0.14em] text-muted-foreground"
-        >
-            {eyebrow}
-        </div>
-
-        <div class="mt-0.5 flex flex-wrap items-center gap-2">
-            <h1 class="text-2xl font-bold tracking-tight">{title}</h1>
-            {#if badge}
-                {@render badge()}
-            {/if}
-            {#if actions}
-                {@render actions()}
-            {/if}
-        </div>
-
-        <p class="mt-1 text-sm text-muted-foreground">{subtitle}</p>
+<header class="mb-4">
+    <div class="text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+        {eyebrow}
     </div>
 
-    <div class="flex flex-wrap items-center gap-2">
-        <TaskViewToggle {active} {month} />
-        <UserFilter
-            {users}
-            selectedId={selectedUserId}
-            {progress}
-            onchange={onUserChange}
-        />
+    <div
+        class="mt-0.5 flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between"
+    >
+        <div class="min-w-0">
+            <h1 class="text-2xl font-bold tracking-tight">{title}</h1>
+            <p class="mt-1 text-sm text-muted-foreground">{subtitle}</p>
+        </div>
+
+        <div class="flex flex-col gap-2 lg:items-end">
+            <div class="flex flex-wrap items-center gap-2 lg:justify-end">
+                <TaskViewToggle {active} {month} />
+                <UserFilter
+                    {users}
+                    selectedId={selectedUserId}
+                    {progress}
+                    onchange={onUserChange}
+                />
+            </div>
+
+            {#if badge || actions}
+                <div class="flex flex-wrap items-center gap-2 lg:justify-end">
+                    {#if badge}
+                        {@render badge()}
+                    {/if}
+                    {#if actions}
+                        {@render actions()}
+                    {/if}
+                </div>
+            {/if}
+        </div>
     </div>
 </header>
