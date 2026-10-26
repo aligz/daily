@@ -1,6 +1,6 @@
 <script lang="ts">
     import { page, useForm, Link, router } from '@inertiajs/svelte';
-    import { ArrowLeft, Pencil, Save, Trash2, Calendar, User, Building2, Mail, Phone } from 'lucide-svelte';
+    import { ArrowLeft, Pencil, Save, Trash2, Calendar, User as UserIcon, Building2, Mail, Phone } from 'lucide-svelte';
     import AppHead from '@/components/AppHead.svelte';
     import { Badge } from '@/components/ui/badge';
     import { Button } from '@/components/ui/button';
@@ -213,7 +213,7 @@
                     </CardHeader>
                     <CardContent class="space-y-3">
                         <div class="flex items-center gap-3">
-                            <User class="h-4 w-4 text-muted-foreground" />
+                            <UserIcon class="h-4 w-4 text-muted-foreground" />
                             <span class="font-medium">{featureRequest.requester_name}</span>
                         </div>
                         {#if featureRequest.requester_email}

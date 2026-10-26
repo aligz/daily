@@ -1,6 +1,6 @@
 <script lang="ts">
     import { useForm, router, page } from '@inertiajs/svelte';
-    import { Plus, GripVertical } from 'lucide-svelte';
+    import { Plus } from 'lucide-svelte';
     import AppHead from '@/components/AppHead.svelte';
     import { Avatar, AvatarFallback } from '@/components/ui/avatar';
     import { Button } from '@/components/ui/button';
@@ -23,34 +23,27 @@
     import { Input } from '@/components/ui/input';
     import { Label } from '@/components/ui/label';
     import AppLayout from '@/layouts/AppLayout.svelte';
+    import TaskCard from '@/components/tasks/TaskCard.svelte';
+    import TaskViewToggle from '@/components/tasks/TaskViewToggle.svelte';
+    import { clickOutside } from '@/lib/clickOutside';
+    import { getInitials } from '@/lib/initials';
+    import { getUserColor } from '@/lib/users';
     import { store, update, destroy } from '@/routes/tasks';
+    import type {
+        BoardTask as Task,
+        BoardUser as User,
+        TaskMetrics,
+    } from '@/types/tasks';
 
-    interface User {
-        id: number;
-        name: string;
-        email: string;
-    }
-
-    interface Task {
-        id: number;
-        title: string;
-        description: string | null;
-        reference: string | null;
-        status: 'backlog' | 'todo' | 'today' | 'done';
-        position: number | null;
-        created_at: string;
-        completed_at: string | null;
-        user: User;
-        history: {
-            id: number;
-            from_status: string | null;
-            to_status: string;
-            created_at: string;
-        }[];
-    }
-
-    let { tasks, users }: { tasks: Record<string, Task[]>; users: User[] } =
-        $props();
+    let {
+        tasks,
+        users,
+        metrics,
+    }: {
+        tasks: Record<string, Task[]>;
+        users: User[];
+        metrics: TaskMetrics;
+    } = $props();
 
     const boards = ['backlog', 'todo', 'today', 'done'];
 
@@ -70,6 +63,23 @@
             );
         }
         return filtered;
+    });
+
+    const myTasksByBoard = $derived.by(() => {
+        const currentUserId = $page.props.auth.user.id;
+        const result: Record<string, Task[]> = {};
+
+        for (const board of ['backlog', 'todo']) {
+            result[board] = (filteredTasks[board] ?? [])
+                .filter((task) => task.user.id === currentUserId)
+                .slice()
+                .sort(
+                    (first, second) =>
+                        (first.position ?? 0) - (second.position ?? 0),
+                );
+        }
+
+        return result;
     });
 
     function getSelectedUser(): User | null {
@@ -150,44 +160,6 @@
     function handleDragOver(event: DragEvent) {
         event.preventDefault();
         if (event.dataTransfer) event.dataTransfer.dropEffect = 'move';
-    }
-
-    function getInitials(name: string) {
-        return name
-            .split(' ')
-            .map((n) => n[0])
-            .slice(0, 2)
-            .join('')
-            .toUpperCase();
-    }
-
-    const userColors = [
-        'bg-red-500 text-white',
-        'bg-orange-500 text-white',
-        'bg-amber-500 text-white',
-        'bg-yellow-500 text-black',
-        'bg-lime-500 text-black',
-        'bg-green-500 text-white',
-        'bg-emerald-500 text-white',
-        'bg-teal-500 text-white',
-        'bg-cyan-500 text-black',
-        'bg-sky-500 text-white',
-        'bg-blue-500 text-white',
-        'bg-indigo-500 text-white',
-        'bg-violet-500 text-white',
-        'bg-purple-500 text-white',
-        'bg-fuchsia-500 text-white',
-        'bg-pink-500 text-white',
-        'bg-rose-500 text-white',
-    ];
-
-    function getUserColor(name: string) {
-        let hash = 0;
-        for (let i = 0; i < name.length; i++) {
-            hash = name.charCodeAt(i) + ((hash << 5) - hash);
-        }
-        const index = Math.abs(hash) % userColors.length;
-        return userColors[index];
     }
 
     function groupTasksByDate(tasks: Task[]) {
@@ -289,10 +261,19 @@
 
 <AppHead title="Tasks" />
 
+<svelte:window
+    onkeydown={(event) => {
+        if (event.key === 'Escape') showUserDropdown = false;
+    }}
+/>
+
 <AppLayout>
     <div class="flex h-full flex-col p-4">
         <div class="mb-4 flex items-center justify-between">
-            <h1 class="text-2xl font-bold tracking-tight">Task Board</h1>
+            <div class="flex items-center gap-3">
+                <h1 class="text-2xl font-bold tracking-tight">Task Board</h1>
+                <TaskViewToggle active="board" />
+            </div>
 
             <div class="flex gap-4">
                 <!-- User Filter Dropdown -->
@@ -301,6 +282,9 @@
                         <button
                             type="button"
                             class="inline-flex items-center gap-2 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
+                            data-user-filter-trigger
+                            aria-haspopup="menu"
+                            aria-expanded={showUserDropdown}
                             onclick={() =>
                                 (showUserDropdown = !showUserDropdown)}
                         >
@@ -342,8 +326,12 @@
                         {#if showUserDropdown}
                             <div
                                 class="absolute left-0 z-50 mt-2 min-w-[200px] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md"
-                                onclickoutside={() =>
-                                    (showUserDropdown = false)}
+                                data-user-filter-menu
+                                use:clickOutside={{
+                                    handler: () =>
+                                        (showUserDropdown = false),
+                                    ignore: '[data-user-filter-trigger]',
+                                }}
                             >
                                 <button
                                     type="button"
@@ -575,137 +563,38 @@
                                     {date}
                                 </div>
                                 {#each groupTasks as task (task.id)}
-                                    <!-- Task Card Component -->
-                                    <div
-                                        role="button"
-                                        tabindex="0"
-                                        class={task.user.id ===
-                                        $page.props.auth.user.id
-                                            ? 'cursor-grab active:cursor-grabbing'
-                                            : 'cursor-pointer'}
-                                        draggable={task.user.id ===
+                                    <TaskCard
+                                        {task}
+                                        mine={task.user.id ===
                                             $page.props.auth.user.id}
-                                        ondragstart={(e) =>
-                                            handleDragStart(e, task)}
-                                        onclick={() => openDialog(task)}
-                                        onkeydown={(e) =>
-                                            e.key === 'Enter' &&
-                                            openDialog(task)}
-                                    >
-                                        <Card
-                                            class="shadow-none hover:shadow-md transition-shadow py-2 gap-2 border-transparent"
-                                        >
-                                            <CardHeader
-                                                class="p-3 pb-1 space-y-0"
-                                            >
-                                                <div
-                                                    class="flex items-start justify-between gap-2"
-                                                >
-                                                    <CardTitle
-                                                        class="text-sm font-medium leading-snug"
-                                                    >
-                                                        {task.title}
-                                                    </CardTitle>
-                                                    <Avatar class="h-5 w-5">
-                                                        <AvatarFallback
-                                                            class="text-[9px] {getUserColor(
-                                                                task.user.name,
-                                                            )}"
-                                                        >
-                                                            {getInitials(
-                                                                task.user.name,
-                                                            )}
-                                                        </AvatarFallback>
-                                                    </Avatar>
-                                                </div>
-                                                {#if task.reference}
-                                                    <CardDescription
-                                                        class="text-[10px] font-mono"
-                                                    >
-                                                        {task.reference}
-                                                    </CardDescription>
-                                                {/if}
-                                            </CardHeader>
-                                            {#if task.description}
-                                                <CardContent class="p-3 pt-1">
-                                                    <p
-                                                        class="text-[11px] text-muted-foreground line-clamp-2"
-                                                    >
-                                                        {task.description}
-                                                    </p>
-                                                </CardContent>
-                                            {/if}
-                                        </Card>
-                                    </div>
+                                        metric={metrics[task.id]}
+                                        onOpen={openDialog}
+                                        onDragStart={handleDragStart}
+                                    />
                                 {/each}
                             {/each}
                         {:else}
+                            {@const myBoardTasks =
+                                myTasksByBoard[board] ?? []}
                             {#each filteredTasks[board] || [] as task (task.id)}
-                                {@const myBoardTasks = (filteredTasks[board] || [])
-                                    .filter((t) => t.user.id === $page.props.auth.user.id)
-                                    .slice()
-                                    .sort((a, b) => (a.position ?? 0) - (b.position ?? 0))}
-                                {@const myIdx = myBoardTasks.findIndex((t) => t.id === task.id)}
-                                <div
-                                    role="button"
-                                    tabindex="0"
-                                    class="group relative {task.user.id === $page.props.auth.user.id
-                                        ? 'cursor-grab active:cursor-grabbing'
-                                        : 'cursor-pointer'}"
-                                    draggable={task.user.id === $page.props.auth.user.id}
-                                    ondragstart={(e) => handleDragStart(e, task)}
-                                    onclick={() => openDialog(task)}
-                                    onkeydown={(e) => e.key === 'Enter' && openDialog(task)}
-                                >
-                                    <Card
-                                        class="shadow-none hover:shadow-md transition-shadow border-transparent py-2 gap-0"
-                                    >
-                                        <CardHeader class="p-3 pb-1 space-y-0">
-                                            <div class="flex items-start justify-between gap-2">
-                                                <CardTitle class="text-sm font-medium leading-snug">
-                                                    {task.title}
-                                                </CardTitle>
-                                                <Avatar class="h-5 w-5 shrink-0">
-                                                    <AvatarFallback
-                                                        class="text-[9px] {getUserColor(task.user.name)}"
-                                                    >
-                                                        {getInitials(task.user.name)}
-                                                    </AvatarFallback>
-                                                </Avatar>
-                                            </div>
-                                            {#if task.reference}
-                                                <CardDescription class="text-[10px] font-mono">
-                                                    {task.reference}
-                                                </CardDescription>
-                                            {/if}
-                                        </CardHeader>
-                                        {#if task.description}
-                                            <CardContent class="p-3 pt-1">
-                                                <p class="text-[11px] text-muted-foreground line-clamp-2">
-                                                    {task.description}
-                                                </p>
-                                            </CardContent>
-                                        {/if}
-                                    </Card>
-                                    {#if task.user.id === $page.props.auth.user.id && (board === 'backlog' || board === 'todo')}
-                                        <div class="absolute right-1 top-1/2 -translate-y-1/2 flex flex-col gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity z-10">
-                                            <button
-                                                type="button"
-                                                disabled={myIdx === 0}
-                                                onclick={(e) => { e.stopPropagation(); reorderTask(task, 'up'); }}
-                                                class="flex h-5 w-5 items-center justify-center rounded bg-background/80 text-xs text-muted-foreground shadow-sm hover:bg-accent hover:text-accent-foreground disabled:pointer-events-none disabled:opacity-30"
-                                                aria-label="Move up"
-                                            >↑</button>
-                                            <button
-                                                type="button"
-                                                disabled={myIdx === myBoardTasks.length - 1}
-                                                onclick={(e) => { e.stopPropagation(); reorderTask(task, 'down'); }}
-                                                class="flex h-5 w-5 items-center justify-center rounded bg-background/80 text-xs text-muted-foreground shadow-sm hover:bg-accent hover:text-accent-foreground disabled:pointer-events-none disabled:opacity-30"
-                                                aria-label="Move down"
-                                            >↓</button>
-                                        </div>
-                                    {/if}
-                                </div>
+                                {@const myIndex = myBoardTasks.findIndex(
+                                    (item) => item.id === task.id,
+                                )}
+                                <TaskCard
+                                    {task}
+                                    mine={task.user.id ===
+                                        $page.props.auth.user.id}
+                                    metric={metrics[task.id]}
+                                    showReorder={board === 'backlog' ||
+                                        board === 'todo'}
+                                    canMoveUp={myIndex > 0}
+                                    canMoveDown={myIndex !== -1 &&
+                                        myIndex < myBoardTasks.length - 1}
+                                    onOpen={openDialog}
+                                    onDragStart={handleDragStart}
+                                    onMoveUp={() => reorderTask(task, 'up')}
+                                    onMoveDown={() => reorderTask(task, 'down')}
+                                />
                             {/each}
                         {/if}
 

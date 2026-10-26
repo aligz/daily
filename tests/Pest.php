@@ -1,5 +1,9 @@
 <?php
 
+use App\Models\Task;
+use App\Models\TaskHistory;
+use Carbon\CarbonImmutable;
+
 /*
 |--------------------------------------------------------------------------
 | Test Case
@@ -41,7 +45,19 @@ expect()->extend('toBeOne', function () {
 |
 */
 
-function something()
+function recordTaskHistory(Task $task, ?string $from, string $to, ?string $utcDate = null): TaskHistory
 {
-    // ..
+    $history = new TaskHistory([
+        'task_id' => $task->id,
+        'from_status' => $from,
+        'to_status' => $to,
+    ]);
+
+    if ($utcDate !== null) {
+        $history->created_at = CarbonImmutable::parse($utcDate, 'UTC');
+    }
+
+    $history->save();
+
+    return $history;
 }

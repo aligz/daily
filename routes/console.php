@@ -2,23 +2,12 @@
 
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Schedule;
 
 Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
 
-use App\Models\Task;
-use App\Models\TaskHistory;
-use Illuminate\Support\Facades\Schedule;
-
-Schedule::call(function () {
-    $tasks = Task::where('status', 'today')->get();
-    foreach ($tasks as $task) {
-        $task->update(['status' => 'todo']);
-        TaskHistory::create([
-            'task_id' => $task->id,
-            'from_status' => 'today',
-            'to_status' => 'todo',
-        ]);
-    }
-})->daily();
+Schedule::command('tasks:reset-today')
+    ->dailyAt('00:00')
+    ->timezone(config('tasks.display_timezone'));

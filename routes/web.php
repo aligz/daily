@@ -21,7 +21,8 @@ Route::get('dashboard', function () {
 Route::get('feature-requests', [\App\Http\Controllers\FeatureRequestController::class, 'index'])->name('feature-requests.index');
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::resource('tasks', \App\Http\Controllers\TaskController::class);
+    Route::get('tasks/calendar', [\App\Http\Controllers\TaskCalendarController::class, 'index'])->name('tasks.calendar');
+    Route::resource('tasks', \App\Http\Controllers\TaskController::class)->except(['show', 'create', 'edit']);
     Route::patch('tasks/{task}/reorder', [\App\Http\Controllers\TaskController::class, 'reorder'])->name('tasks.reorder');
     Route::get('reports', [\App\Http\Controllers\ReportController::class, 'index'])->name('reports.index');
     Route::resource('divisions', \App\Http\Controllers\DivisionController::class)->except(['create', 'show']);

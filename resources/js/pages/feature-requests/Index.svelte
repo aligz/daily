@@ -1,6 +1,6 @@
 <script lang="ts">
     import { page, router } from '@inertiajs/svelte';
-    import { Plus, Calendar, Building2, User } from 'lucide-svelte';
+    import { Plus, Calendar, Building2, User as UserIcon } from 'lucide-svelte';
     import AppHead from '@/components/AppHead.svelte';
     import { Avatar, AvatarFallback } from '@/components/ui/avatar';
     import { Badge } from '@/components/ui/badge';
@@ -298,7 +298,7 @@
                                     <CardContent class="p-2 pt-1 space-y-2">
                                         <!-- Requester & Division -->
                                         <div class="flex items-center gap-1.5 text-xs text-muted-foreground">
-                                            <User class="h-3 w-3 shrink-0" />
+                                            <UserIcon class="h-3 w-3 shrink-0" />
                                             <span class="truncate">{request.requester_name}</span>
                                             <span class="text-border">|</span>
                                             <Building2 class="h-3 w-3 shrink-0" />

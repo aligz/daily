@@ -2,20 +2,24 @@
 
 namespace App\Http\Controllers;
 
+use App\Actions\Tasks\ComputeTaskMetrics;
 use App\Models\Task;
 use App\Models\TaskHistory;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
 class TaskController extends Controller
 {
-    public function index()
+    public function index(ComputeTaskMetrics $computeMetrics)
     {
         $users = \App\Models\User::select('id', 'name', 'email')->get();
 
-        $tasks = Task::with(['user', 'history'])
-            ->get()
+        $allTasks = Task::with(['user', 'history'])->get();
+        $metrics = $computeMetrics($allTasks);
+
+        $tasks = $allTasks
             ->groupBy('status')
             ->map(function ($statusTasks, $status) {
                 if (in_array($status, ['backlog', 'todo'])) {
@@ -30,6 +34,7 @@ class TaskController extends Controller
         return Inertia::render('tasks/Index', [
             'tasks' => $tasks,
             'users' => $users,
+            'metrics' => $metrics,
         ]);
     }
 
@@ -43,6 +48,10 @@ class TaskController extends Controller
         ]);
 
         DB::transaction(function () use ($validated) {
+            if ($validated['status'] === 'today') {
+                $this->demoteTodayTasks((int) auth()->id());
+            }
+
             if (($validated['status'] ?? null) === 'done') {
                 $validated['completed_at'] = now();
             }
@@ -90,25 +99,7 @@ class TaskController extends Controller
             }
 
             if ($newStatus === 'today' && $oldStatus !== 'today') {
-                $existingTodayTask = auth()->user()->tasks()
-                    ->where('status', 'today')
-                    ->where('id', '!=', $task->id)
-                    ->first();
-
-                if ($existingTodayTask) {
-                    $maxPosition = auth()->user()->tasks()
-                        ->where('status', 'todo')
-                        ->max('position') ?? 0.0;
-                    $existingTodayTask->update([
-                        'status' => 'todo',
-                        'position' => $maxPosition + 1.0,
-                    ]);
-                    TaskHistory::create([
-                        'task_id' => $existingTodayTask->id,
-                        'from_status' => 'today',
-                        'to_status' => 'todo',
-                    ]);
-                }
+                $this->demoteTodayTasks($task->user_id, $task->id);
             }
 
             if (isset($validated['status']) && $oldStatus !== $newStatus) {
@@ -183,5 +174,46 @@ class TaskController extends Controller
         $task->delete();
 
         return redirect()->back();
+    }
+
+    /**
+     * Enforce the single "today" rule by moving every other today task back
+     * to todo, appended to the bottom of the todo column.
+     */
+    private function demoteTodayTasks(int $userId, ?int $exceptTaskId = null): void
+    {
+        // Serialize concurrent "move to today" requests for the same user.
+        User::query()->whereKey($userId)->lockForUpdate()->first();
+
+        $todayTasks = Task::query()
+            ->where('user_id', $userId)
+            ->where('status', 'today')
+            ->when($exceptTaskId !== null, fn ($query) => $query->where('id', '!=', $exceptTaskId))
+            ->lockForUpdate()
+            ->get();
+
+        if ($todayTasks->isEmpty()) {
+            return;
+        }
+
+        $maxPosition = (float) (Task::query()
+            ->where('user_id', $userId)
+            ->where('status', 'todo')
+            ->max('position') ?? 0.0);
+
+        foreach ($todayTasks as $todayTask) {
+            $maxPosition += 1.0;
+
+            $todayTask->update([
+                'status' => 'todo',
+                'position' => $maxPosition,
+            ]);
+
+            TaskHistory::create([
+                'task_id' => $todayTask->id,
+                'from_status' => 'today',
+                'to_status' => 'todo',
+            ]);
+        }
     }
 }

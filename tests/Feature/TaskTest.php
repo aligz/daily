@@ -1,13 +1,10 @@
 <?php
 
 use App\Models\Task;
-use App\Models\TaskHistory;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Schedule;
 
 use function Pest\Laravel\actingAs;
-use function Pest\Laravel\artisan;
 use function Pest\Laravel\assertDatabaseHas;
 
 uses(RefreshDatabase::class);
@@ -28,7 +25,7 @@ test('user can view tasks page', function () {
         ->assertOk()
         ->assertInertia(
             fn ($page) => $page
-                ->component('Tasks/Index')
+                ->component('tasks/Index')
                 ->has('tasks')
                 ->has('users')
         );
@@ -151,36 +148,79 @@ test('completed_at is set when task is marked as done', function () {
     expect($task->completed_at)->toBeNull();
 });
 
-test('daily schedule resets today tasks to todo', function () {
+test('removed task resource routes are not registered', function () {
     $user = User::factory()->create();
-    $task = Task::factory()->create(['user_id' => $user->id, 'status' => 'today']);
 
-    // Run the schedule callback logic manually or via artisan if we registered a command.
-    // Since it's a closure in console.php, we invoke the logic directly or fire the schedule run?
-    // Testing specific schedule callback is tricky without a command.
-    // Best practice: Extract to a job or command.
-    // For now, I'll simulate the logic as if the schedule ran,
-    // OR easier: I can just run the logic inside the test to verify IT works, assuming Schedule::call works.
+    actingAs($user)->get('/tasks/create')->assertStatus(405);
+    actingAs($user)->get('/tasks/1')->assertStatus(405);
+});
 
-    // Actually, let's just trigger the code inside the closure.
-    // Or better, let's verify the logic itself.
+test('creating a today task moves the existing today task back to todo', function () {
+    $user = User::factory()->create();
+    $existing = Task::factory()->create([
+        'user_id' => $user->id,
+        'status' => 'today',
+        'position' => null,
+    ]);
+    Task::factory()->create([
+        'user_id' => $user->id,
+        'status' => 'todo',
+        'position' => 5.0,
+    ]);
 
-    $tasks = Task::where('status', 'today')->get();
-    foreach ($tasks as $t) {
-        $t->update(['status' => 'todo']);
-        TaskHistory::create([
-            'task_id' => $t->id,
-            'from_status' => 'today',
-            'to_status' => 'todo',
-        ]);
-    }
+    actingAs($user)
+        ->post(route('tasks.store'), [
+            'title' => 'New focus',
+            'status' => 'today',
+        ])
+        ->assertRedirect();
 
-    $task->refresh();
-    expect($task->status)->toBe('todo');
+    $existing->refresh();
+    $new = Task::query()->where('title', 'New focus')->firstOrFail();
+
+    expect($existing->status)->toBe('todo');
+    expect($existing->position)->toBe(6.0);
+    expect($new->status)->toBe('today');
+    expect($new->position)->toBeNull();
 
     assertDatabaseHas('task_histories', [
-        'task_id' => $task->id,
+        'task_id' => $existing->id,
         'from_status' => 'today',
         'to_status' => 'todo',
     ]);
+    assertDatabaseHas('task_histories', [
+        'task_id' => $new->id,
+        'from_status' => null,
+        'to_status' => 'today',
+    ]);
+});
+
+test('creating a today task demotes every legacy today task', function () {
+    $user = User::factory()->create();
+    $first = Task::factory()->create(['user_id' => $user->id, 'status' => 'today']);
+    $second = Task::factory()->create(['user_id' => $user->id, 'status' => 'today']);
+
+    actingAs($user)
+        ->post(route('tasks.store'), [
+            'title' => 'Only focus',
+            'status' => 'today',
+        ])
+        ->assertRedirect();
+
+    expect($first->refresh()->status)->toBe('todo');
+    expect($second->refresh()->status)->toBe('todo');
+    expect(Task::query()->where('user_id', $user->id)->where('status', 'today')->count())->toBe(1);
+});
+
+test('creating a today task without an existing one keeps it on today', function () {
+    $user = User::factory()->create();
+
+    actingAs($user)
+        ->post(route('tasks.store'), [
+            'title' => 'First focus',
+            'status' => 'today',
+        ])
+        ->assertRedirect();
+
+    expect(Task::query()->where('title', 'First focus')->firstOrFail()->status)->toBe('today');
 });
