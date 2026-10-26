@@ -98,7 +98,7 @@
     onclick={() => onSelect(date)}
     onkeydown={handleKeydown}
     class={cn(
-        'relative flex min-h-[104px] flex-col gap-1 border-b border-r border-border p-1.5 text-left transition-colors hover:bg-accent/40 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset focus-visible:outline-none',
+        'relative flex min-h-[132px] flex-col gap-1 border-b border-r border-border p-1.5 text-left transition-colors hover:bg-accent/40 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset focus-visible:outline-none',
         !inMonth && 'opacity-40',
         weekend && inMonth && 'bg-muted/30',
         selected && 'bg-primary/5 ring-1 ring-primary ring-inset',
@@ -113,7 +113,7 @@
     <span class="flex items-center justify-between gap-1">
         <span
             class={cn(
-                'text-[10px] tabular-nums',
+                'text-[12.5px] tabular-nums',
                 isToday
                     ? 'inline-flex h-5 min-w-5 items-center justify-center rounded-sm bg-primary px-1 font-semibold text-primary-foreground'
                     : 'px-0.5 text-muted-foreground',
@@ -122,11 +122,11 @@
             {dayNumber(date)}
         </span>
         {#if isToday}
-            <span class="text-[8px] uppercase tracking-[0.1em] text-primary">
+            <span class="text-[10px] uppercase tracking-[0.1em] text-primary">
                 Today
             </span>
         {:else if total > 0}
-            <span class="text-[9px] tabular-nums text-muted-foreground">
+            <span class="text-[11px] tabular-nums text-muted-foreground">
                 {total}
             </span>
         {/if}
@@ -135,7 +135,7 @@
     {#each chips as event (event.kind + event.id + event.at)}
         <span
             class={cn(
-                'flex w-full items-center gap-1 truncate rounded-sm px-1 py-0.5 text-[10px]',
+                'flex w-full items-center gap-1 truncate rounded-sm px-1.5 py-[3px] text-[12.5px]',
                 event.kind === 'planned'
                     ? 'border border-dashed border-muted-foreground/50 text-muted-foreground'
                     : cn('border-l-2', chipClass(event.kind)),
@@ -150,14 +150,14 @@
     {/each}
 
     {#if extra > 0}
-        <span class="text-[9px] text-muted-foreground">+{extra} more</span>
+        <span class="text-[11px] text-muted-foreground">+{extra} more</span>
     {/if}
 
     {#if checklistDay || day.rollback.length > 0}
         <span class="mt-auto flex flex-col gap-0.5">
             {#if checklistDay}
                 <span
-                    class="flex items-center gap-1 text-[9px] text-violet-600 dark:text-violet-300"
+                    class="flex items-center gap-1 text-[11px] text-violet-600 dark:text-violet-300"
                     title={`Routine: ${checklistResolved} of ${checklistDay.total} done`}
                 >
                     <span aria-hidden="true">▣</span>
@@ -176,7 +176,7 @@
             {/if}
 
             {#if day.rollback.length > 0}
-                <span class="flex items-center gap-1 text-[9px] text-destructive">
+                <span class="flex items-center gap-1 text-[11px] text-destructive">
                     ↩ {day.rollback.length} rolled back
                 </span>
             {/if}

@@ -178,18 +178,18 @@
         class="flex flex-wrap items-center gap-x-2 gap-y-1 border-b border-border px-3 py-2"
     >
         <span
-            class="text-[9px] uppercase tracking-[0.14em] text-muted-foreground"
+            class="text-[11px] uppercase tracking-[0.14em] text-muted-foreground"
         >
             Routine
         </span>
-        <span class="text-[13px] font-semibold tracking-tight">
+        <span class="text-[16px] font-semibold tracking-tight">
             {readOnly ? `${checklist.owner.name}'s routine` : 'Your routine'}
         </span>
-        <span class="text-[10px] text-muted-foreground">· today</span>
+        <span class="text-[12.5px] text-muted-foreground">· today</span>
 
         {#if readOnly}
             <span
-                class="inline-flex items-center gap-1 rounded-sm border border-border px-1.5 py-0.5 text-[9px] text-muted-foreground"
+                class="inline-flex items-center gap-1 rounded-sm border border-border px-1.5 py-0.5 text-[11px] text-muted-foreground"
             >
                 <Lock class="h-2.5 w-2.5" aria-hidden="true" />
                 Read-only
@@ -199,13 +199,13 @@
         <div class="ml-auto flex items-center gap-2" aria-live="polite">
             {#if checklist.stats.streak > 0}
                 <span
-                    class="rounded-sm border border-violet-500/40 bg-violet-500/10 px-1.5 py-0.5 text-[10px] text-violet-600 dark:text-violet-300"
+                    class="rounded-sm border border-violet-500/40 bg-violet-500/10 px-1.5 py-0.5 text-[12.5px] text-violet-600 dark:text-violet-300"
                     title={`${checklist.stats.streak}-day streak`}
                 >
                     🔥 {checklist.stats.streak}
                 </span>
             {/if}
-            <span class="text-[11px] tabular-nums text-muted-foreground">
+            <span class="text-[13.5px] tabular-nums text-muted-foreground">
                 {resolved}/{checklist.stats.total} done
             </span>
             <span
@@ -238,7 +238,7 @@
 
                     <label
                         for={`routine-${item.id}`}
-                        class="min-w-0 flex-1 cursor-pointer truncate text-[12px]"
+                        class="min-w-0 flex-1 cursor-pointer truncate text-[14px]"
                         class:line-through={item.status === 'done'}
                         class:text-muted-foreground={item.status !== 'pending'}
                         class:cursor-default={readOnly}
@@ -248,7 +248,7 @@
 
                     {#if item.status === 'skipped'}
                         <span
-                            class="shrink-0 rounded-sm border border-dashed border-border px-1 text-[8px] uppercase tracking-[0.08em] text-muted-foreground"
+                            class="shrink-0 rounded-sm border border-dashed border-border px-1 text-[10px] uppercase tracking-[0.08em] text-muted-foreground"
                         >
                             skipped
                         </span>
@@ -280,7 +280,7 @@
                                 <button
                                     type="button"
                                     role="menuitem"
-                                    class="block w-full px-2.5 py-1.5 text-left text-[11px] hover:bg-accent"
+                                    class="block w-full px-2.5 py-1.5 text-left text-[13.5px] hover:bg-accent"
                                     onclick={() =>
                                         setStatus(
                                             item,
@@ -297,7 +297,7 @@
                                     type="button"
                                     role="menuitem"
                                     disabled={index === 0}
-                                    class="block w-full px-2.5 py-1.5 text-left text-[11px] hover:bg-accent disabled:opacity-40"
+                                    class="block w-full px-2.5 py-1.5 text-left text-[13.5px] hover:bg-accent disabled:opacity-40"
                                     onclick={() => move(item, 'up')}
                                 >
                                     Move up
@@ -306,7 +306,7 @@
                                     type="button"
                                     role="menuitem"
                                     disabled={index === checklist.items.length - 1}
-                                    class="block w-full px-2.5 py-1.5 text-left text-[11px] hover:bg-accent disabled:opacity-40"
+                                    class="block w-full px-2.5 py-1.5 text-left text-[13.5px] hover:bg-accent disabled:opacity-40"
                                     onclick={() => move(item, 'down')}
                                 >
                                     Move down
@@ -314,7 +314,7 @@
                                 <button
                                     type="button"
                                     role="menuitem"
-                                    class="block w-full px-2.5 py-1.5 text-left text-[11px] hover:bg-accent"
+                                    class="block w-full px-2.5 py-1.5 text-left text-[13.5px] hover:bg-accent"
                                     onclick={() => openEdit(item)}
                                 >
                                     Edit
@@ -322,7 +322,7 @@
                                 <button
                                     type="button"
                                     role="menuitem"
-                                    class="block w-full px-2.5 py-1.5 text-left text-[11px] text-destructive hover:bg-accent"
+                                    class="block w-full px-2.5 py-1.5 text-left text-[13.5px] text-destructive hover:bg-accent"
                                     onclick={() => archive(item)}
                                 >
                                     Archive
@@ -334,7 +334,7 @@
             {/each}
         </ul>
     {:else}
-        <p class="px-3 py-2 text-[11px] text-muted-foreground">
+        <p class="px-3 py-2 text-[13.5px] text-muted-foreground">
             No routines yet. Add the first thing you do every day.
         </p>
     {/if}
@@ -343,7 +343,7 @@
         <div class="border-t border-border px-3 py-2">
             <label
                 for="routine-note"
-                class="text-[9px] uppercase tracking-[0.14em] text-muted-foreground"
+                class="text-[11px] uppercase tracking-[0.14em] text-muted-foreground"
             >
                 Note for today
             </label>
@@ -353,18 +353,18 @@
                 rows="2"
                 maxlength={2000}
                 placeholder="Anything blocking you today?"
-                class="mt-1 w-full resize-y rounded border border-border bg-background px-2 py-1.5 text-[12px] focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none"
+                class="mt-1 w-full resize-y rounded border border-border bg-background px-2 py-1.5 text-[14px] focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none"
             ></textarea>
             <div class="mt-1 flex justify-end gap-2">
                 <Button
                     variant="ghost"
                     size="sm"
-                    class="h-7 px-2 text-[11px]"
+                    class="h-7 px-2 text-[13.5px]"
                     onclick={() => (noteOpen = false)}
                 >
                     Cancel
                 </Button>
-                <Button size="sm" class="h-7 px-2 text-[11px]" onclick={saveNote}>
+                <Button size="sm" class="h-7 px-2 text-[13.5px]" onclick={saveNote}>
                     Save note
                 </Button>
             </div>
@@ -378,7 +378,7 @@
             <Button
                 variant="ghost"
                 size="sm"
-                class="h-7 px-2 text-[11px]"
+                class="h-7 px-2 text-[13.5px]"
                 onclick={openCreate}
             >
                 <Plus class="h-3 w-3" aria-hidden="true" />
@@ -387,7 +387,7 @@
             <Button
                 variant="ghost"
                 size="sm"
-                class="h-7 px-2 text-[11px]"
+                class="h-7 px-2 text-[13.5px]"
                 onclick={openNote}
             >
                 <Pencil class="h-3 w-3" aria-hidden="true" />
@@ -397,27 +397,27 @@
 
         {#if checklist.note}
             <span
-                class="min-w-0 flex-1 truncate text-[10px] text-muted-foreground italic"
+                class="min-w-0 flex-1 truncate text-[12.5px] text-muted-foreground italic"
                 title={checklist.note.body}
             >
                 “{checklist.note.body}”
             </span>
         {:else if !noteOpen}
-            <span class="text-[10px] text-muted-foreground">No note.</span>
+            <span class="text-[12.5px] text-muted-foreground">No note.</span>
         {/if}
     </footer>
 
     {#if checklist.archived.length > 0}
         <details class="border-t border-border px-3 py-1.5">
             <summary
-                class="cursor-pointer text-[10px] text-muted-foreground select-none"
+                class="cursor-pointer text-[12.5px] text-muted-foreground select-none"
             >
                 Archived routines ({checklist.archived.length})
             </summary>
             <ul class="mt-1 flex flex-col gap-0.5 pb-1">
                 {#each checklist.archived as routine (routine.id)}
                     <li
-                        class="flex items-center gap-2 text-[10px] text-muted-foreground"
+                        class="flex items-center gap-2 text-[12.5px] text-muted-foreground"
                     >
                         <span class="truncate">{routine.title}</span>
                         <span class="ml-auto shrink-0 tabular-nums">

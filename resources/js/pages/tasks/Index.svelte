@@ -2,7 +2,8 @@
     import { Link, useForm, router, page } from '@inertiajs/svelte';
     import { Plus } from 'lucide-svelte';
     import AppHead from '@/components/AppHead.svelte';
-    import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+    import TaskCard from '@/components/tasks/TaskCard.svelte';
+    import TaskHeader from '@/components/tasks/TaskHeader.svelte';
     import { Button } from '@/components/ui/button';
     import {
         Card,
@@ -18,17 +19,11 @@
         DialogFooter,
         DialogHeader,
         DialogTitle,
-        DialogTrigger,
     } from '@/components/ui/dialog';
     import { Input } from '@/components/ui/input';
     import { Label } from '@/components/ui/label';
     import AppLayout from '@/layouts/AppLayout.svelte';
-    import TaskCard from '@/components/tasks/TaskCard.svelte';
-    import TaskViewToggle from '@/components/tasks/TaskViewToggle.svelte';
-    import { clickOutside } from '@/lib/clickOutside';
     import { todayInAppTimezone } from '@/lib/date';
-    import { getInitials } from '@/lib/initials';
-    import { getUserColor } from '@/lib/users';
     import { store, update, destroy } from '@/routes/tasks';
     import type {
         BoardTask as Task,
@@ -53,7 +48,6 @@
 
     // Filter State
     let selectedUserId = $state<number | null>(null);
-    let showUserDropdown = $state(false);
 
     // Filtered Tasks
     let filteredTasks = $derived.by(() => {
@@ -85,11 +79,6 @@
 
         return result;
     });
-
-    function getSelectedUser(): User | null {
-        if (!selectedUserId) return null;
-        return users.find((u) => u.id === selectedUserId) || null;
-    }
 
     // Move Task Logic
     function moveTask(task: Task, newStatus: string) {
@@ -267,137 +256,39 @@
 
 <AppHead title="Tasks" />
 
-<svelte:window
-    onkeydown={(event) => {
-        if (event.key === 'Escape') showUserDropdown = false;
-    }}
-/>
-
 <AppLayout>
     <div class="flex h-full flex-col p-4">
-        <div class="mb-4 flex items-center justify-between">
-            <div class="flex items-center gap-3">
-                <h1 class="text-2xl font-bold tracking-tight">Task Board</h1>
-                <TaskViewToggle active="board" />
-
+        <TaskHeader
+            active="board"
+            eyebrow="Tasks / Board"
+            title="Task Board"
+            subtitle="Drag cards between columns. Today's routine lives in the calendar."
+            {users}
+            selectedUserId={selectedUserId}
+            onUserChange={(id) => (selectedUserId = id)}
+        >
+            {#snippet badge()}
                 {#if routine.total > 0}
                     <Link
                         href="/tasks/calendar"
-                        class="inline-flex items-center gap-1.5 rounded-sm border border-violet-500/40 bg-violet-500/10 px-2 py-1 text-[11px] text-violet-600 transition-colors hover:bg-violet-500/15 dark:text-violet-300"
+                        class="inline-flex items-center gap-1.5 rounded-sm border border-violet-500/40 bg-violet-500/10 px-2 py-1 text-[12.5px] text-violet-600 transition-colors hover:bg-violet-500/15 dark:text-violet-300"
                         title="Open the calendar to check your routine"
                     >
                         <span aria-hidden="true">▣</span>
                         {routine.done + routine.skipped}/{routine.total} routine
                     </Link>
                 {/if}
-            </div>
+            {/snippet}
 
-            <div class="flex gap-4">
-                <!-- User Filter Dropdown -->
-                <div class="mb-4 flex items-center gap-2">
-                    <div class="relative">
-                        <button
-                            type="button"
-                            class="inline-flex items-center gap-2 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
-                            data-user-filter-trigger
-                            aria-haspopup="menu"
-                            aria-expanded={showUserDropdown}
-                            onclick={() =>
-                                (showUserDropdown = !showUserDropdown)}
-                        >
-                            {#if selectedUserId}
-                                {#if getSelectedUser()}
-                                    <Avatar class="h-5 w-5">
-                                        <AvatarFallback
-                                            class="text-[9px] {getUserColor(
-                                                getSelectedUser()!.name,
-                                            )}"
-                                        >
-                                            {getInitials(
-                                                getSelectedUser()!.name,
-                                            )}
-                                        </AvatarFallback>
-                                    </Avatar>
-                                {/if}
-                                <span class="max-w-[120px] truncate">
-                                    {getSelectedUser()?.name}
-                                </span>
-                            {:else}
-                                <span>All Users</span>
-                            {/if}
-                            <svg
-                                class="h-4 w-4 opacity-50"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2"
-                                    d="M19 9l-7 7-7-7"
-                                />
-                            </svg>
-                        </button>
+            {#snippet actions()}
+                <Button size="sm" onclick={() => openDialog()}>
+                    <Plus class="mr-1.5 h-3.5 w-3.5" />
+                    New Task
+                </Button>
+            {/snippet}
+        </TaskHeader>
 
-                        {#if showUserDropdown}
-                            <div
-                                class="absolute left-0 z-50 mt-2 min-w-[200px] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md"
-                                data-user-filter-menu
-                                use:clickOutside={{
-                                    handler: () =>
-                                        (showUserDropdown = false),
-                                    ignore: '[data-user-filter-trigger]',
-                                }}
-                            >
-                                <button
-                                    type="button"
-                                    class="relative flex w-full cursor-pointer select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none hover:bg-accent hover:text-accent-foreground"
-                                    onclick={() => {
-                                        selectedUserId = null;
-                                        showUserDropdown = false;
-                                    }}
-                                >
-                                    <span class="text-muted-foreground">All Users</span>
-                                </button>
-                                <div class="h-px bg-border"></div>
-                                {#each users as user}
-                                    <button
-                                        type="button"
-                                        class="relative flex w-full cursor-pointer select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none hover:bg-accent hover:text-accent-foreground {selectedUserId ===
-                                        user.id
-                                            ? 'bg-accent'
-                                            : ''}"
-                                        onclick={() => {
-                                            selectedUserId = user.id;
-                                            showUserDropdown = false;
-                                        }}
-                                    >
-                                        <Avatar class="h-5 w-5">
-                                            <AvatarFallback
-                                                class="text-[9px] {getUserColor(
-                                                    user.name,
-                                                )}"
-                                            >
-                                                {getInitials(user.name)}
-                                            </AvatarFallback>
-                                        </Avatar>
-                                        <span>{user.name}</span>
-                                    </button>
-                                {/each}
-                            </div>
-                        {/if}
-                    </div>
-                </div>
                 <Dialog bind:open={isOpen}>
-                    <DialogTrigger asChild>
-                        {#snippet children(params)}
-                            <Button {...params} onclick={() => openDialog()}>
-                                <Plus class="mr-2 h-4 w-4" />
-                                New Task
-                            </Button>
-                        {/snippet}
-                    </DialogTrigger>
                     <DialogContent class="sm:max-w-[425px]">
                         <DialogHeader>
                             <DialogTitle
@@ -553,8 +444,6 @@
                         </form>
                     </DialogContent>
                 </Dialog>
-            </div>
-        </div>
 
         <div class="flex flex-1 min-h-0 gap-6 overflow-x-auto pb-4">
             {#each boards as board}

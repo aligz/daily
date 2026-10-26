@@ -155,3 +155,14 @@ export type CalendarProps = {
     };
     thresholds: CalendarThresholds;
 };
+
+export type UserFilterOption = {
+    id: number;
+    name: string;
+};
+
+export type UserFilterProgress = {
+    done: number;
+    skipped: number;
+    total: number;
+};

@@ -1,15 +1,15 @@
 <script lang="ts">
     import { router } from '@inertiajs/svelte';
     import AppHead from '@/components/AppHead.svelte';
+    import RoutineBar from '@/components/checklist/RoutineBar.svelte';
     import CalendarAgenda from '@/components/tasks/CalendarAgenda.svelte';
     import CalendarMonth from '@/components/tasks/CalendarMonth.svelte';
     import CalendarStats from '@/components/tasks/CalendarStats.svelte';
     import DayDetail from '@/components/tasks/DayDetail.svelte';
-    import RoutineBar from '@/components/checklist/RoutineBar.svelte';
-    import TaskViewToggle from '@/components/tasks/TaskViewToggle.svelte';
+    import TaskHeader from '@/components/tasks/TaskHeader.svelte';
     import AppLayout from '@/layouts/AppLayout.svelte';
     import { todayInAppTimezone } from '@/lib/date';
-    import type { CalendarDay, CalendarProps, CalendarUser } from '@/types/tasks';
+    import type { CalendarDay, CalendarProps } from '@/types/tasks';
 
     let {
         month,
@@ -52,19 +52,18 @@
 
     const selectedDay = $derived.by(() => days[selectedDate] ?? emptyDay);
 
-    const teamById = $derived(
-        new Map(checklist_team.map((member) => [member.id, member])),
+    const teamProgress = $derived(
+        Object.fromEntries(
+            checklist_team.map((member) => [
+                member.id,
+                {
+                    done: member.done,
+                    skipped: member.skipped,
+                    total: member.total,
+                },
+            ]),
+        ),
     );
-
-    function userLabel(user: CalendarUser): string {
-        const member = teamById.get(user.id);
-
-        if (!member) {
-            return user.name;
-        }
-
-        return `${user.name} · ${member.done + member.skipped}/${member.total}`;
-    }
 
     function visit(nextMonth: string, nextUserId: number | null = userId) {
         router.get(
@@ -107,9 +106,9 @@
         }
     }
 
-    function changeUser(value: string) {
-        userId = value ? Number(value) : null;
-        visit(month, userId);
+    function changeUser(next: number | null) {
+        userId = next;
+        visit(month, next);
     }
 </script>
 
@@ -122,39 +121,17 @@
     ]}
 >
     <div class="flex h-full flex-col gap-3 p-4">
-        <div
-            class="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between"
-        >
-            <div>
-                <div
-                    class="text-[10px] uppercase tracking-[0.14em] text-muted-foreground"
-                >
-                    Tasks / Calendar
-                </div>
-                <h1 class="text-2xl font-bold tracking-tight">
-                    Task Calendar
-                </h1>
-                <p class="text-sm text-muted-foreground">
-                    Daily activity, completed work, and tasks that slipped.
-                </p>
-            </div>
-
-            <div class="flex flex-wrap items-center gap-2">
-                <TaskViewToggle active="calendar" {month} />
-
-                <select
-                    class="h-8 rounded border border-border bg-card px-2 pr-6 text-[11px] text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
-                    value={userId ?? ''}
-                    onchange={(event) => changeUser(event.currentTarget.value)}
-                    aria-label="Filter by user"
-                >
-                    <option value="">All users</option>
-                    {#each users as user (user.id)}
-                        <option value={user.id}>{userLabel(user)}</option>
-                    {/each}
-                </select>
-            </div>
-        </div>
+        <TaskHeader
+            active="calendar"
+            eyebrow="Tasks / Calendar"
+            title="Task Calendar"
+            subtitle="Daily activity, completed work, and your routine."
+            {users}
+            selectedUserId={userId}
+            progress={teamProgress}
+            onUserChange={changeUser}
+            {month}
+        />
 
         <RoutineBar {checklist} />
 
@@ -162,7 +139,7 @@
 
         {#if summary.completed + summary.today_entries + summary.rollbacks + summary.planned === 0}
             <p
-                class="rounded border border-dashed border-border px-3 py-2 text-[11px] text-muted-foreground"
+                class="rounded border border-dashed border-border px-3 py-2 text-[13.5px] text-muted-foreground"
             >
                 No activity this month. Tasks appear here once they enter the
                 today board or are completed.
@@ -195,7 +172,7 @@
 
         <CalendarAgenda {month} {days} checklistByDate={checklist_by_date} />
 
-        <p class="flex items-center gap-1.5 text-[10px] text-muted-foreground">
+        <p class="flex items-center gap-1.5 text-[12.5px] text-muted-foreground">
             <span aria-hidden="true">i</span>
             “Rolled back” is counted from history entries where a task moved from
             today to todo, including the nightly reset.
