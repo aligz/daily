@@ -9,7 +9,7 @@
     import TaskViewToggle from '@/components/tasks/TaskViewToggle.svelte';
     import AppLayout from '@/layouts/AppLayout.svelte';
     import { todayInAppTimezone } from '@/lib/date';
-    import type { CalendarDay, CalendarProps } from '@/types/tasks';
+    import type { CalendarDay, CalendarProps, CalendarUser } from '@/types/tasks';
 
     let {
         month,
@@ -18,6 +18,7 @@
         summary,
         checklist,
         checklist_by_date,
+        checklist_team,
         molorTasks,
         users,
         filters,
@@ -51,6 +52,20 @@
 
     const selectedDay = $derived.by(() => days[selectedDate] ?? emptyDay);
 
+    const teamById = $derived(
+        new Map(checklist_team.map((member) => [member.id, member])),
+    );
+
+    function userLabel(user: CalendarUser): string {
+        const member = teamById.get(user.id);
+
+        if (!member) {
+            return user.name;
+        }
+
+        return `${user.name} · ${member.done + member.skipped}/${member.total}`;
+    }
+
     function visit(nextMonth: string, nextUserId: number | null = userId) {
         router.get(
             '/tasks/calendar',
@@ -68,6 +83,7 @@
                     'summary',
                     'checklist',
                     'checklist_by_date',
+                    'checklist_team',
                     'molorTasks',
                     'users',
                     'filters',
@@ -134,7 +150,7 @@
                 >
                     <option value="">All users</option>
                     {#each users as user (user.id)}
-                        <option value={user.id}>{user.name}</option>
+                        <option value={user.id}>{userLabel(user)}</option>
                     {/each}
                 </select>
             </div>

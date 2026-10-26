@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Actions\Checklist\ComputeChecklistStreak;
 use App\Actions\Tasks\ComputeTaskMetrics;
 use App\Models\Routine;
 use App\Models\RoutineEntry;
@@ -114,6 +115,7 @@ class TaskCalendarController extends Controller
             'summary' => $summary,
             'checklist' => $this->buildChecklist($checklistOwnerId, $timezone),
             'checklist_by_date' => $this->buildChecklistByDate($checklistOwnerId, $gridStart, $gridEnd),
+            'checklist_team' => $this->buildChecklistTeam($timezone),
             'molorTasks' => $molorTasks,
             'users' => User::query()->select('id', 'name')->orderBy('name')->get(),
             'filters' => ['user_id' => $userId],
@@ -219,6 +221,71 @@ class TaskCalendarController extends Controller
         }
 
         return auth()->user()->isHead() ? $userId : $authId;
+    }
+
+    /**
+     * Today's progress for every developer, shown to heads in the user filter.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    private function buildChecklistTeam(string $timezone): array
+    {
+        if (! auth()->user()->isHead()) {
+            return [];
+        }
+
+        $today = CarbonImmutable::now($timezone)->toDateString();
+
+        $users = User::query()
+            ->where('role', 'developer')
+            ->orderBy('name')
+            ->get(['id', 'name']);
+
+        if ($users->isEmpty()) {
+            return [];
+        }
+
+        $routines = Routine::query()
+            ->whereIn('user_id', $users->pluck('id'))
+            ->get()
+            ->groupBy('user_id');
+
+        $entries = RoutineEntry::query()
+            ->whereIn('routine_id', $routines->flatten()->pluck('id'))
+            ->whereDate('check_date', $today)
+            ->get()
+            ->keyBy('routine_id');
+
+        return $users
+            ->map(function (User $user) use ($routines, $entries, $today): array {
+                $active = ($routines->get($user->id) ?? collect())
+                    ->filter(fn (Routine $routine) => $routine->isActiveOn($today));
+
+                $done = 0;
+                $skipped = 0;
+
+                foreach ($active as $routine) {
+                    $status = $entries->get($routine->id)?->status;
+
+                    if ($status === RoutineEntry::STATUS_DONE) {
+                        $done++;
+                    }
+
+                    if ($status === RoutineEntry::STATUS_SKIPPED) {
+                        $skipped++;
+                    }
+                }
+
+                return [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'done' => $done,
+                    'skipped' => $skipped,
+                    'total' => $active->count(),
+                ];
+            })
+            ->values()
+            ->all();
     }
 
     /**
@@ -348,6 +415,7 @@ class TaskCalendarController extends Controller
                 'skipped' => $skipped,
                 'pending' => $total - $done - $skipped,
                 'percent' => $total === 0 ? 0 : (int) round((($done + $skipped) / $total) * 100),
+                'streak' => app(ComputeChecklistStreak::class)($ownerId, $today),
             ],
             'archived' => $routines
                 ->filter(fn (Routine $routine) => $routine->archived_on !== null

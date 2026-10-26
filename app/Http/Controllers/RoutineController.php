@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Routine;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 
 class RoutineController extends Controller
@@ -43,6 +44,45 @@ class RoutineController extends Controller
         ]);
 
         $routine->update(['title' => trim($validated['title'])]);
+
+        return back();
+    }
+
+    public function move(Request $request, Routine $routine)
+    {
+        Gate::authorize('manage', $routine->user);
+
+        $validated = $request->validate([
+            'direction' => ['required', 'in:up,down'],
+        ]);
+
+        $routines = $routine->user->routines()
+            ->whereNull('archived_on')
+            ->orderBy('position')
+            ->orderBy('id')
+            ->get()
+            ->values();
+
+        $index = $routines->search(fn (Routine $item) => $item->id === $routine->id);
+
+        if ($index === false) {
+            abort(404);
+        }
+
+        $target = $validated['direction'] === 'up' ? $index - 1 : $index + 1;
+
+        if ($target < 0 || $target >= $routines->count()) {
+            return back();
+        }
+
+        $ids = $routines->pluck('id')->all();
+        [$ids[$index], $ids[$target]] = [$ids[$target], $ids[$index]];
+
+        DB::transaction(function () use ($ids): void {
+            foreach ($ids as $position => $id) {
+                Routine::query()->whereKey($id)->update(['position' => $position + 1]);
+            }
+        });
 
         return back();
     }

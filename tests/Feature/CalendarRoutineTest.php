@@ -136,3 +136,24 @@ it('sends per-date routine progress for the grid and panel', function () {
             ->where('checklist_by_date.2026-10-20.items.0.title', 'Review pull request')
             ->missing('checklist_by_date.2026-09-29'));
 });
+
+it('sends team progress only to heads', function () {
+    $head = User::factory()->head()->create();
+    $developer = User::factory()->create();
+
+    Routine::factory()->for($developer)->create();
+    Routine::factory()->for($head)->create();
+
+    $this->actingAs($head)
+        ->get(route('tasks.calendar'))
+        ->assertInertia(fn (AssertableInertia $page) => $page
+            ->has('checklist_team', 1)
+            ->where('checklist_team.0.id', $developer->id)
+            ->where('checklist_team.0.total', 1)
+            ->where('checklist_team.0.done', 0));
+
+    $this->actingAs($developer)
+        ->get(route('tasks.calendar'))
+        ->assertInertia(fn (AssertableInertia $page) => $page
+            ->has('checklist_team', 0));
+});

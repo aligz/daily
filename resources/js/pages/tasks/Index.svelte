@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { useForm, router, page } from '@inertiajs/svelte';
+    import { Link, useForm, router, page } from '@inertiajs/svelte';
     import { Plus } from 'lucide-svelte';
     import AppHead from '@/components/AppHead.svelte';
     import { Avatar, AvatarFallback } from '@/components/ui/avatar';
@@ -40,10 +40,12 @@
         tasks,
         users,
         metrics,
+        routine,
     }: {
         tasks: Record<string, Task[]>;
         users: User[];
         metrics: TaskMetrics;
+        routine: { done: number; skipped: number; total: number };
     } = $props();
 
     const boards = ['backlog', 'todo', 'today', 'done'];
@@ -277,6 +279,17 @@
             <div class="flex items-center gap-3">
                 <h1 class="text-2xl font-bold tracking-tight">Task Board</h1>
                 <TaskViewToggle active="board" />
+
+                {#if routine.total > 0}
+                    <Link
+                        href="/tasks/calendar"
+                        class="inline-flex items-center gap-1.5 rounded-sm border border-violet-500/40 bg-violet-500/10 px-2 py-1 text-[11px] text-violet-600 transition-colors hover:bg-violet-500/15 dark:text-violet-300"
+                        title="Open the calendar to check your routine"
+                    >
+                        <span aria-hidden="true">▣</span>
+                        {routine.done + routine.skipped}/{routine.total} routine
+                    </Link>
+                {/if}
             </div>
 
             <div class="flex gap-4">

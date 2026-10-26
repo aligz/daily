@@ -95,6 +95,15 @@ export type ChecklistStats = {
     skipped: number;
     pending: number;
     percent: number;
+    streak: number;
+};
+
+export type ChecklistTeamMember = {
+    id: number;
+    name: string;
+    done: number;
+    skipped: number;
+    total: number;
 };
 
 export type ArchivedRoutine = {
@@ -138,6 +147,7 @@ export type CalendarProps = {
     summary: CalendarSummary;
     checklist: ChecklistProps;
     checklist_by_date: Record<string, ChecklistDay>;
+    checklist_team: ChecklistTeamMember[];
     molorTasks: MolorTask[];
     users: CalendarUser[];
     filters: {

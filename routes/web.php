@@ -27,6 +27,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::post('routines', [\App\Http\Controllers\RoutineController::class, 'store'])->name('routines.store');
     Route::patch('routines/{routine}', [\App\Http\Controllers\RoutineController::class, 'update'])->name('routines.update');
+    Route::patch('routines/{routine}/move', [\App\Http\Controllers\RoutineController::class, 'move'])->name('routines.move');
     Route::delete('routines/{routine}', [\App\Http\Controllers\RoutineController::class, 'archive'])->name('routines.destroy');
     Route::put('checklist/note', [\App\Http\Controllers\ChecklistController::class, 'saveNote'])->name('checklist.note.update');
     Route::patch('checklist/{routine}', [\App\Http\Controllers\ChecklistController::class, 'check'])->name('checklist.check');

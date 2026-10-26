@@ -1,8 +1,10 @@
 <?php
 
 use App\Models\Routine;
+use App\Models\RoutineEntry;
 use App\Models\User;
 use Carbon\CarbonImmutable;
+use Inertia\Testing\AssertableInertia;
 
 function todayWib(): string
 {
@@ -111,4 +113,54 @@ it('forbids archiving a routine owned by someone else', function () {
 it('redirects guests to the login page', function () {
     $this->post(route('routines.store'), ['title' => 'Nope'])
         ->assertRedirect(route('login'));
+});
+
+it('moves a routine up and down', function () {
+    $user = User::factory()->create();
+    $first = Routine::factory()->for($user)->create(['title' => 'First', 'position' => 1]);
+    $second = Routine::factory()->for($user)->create(['title' => 'Second', 'position' => 2]);
+
+    $this->actingAs($user)
+        ->patch(route('routines.move', $second), ['direction' => 'up'])
+        ->assertRedirect();
+
+    expect($second->fresh()->position)->toBe(1.0)
+        ->and($first->fresh()->position)->toBe(2.0);
+
+    $this->actingAs($user)
+        ->patch(route('routines.move', $second), ['direction' => 'down'])
+        ->assertRedirect();
+
+    expect($second->fresh()->position)->toBe(2.0)
+        ->and($first->fresh()->position)->toBe(1.0);
+});
+
+it('ignores moving the first routine further up', function () {
+    $user = User::factory()->create();
+    $first = Routine::factory()->for($user)->create(['position' => 1]);
+    Routine::factory()->for($user)->create(['position' => 2]);
+
+    $this->actingAs($user)
+        ->patch(route('routines.move', $first), ['direction' => 'up'])
+        ->assertRedirect();
+
+    expect($first->fresh()->position)->toBe(1.0);
+});
+
+it('exposes today routine progress to the board', function () {
+    $user = User::factory()->create();
+    $routine = Routine::factory()->for($user)->create();
+
+    RoutineEntry::factory()->for($routine)->create([
+        'check_date' => todayWib(),
+        'status' => 'done',
+    ]);
+
+    $this->actingAs($user)
+        ->get(route('tasks.index'))
+        ->assertOk()
+        ->assertInertia(fn (AssertableInertia $page) => $page
+            ->where('routine.total', 1)
+            ->where('routine.done', 1)
+            ->where('routine.skipped', 0));
 });

@@ -3,9 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Actions\Tasks\ComputeTaskMetrics;
+use App\Models\Routine;
+use App\Models\RoutineEntry;
 use App\Models\Task;
 use App\Models\TaskHistory;
 use App\Models\User;
+use Carbon\CarbonImmutable;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
@@ -35,7 +38,52 @@ class TaskController extends Controller
             'tasks' => $tasks,
             'users' => $users,
             'metrics' => $metrics,
+            'routine' => $this->routineSummary(),
         ]);
+    }
+
+    /**
+     * Today's routine progress for the board chip.
+     *
+     * @return array{done: int, skipped: int, total: int}
+     */
+    private function routineSummary(): array
+    {
+        $today = CarbonImmutable::now(config('tasks.display_timezone'))->toDateString();
+
+        $routines = Routine::query()
+            ->where('user_id', auth()->id())
+            ->get()
+            ->filter(fn (Routine $routine) => $routine->isActiveOn($today));
+
+        $done = 0;
+        $skipped = 0;
+
+        if ($routines->isNotEmpty()) {
+            $entries = RoutineEntry::query()
+                ->whereIn('routine_id', $routines->pluck('id'))
+                ->whereDate('check_date', $today)
+                ->get()
+                ->keyBy('routine_id');
+
+            foreach ($routines as $routine) {
+                $status = $entries->get($routine->id)?->status;
+
+                if ($status === RoutineEntry::STATUS_DONE) {
+                    $done++;
+                }
+
+                if ($status === RoutineEntry::STATUS_SKIPPED) {
+                    $skipped++;
+                }
+            }
+        }
+
+        return [
+            'done' => $done,
+            'skipped' => $skipped,
+            'total' => $routines->count(),
+        ];
     }
 
     public function store(Request $request)

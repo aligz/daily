@@ -43,6 +43,16 @@
         );
     }
 
+    function move(item: ChecklistItem, direction: 'up' | 'down') {
+        menuOpen = null;
+
+        router.patch(
+            `/routines/${item.id}/move`,
+            { direction },
+            { preserveScroll: true, preserveState: true },
+        );
+    }
+
     function archive(item: ChecklistItem) {
         menuOpen = null;
 
@@ -139,6 +149,14 @@
         {/if}
 
         <div class="ml-auto flex items-center gap-2" aria-live="polite">
+            {#if checklist.stats.streak > 0}
+                <span
+                    class="rounded-sm border border-violet-500/40 bg-violet-500/10 px-1.5 py-0.5 text-[10px] text-violet-600 dark:text-violet-300"
+                    title={`${checklist.stats.streak}-day streak`}
+                >
+                    🔥 {checklist.stats.streak}
+                </span>
+            {/if}
             <span class="text-[11px] tabular-nums text-muted-foreground">
                 {resolved}/{checklist.stats.total} done
             </span>
@@ -159,7 +177,7 @@
 
     {#if hasItems}
         <ul class="grid gap-x-6 px-2 py-1.5 sm:grid-cols-2">
-            {#each checklist.items as item (item.id)}
+            {#each checklist.items as item, index (item.id)}
                 <li class="relative flex items-center gap-2 rounded px-1.5 py-1 hover:bg-accent/40">
                     <input
                         id={`routine-${item.id}`}
@@ -226,6 +244,24 @@
                                     {item.status === 'skipped'
                                         ? 'Mark as pending'
                                         : 'Skip'}
+                                </button>
+                                <button
+                                    type="button"
+                                    role="menuitem"
+                                    disabled={index === 0}
+                                    class="block w-full px-2.5 py-1.5 text-left text-[11px] hover:bg-accent disabled:opacity-40"
+                                    onclick={() => move(item, 'up')}
+                                >
+                                    Move up
+                                </button>
+                                <button
+                                    type="button"
+                                    role="menuitem"
+                                    disabled={index === checklist.items.length - 1}
+                                    class="block w-full px-2.5 py-1.5 text-left text-[11px] hover:bg-accent disabled:opacity-40"
+                                    onclick={() => move(item, 'down')}
+                                >
+                                    Move down
                                 </button>
                                 <button
                                     type="button"
@@ -322,6 +358,28 @@
             <span class="text-[10px] text-muted-foreground">No note.</span>
         {/if}
     </footer>
+
+    {#if checklist.archived.length > 0}
+        <details class="border-t border-border px-3 py-1.5">
+            <summary
+                class="cursor-pointer text-[10px] text-muted-foreground select-none"
+            >
+                Archived routines ({checklist.archived.length})
+            </summary>
+            <ul class="mt-1 flex flex-col gap-0.5 pb-1">
+                {#each checklist.archived as routine (routine.id)}
+                    <li
+                        class="flex items-center gap-2 text-[10px] text-muted-foreground"
+                    >
+                        <span class="truncate">{routine.title}</span>
+                        <span class="ml-auto shrink-0 tabular-nums">
+                            {routine.archived_on}
+                        </span>
+                    </li>
+                {/each}
+            </ul>
+        </details>
+    {/if}
 </section>
 
 <Dialog bind:open={dialogOpen}>
