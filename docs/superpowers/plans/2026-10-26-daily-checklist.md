@@ -1,6 +1,7 @@
 # Daily Checklist — Implementation Plan
 
-> **Status:** disetujui 26 Okt 2026. UI tinggal di **kalender**, tidak ada halaman `/checklist`.
+> **Status:** disetujui & **selesai 26 Okt 2026** — Phase 0–4 terpasang di `daily.gza.li`.
+> UI tinggal di **kalender**, tidak ada halaman `/checklist`.
 > **Mockup:** [`docs/mockups/checklist-on-calendar.html`](../../mockups/checklist-on-calendar.html) · screenshot di [`docs/mockups/screenshots/`](../../mockups/screenshots)
 
 **Goal:** Setiap user punya daftar **routine harian** yang selalu sama tiap hari, bisa dicentang setelah dikerjakan, bisa di-skip, dan punya satu catatan bebas per hari untuk mencatat kendala. Head bisa melihat rutinitas developer-nya (read-only).
@@ -512,30 +513,30 @@ tables ................... routines, routine_entries, routine_notes, users.role
 
 ---
 
-## 6. Phase 1 — Bar + CRUD routine (1,5 hari)
+## 6. Phase 1 — Bar + CRUD routine (1,5 hari) — ✅ SELESAI
 
 ### Task 1.1 — Data untuk kalender
 
-- [ ] `TaskCalendarController`: owner, read_only, items hari ini, note, stats, `checklist_by_date`, `archived_routines`.
-- [ ] Head: `checklist_team` (progress hari ini per developer) + option di filter.
-- [ ] Developer yang `user_id`-nya orang lain → 403.
+- [x] `TaskCalendarController`: owner, read_only, items hari ini, note, stats, `checklist_by_date`, `archived_routines`.
+- [x] Head: `checklist_team` (progress hari ini per developer) + option di filter.
+- [x] Developer yang `user_id`-nya orang lain → 403.
 
 ### Task 1.2 — Bar
 
-- [ ] `RoutineBar.svelte`: header (`Your routine · today`, `4/5`, `🔥 4`), grid 2 kolom item.
-- [ ] Item: checkbox, judul, menu `⋯`, state done (strikethrough).
-- [ ] Empty state + `Add routine`.
-- [ ] Mode read-only: label owner, lock, tanpa kontrol tulis.
-- [ ] `RoutineDialog.svelte` untuk tambah/edit judul.
-- [ ] `Archived routines` collapsible, read-only.
+- [x] `RoutineBar.svelte`: header (`Your routine · today`, `4/5`, `🔥 4`), grid 2 kolom item.
+- [x] Item: checkbox, judul, menu `⋯`, state done (strikethrough).
+- [x] Empty state + `Add routine`.
+- [x] Mode read-only: label owner, lock, tanpa kontrol tulis.
+- [x] `RoutineDialog.svelte` untuk tambah/edit judul.
+- [x] `Archived routines` collapsible, read-only.
 
 ### Task 1.3 — CRUD
 
-- [ ] `RoutineController@store`: judul wajib ≤255, maks 20 routine aktif, `starts_on` = hari ini, `position` = max+1.
-- [ ] `update`: judul saja; `403` kalau bukan miliknya.
-- [ ] `reorder`: validasi `position` numerik.
-- [ ] `archive`: `archived_on` = hari ini; `404` kalau sudah diarsip.
-- [ ] Semua endpoint pakai `Gate::authorize('manage', $routine->user)`.
+- [x] `RoutineController@store`: judul wajib ≤255, maks 20 routine aktif, `starts_on` = hari ini, `position` = max+1.
+- [x] `update`: judul saja; `403` kalau bukan miliknya.
+- [x] `reorder`: validasi `position` numerik.
+- [x] `archive`: `archived_on` = hari ini; `404` kalau sudah diarsip.
+- [x] Semua endpoint pakai `Gate::authorize('manage', $routine->user)`.
 
 ### Verification Phase 1
 
@@ -545,84 +546,84 @@ docker exec -u www-data daily-app ./vendor/bin/pint --test
 npm run check
 ```
 
-- [ ] Bar tampil di kalender, tambah/edit/arsip jalan.
-- [ ] Arsip menghilangkan routine dari bar hari ini; entry lama tetap ada.
-- [ ] Filter ke developer lain sebagai developer → 403.
+- [x] Bar tampil di kalender, tambah/edit/arsip jalan.
+- [x] Arsip menghilangkan routine dari bar hari ini; entry lama tetap ada.
+- [x] Filter ke developer lain sebagai developer → 403.
 
 ---
 
-## 7. Phase 2 — Centang, skip, catatan, streak (1 hari)
+## 7. Phase 2 — Centang, skip, catatan, streak (1 hari) — ✅ SELESAI
 
 ### Task 2.1 — Endpoint check
 
-- [ ] `PATCH /checklist/{routine}` `{date, status}`.
-- [ ] Guard: `manage`, tanggal ∈ {hari ini, kemarin}, routine aktif pada tanggal itu.
-- [ ] `done`/`skipped` → `updateOrCreate`; `pending` → `delete`.
-- [ ] Anti-duplikat: `unique` + retry sekali saat `23000`.
+- [x] `PATCH /checklist/{routine}` `{date, status}`.
+- [x] Guard: `manage`, tanggal ∈ {hari ini, kemarin}, routine aktif pada tanggal itu.
+- [x] `done`/`skipped` → `updateOrCreate`; `pending` → `delete`.
+- [x] Anti-duplikat: `unique` + retry sekali saat `23000`.
 
 ### Task 2.2 — UI
 
-- [ ] Checkbox → `router.patch` (`preserveScroll`, `preserveState`), optimistic + revert on error.
-- [ ] Menu `⋯`: `Skip` / `Mark as pending` / `Edit` / `Archive`.
-- [ ] `RoutineNote`: popover textarea, counter, `Save note`, feedback `Saved`.
-- [ ] Progres & streak update tanpa reload penuh.
+- [x] Checkbox → `router.patch` (`preserveScroll`, `preserveState`), optimistic + revert on error.
+- [x] Menu `⋯`: `Skip` / `Mark as pending` / `Edit` / `Archive`.
+- [x] `RoutineNote`: popover textarea, counter, `Save note`, feedback `Saved`.
+- [x] Progres & streak update tanpa reload penuh.
 
 ### Task 2.3 — Streak
 
-- [ ] `ComputeChecklistStats`: progres, 7 hari, streak (lookback 90 hari).
-- [ ] Streak: hari dihitung kalau semua routine yang aktif hari itu `done`/`skipped`; hari ini yang belum selesai dilewati; hari lampau yang bolong memutus; hari tanpa routine memutus.
+- [x] `ComputeChecklistStats`: progres, 7 hari, streak (lookback 90 hari).
+- [x] Streak: hari dihitung kalau semua routine yang aktif hari itu `done`/`skipped`; hari ini yang belum selesai dilewati; hari lampau yang bolong memutus; hari tanpa routine memutus.
 
 ### Task 2.4 — Test
 
-- [ ] done dua kali idempoten; pending menghapus baris; skipped dihitung selesai.
-- [ ] Tanggal besok / 2 hari lalu → 422.
-- [ ] Routine orang lain → 403.
-- [ ] Routine terarsip → 422.
-- [ ] Catatan: upsert, trim, kosong → hapus, >2000 → 422.
+- [x] done dua kali idempoten; pending menghapus baris; skipped dihitung selesai.
+- [x] Tanggal besok / 2 hari lalu → 422.
+- [x] Routine orang lain → 403.
+- [x] Routine terarsip → 422.
+- [x] Catatan: upsert, trim, kosong → hapus, >2000 → 422.
 
 ---
 
-## 8. Phase 3 — Riwayat di grid + panel + mobile (1 hari)
+## 8. Phase 3 — Riwayat di grid + panel + mobile (1 hari) — ✅ SELESAI
 
 ### Task 3.1 — Grid
 
-- [ ] `CalendarDay`: baris `▣ bar 4/5` di kaki sel, ungu, `title` + `aria-label`.
-- [ ] Tidak render apa pun kalau tanggal itu tanpa routine aktif.
-- [ ] Hari dengan 3 chip + rollback tidak overflow (tes 112px).
+- [x] `CalendarDay`: baris `▣ bar 4/5` di kaki sel, ungu, `title` + `aria-label`.
+- [x] Tidak render apa pun kalau tanggal itu tanpa routine aktif.
+- [x] Hari dengan 3 chip + rollback tidak overflow (tes 112px).
 
 ### Task 3.2 — Panel & agenda
 
-- [ ] `DayDetail`: blok checklist (progress, item, catatan) di atas seksi task.
-- [ ] `CalendarAgenda`: baris `▣ 4/5 · "catatan"`, clamp 1 baris.
-- [ ] Tanggal lampau read-only; hari ini juga read-only di panel (tulis hanya dari bar).
+- [x] `DayDetail`: blok checklist (progress, item, catatan) di atas seksi task.
+- [x] `CalendarAgenda`: baris `▣ 4/5 · "catatan"`, clamp 1 baris.
+- [x] Tanggal lampau read-only; hari ini juga read-only di panel (tulis hanya dari bar).
 
 ### Task 3.3 — Test + browser
 
-- [ ] `CalendarRoutineTest`: data per tanggal, user filter, head vs developer, streak sama dengan bar.
-- [ ] Browser: indikator muncul di tanggal yang benar, tidak ada console error.
+- [x] `CalendarRoutineTest`: data per tanggal, user filter, head vs developer, streak sama dengan bar.
+- [x] Browser: indikator muncul di tanggal yang benar, tidak ada console error.
 
 ---
 
-## 9. Phase 4 — Head mode, board chip, polish (½ hari)
+## 9. Phase 4 — Head mode, board chip, polish (½ hari) — ✅ SELESAI
 
 ### Task 4.1 — Head
 
-- [ ] Filter user menampilkan `Rina 4/5` untuk head.
-- [ ] Pilih developer → bar read-only + grid/detail milik developer.
-- [ ] Developer yang mencoba `?user_id=` orang lain → 403.
+- [x] Filter user menampilkan `Rina 4/5` untuk head.
+- [x] Pilih developer → bar read-only + grid/detail milik developer.
+- [x] Developer yang mencoba `?user_id=` orang lain → 403.
 
 ### Task 4.2 — Board chip
 
-- [ ] `TaskController@index`: kirim `routine` ringkas (done/total) untuk hari ini.
-- [ ] `Index.svelte`: chip `Rutinitas 3/5` → link `tasks.calendar`; tidak render kalau `total = 0`.
+- [x] `TaskController@index`: kirim `routine` ringkas (done/total) untuk hari ini.
+- [x] `Index.svelte`: chip `Rutinitas 3/5` → link `tasks.calendar`; tidak render kalau `total = 0`.
 
 ### Task 4.3 — Polish + docs
 
-- [ ] Mobile: bar di atas agenda, target tap ≥44px, tidak overflow.
-- [ ] Dark mode & kontras.
-- [ ] Screenshot ke `docs/mockups/screenshots/`.
-- [ ] Update README (kalau ada daftar fitur).
-- [ ] `npm run check`, `pint`, full test.
+- [x] Mobile: bar di atas agenda, target tap ≥44px, tidak overflow.
+- [x] Dark mode & kontras.
+- [x] Screenshot ke `docs/mockups/screenshots/`.
+- [x] Update README (kalau ada daftar fitur).
+- [x] `npm run check`, `pint`, full test.
 
 ---
 

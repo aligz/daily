@@ -13,7 +13,11 @@
     import { Input } from '@/components/ui/input';
     import { Label } from '@/components/ui/label';
     import { clickOutside } from '@/lib/clickOutside';
-    import type { ChecklistItem, ChecklistProps } from '@/types/tasks';
+    import type {
+        ChecklistItem,
+        ChecklistProps,
+        ChecklistStatus,
+    } from '@/types/tasks';
 
     let { checklist }: { checklist: ChecklistProps } = $props();
 
@@ -25,21 +29,65 @@
 
     const form = useForm({ title: '' });
 
+    let pendingStatus = $state<Record<number, ChecklistStatus>>({});
+
     const readOnly = $derived(checklist.read_only);
-    const resolved = $derived(checklist.stats.done + checklist.stats.skipped);
     const hasItems = $derived(checklist.items.length > 0);
 
-    function toggle(item: ChecklistItem) {
-        setStatus(item, item.status === 'done' ? 'pending' : 'done');
+    const displayItems = $derived(
+        checklist.items.map((item) => ({
+            ...item,
+            status: pendingStatus[item.id] ?? item.status,
+        })),
+    );
+
+    const resolved = $derived(
+        displayItems.filter(
+            (item) => item.status === 'done' || item.status === 'skipped',
+        ).length,
+    );
+    const percent = $derived(
+        checklist.stats.total > 0
+            ? Math.round((resolved / checklist.stats.total) * 100)
+            : 0,
+    );
+
+    function statusOf(item: ChecklistItem): ChecklistStatus {
+        return pendingStatus[item.id] ?? item.status;
     }
 
-    function setStatus(item: ChecklistItem, status: 'done' | 'skipped' | 'pending') {
+    function toggle(item: ChecklistItem) {
+        setStatus(item, statusOf(item) === 'done' ? 'pending' : 'done');
+    }
+
+    function setStatus(item: ChecklistItem, status: ChecklistStatus) {
+        const previous = pendingStatus[item.id];
         menuOpen = null;
+        pendingStatus = { ...pendingStatus, [item.id]: status };
 
         router.patch(
             `/checklist/${item.id}`,
             { date: checklist.date, status },
-            { preserveScroll: true, preserveState: true },
+            {
+                preserveScroll: true,
+                preserveState: true,
+                onSuccess: () => {
+                    const next = { ...pendingStatus };
+                    delete next[item.id];
+                    pendingStatus = next;
+                },
+                onError: () => {
+                    const next = { ...pendingStatus };
+
+                    if (previous === undefined) {
+                        delete next[item.id];
+                    } else {
+                        next[item.id] = previous;
+                    }
+
+                    pendingStatus = next;
+                },
+            },
         );
     }
 
@@ -165,11 +213,11 @@
                 role="progressbar"
                 aria-valuemin={0}
                 aria-valuemax={100}
-                aria-valuenow={checklist.stats.percent}
+                aria-valuenow={percent}
             >
                 <span
                     class="block h-full bg-violet-500"
-                    style={`width: ${checklist.stats.percent}%`}
+                    style={`width: ${percent}%`}
                 ></span>
             </span>
         </div>
@@ -177,7 +225,7 @@
 
     {#if hasItems}
         <ul class="grid gap-x-6 px-2 py-1.5 sm:grid-cols-2">
-            {#each checklist.items as item, index (item.id)}
+            {#each displayItems as item, index (item.id)}
                 <li class="relative flex items-center gap-2 rounded px-1.5 py-1 hover:bg-accent/40">
                     <input
                         id={`routine-${item.id}`}
@@ -236,7 +284,7 @@
                                     onclick={() =>
                                         setStatus(
                                             item,
-                                            item.status === 'skipped'
+                                            statusOf(item) === 'skipped'
                                                 ? 'pending'
                                                 : 'skipped',
                                         )}
