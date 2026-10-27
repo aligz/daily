@@ -6,147 +6,114 @@
     import LayoutGrid from 'lucide-svelte/icons/layout-grid';
     import ListChecks from 'lucide-svelte/icons/list-checks';
     import Moon from 'lucide-svelte/icons/moon';
+    import { onMount } from 'svelte';
     import AppHead from '@/components/AppHead.svelte';
     import AppLayout from '@/layouts/AppLayout.svelte';
+    import { en } from '@/lib/guide/en';
+    import { id as idCopy } from '@/lib/guide/id';
+    import type { GuideLang, GuideLine } from '@/lib/guide/types';
 
-    const toc = [
-        { id: 'board', number: '01', title: 'The board' },
-        { id: 'cards', number: '02', title: 'Reading a card' },
-        { id: 'calendar', number: '03', title: 'The calendar' },
-        { id: 'routine', number: '04', title: 'Your routine' },
-        { id: 'team', number: '05', title: 'Working as a team' },
-        { id: 'habits', number: '06', title: 'Habits that help' },
-        { id: 'questions', number: '07', title: 'Quick answers' },
-    ];
+    const STORAGE_KEY = 'daily.guide.lang';
 
-    const columns = [
+    const columnStyles = [
         {
-            name: 'Backlog',
             dot: 'bg-muted-foreground/50',
             border: 'border-l-muted-foreground/40',
-            what: 'Things worth doing, not yet promised.',
-            how: 'Park ideas here without committing to them.',
         },
-        {
-            name: 'Todo',
-            dot: 'bg-orange-500',
-            border: 'border-l-orange-500/60',
-            what: 'Agreed work, waiting for a slot.',
-            how: 'This is your queue. Pick from here when Today is empty.',
-        },
-        {
-            name: 'Today',
-            dot: 'bg-sky-500',
-            border: 'border-l-sky-500/60',
-            what: 'What you are doing right now.',
-            how: 'Keep it to one to three cards you can actually finish.',
-        },
-        {
-            name: 'Done',
-            dot: 'bg-green-500',
-            border: 'border-l-green-500/60',
-            what: 'Finished work, grouped by finish date.',
-            how: 'Drag a card here once it is really finished.',
-        },
+        { dot: 'bg-orange-500', border: 'border-l-orange-500/60' },
+        { dot: 'bg-sky-500', border: 'border-l-sky-500/60' },
+        { dot: 'bg-green-500', border: 'border-l-green-500/60' },
     ];
 
-    const badges = [
-        {
-            chip: '▶ Focus today',
-            chipClass:
-                'border-sky-500/50 bg-sky-500/10 text-sky-700 dark:text-sky-300',
-            meaning: 'The card sits in the Today column right now.',
-        },
-        {
-            chip: '◇ Plan 12 Nov',
-            chipClass:
-                'border-dashed border-muted-foreground/60 text-muted-foreground',
-            meaning:
-                'The day you planned to pick it up. It also shows on the calendar.',
-        },
-        {
-            chip: 'Stale 21d',
-            chipClass:
-                'border-amber-500/50 bg-amber-500/10 text-amber-700 dark:text-amber-300',
-            meaning:
-                'Nobody touched it for a long time (14 days by default). Split it, schedule it, or drop it.',
-        },
-        {
-            chip: '4× today · 3↩',
-            chipClass:
-                'border-destructive/50 bg-destructive/10 text-destructive',
-            meaning:
-                'It keeps coming back: three or more visits to Today, or two or more slip-backs. A hint that it is too big.',
-        },
-        {
-            chip: '✓ Done 26 Oct',
-            chipClass:
-                'border-green-500/50 bg-green-500/10 text-green-700 dark:text-green-300',
-            meaning: 'When the task was finished.',
-        },
+    const legendStyles = [
+        'border-sky-500/50 bg-sky-500/10 text-sky-700 dark:text-sky-300',
+        'border-dashed border-muted-foreground/60 text-muted-foreground',
+        'border-amber-500/50 bg-amber-500/10 text-amber-700 dark:text-amber-300',
+        'border-destructive/50 bg-destructive/10 text-destructive',
+        'border-green-500/50 bg-green-500/10 text-green-700 dark:text-green-300',
     ];
 
-    const habits = [
-        {
-            lead: 'Keep Today small.',
-            body: 'One to three cards you can genuinely finish. Today is a promise, not a wishlist.',
-        },
-        {
-            lead: 'Tidy up before you leave.',
-            body: 'Finished to Done, unfinished back to Todo. Tomorrow starts clean, and the calendar stays honest.',
-        },
-        {
-            lead: 'Plan tomorrow before you log off.',
-            body: 'Set “Planned for” on the card you will start with. Future you will not have to remember.',
-        },
-        {
-            lead: 'Put the ticket number in Reference.',
-            body: 'A short code such as JIRA-123 on the card makes it searchable later, in the calendar too.',
-        },
-        {
-            lead: 'Tick your routine before you go.',
-            body: 'Could not do it? Use Skip and leave the one-line note. Skipping is honest; silence is not.',
-        },
-        {
-            lead: 'Trust the badges.',
-            body: 'Stale or delayed is not a scolding. It is a signal to split the task, schedule it, or drop it.',
-        },
+    const summaryIcons = [LayoutGrid, CalendarDays, ListChecks];
+    const summaryTones = [
+        'text-sky-600 dark:text-sky-400',
+        'text-green-600 dark:text-green-400',
+        'text-violet-600 dark:text-violet-400',
     ];
 
-    const questions = [
-        {
-            q: 'A card I was working on vanished from Today.',
-            a: 'At midnight (Jakarta time) the app moves whatever is left in Today back to Todo. Nothing is lost — the card is in Todo, and the calendar records the move as “rolled back”.',
-        },
-        {
-            q: 'Why can’t I move or tick something?',
-            a: 'You can only move your own cards. Routine boxes belong to their owner; heads can open other people’s routines, but only to look.',
-        },
-        {
-            q: 'Why does the date picker refuse last week?',
-            a: '“Planned for” is about the future, so past dates are disabled. If you need to keep older context, put it in the description.',
-        },
-        {
-            q: 'I deleted a task. Why is it still on the calendar?',
-            a: 'The calendar keeps history. A deleted task still appears, struck through and marked “(deleted)”, so past days stay accurate.',
-        },
-        {
-            q: 'Where is my routine?',
-            a: 'On the calendar page, in the violet bar above the monthly numbers. It is not on the board.',
-        },
-        {
-            q: 'Can I bring back an archived routine?',
-            a: 'Not in this version. Add it again as a new routine; the old entries stay visible on past days.',
-        },
-        {
-            q: 'Does skipping a routine break my streak?',
-            a: 'No. Done and skipped both count as handled. Only a day you never touched does.',
-        },
-        {
-            q: 'Why do I see 0/3 before doing anything?',
-            a: 'An untouched routine counts as pending, not completed. The number fills in as you tick boxes.',
-        },
-    ];
+    let lang = $state<GuideLang>('en');
+
+    const copy = $derived(lang === 'id' ? idCopy : en);
+
+    const toc = $derived(
+        copy.toc.map((item, index) => ({
+            ...item,
+            number: String(index + 1).padStart(2, '0'),
+        })),
+    );
+
+    const columns = $derived(
+        copy.board.columns.map((column, index) => ({
+            ...column,
+            ...columnStyles[index],
+        })),
+    );
+
+    const legend = $derived(
+        copy.cards.legend.map((item, index) => ({
+            ...item,
+            chipClass: legendStyles[index],
+        })),
+    );
+
+    function detectLang(): GuideLang | null {
+        const param = new URLSearchParams(window.location.search).get('lang');
+
+        if (param === 'id' || param === 'en') {
+            return param;
+        }
+
+        try {
+            const stored = window.localStorage.getItem(STORAGE_KEY);
+
+            if (stored === 'id' || stored === 'en') {
+                return stored;
+            }
+        } catch {
+            // Private mode and locked-down browsers can refuse storage.
+        }
+
+        return window.navigator.language?.toLowerCase().startsWith('id')
+            ? 'id'
+            : null;
+    }
+
+    function choose(next: GuideLang) {
+        if (next === lang) {
+            return;
+        }
+
+        lang = next;
+        document.documentElement.lang = next;
+
+        try {
+            window.localStorage.setItem(STORAGE_KEY, next);
+        } catch {
+            // Language still switches for this visit.
+        }
+
+        const url = new URL(window.location.href);
+        url.searchParams.set('lang', next);
+        window.history.replaceState(window.history.state, '', url.toString());
+    }
+
+    onMount(() => {
+        const detected = detectLang();
+
+        if (detected && detected !== lang) {
+            lang = detected;
+            document.documentElement.lang = detected;
+        }
+    });
 </script>
 
 {#snippet heading(number: string, title: string)}
@@ -168,62 +135,90 @@
     </Link>
 {/snippet}
 
-<AppHead title="Guide" />
+<!-- eslint-disable svelte/no-useless-mustaches -->
+{#snippet line(item: GuideLine, weight: string)}{#if item.lead}<span
+            class="text-foreground {weight}">{item.lead}</span
+        >{' '}{/if}{item.body}{/snippet}
+<!-- eslint-enable svelte/no-useless-mustaches -->
 
-<AppLayout breadcrumbs={[{ title: 'Guide', href: '/guide' }]}>
+<AppHead title={copy.title} />
+
+<AppLayout breadcrumbs={[{ title: copy.eyebrow, href: '/guide' }]}>
     <div class="mx-auto w-full max-w-4xl px-4 py-6 pb-20">
         <header class="border-b border-border pb-6">
-            <p
-                class="text-[11px] uppercase tracking-[0.16em] text-muted-foreground"
-            >
-                Guide
-            </p>
-            <h1 class="mt-1 text-3xl font-semibold tracking-tight">
-                How to use Daily
-            </h1>
+            <div class="flex items-start justify-between gap-4">
+                <div class="min-w-0">
+                    <p
+                        class="text-[11px] uppercase tracking-[0.16em] text-muted-foreground"
+                    >
+                        {copy.eyebrow}
+                    </p>
+                    <h1 class="mt-1 text-3xl font-semibold tracking-tight">
+                        {copy.title}
+                    </h1>
+                </div>
+
+                <div
+                    class="flex shrink-0 items-center gap-0.5 rounded border border-border bg-card p-0.5"
+                    role="group"
+                    aria-label={copy.languageLabel}
+                >
+                    <button
+                        type="button"
+                        aria-pressed={lang === 'id'}
+                        onclick={() => choose('id')}
+                        class="rounded-sm px-2 py-0.5 text-[12px] font-semibold transition-colors {lang ===
+                        'id'
+                            ? 'bg-foreground text-background'
+                            : 'text-muted-foreground hover:bg-accent hover:text-foreground'}"
+                    >
+                        ID
+                    </button>
+                    <button
+                        type="button"
+                        aria-pressed={lang === 'en'}
+                        onclick={() => choose('en')}
+                        class="rounded-sm px-2 py-0.5 text-[12px] font-semibold transition-colors {lang ===
+                        'en'
+                            ? 'bg-foreground text-background'
+                            : 'text-muted-foreground hover:bg-accent hover:text-foreground'}"
+                    >
+                        EN
+                    </button>
+                </div>
+            </div>
+
             <p
                 class="mt-2 max-w-2xl text-[15px] leading-relaxed text-muted-foreground"
             >
-                Three places, one habit: plan the day, do the work, look back.
-                This page explains every screen in plain language. Read it once,
-                then come back whenever something looks unfamiliar.
+                {copy.intro}
             </p>
+
             <div class="mt-4 flex flex-wrap gap-2">
-                {@render pill('/tasks', 'Open the board')}
-                {@render pill('/tasks/calendar', 'Open the calendar')}
+                {@render pill('/tasks', copy.openBoard)}
+                {@render pill('/tasks/calendar', copy.openCalendar)}
             </div>
         </header>
 
         <div class="mt-6 grid gap-4 sm:grid-cols-3">
-            <div class="rounded border border-border bg-card p-3.5">
-                <LayoutGrid class="h-4 w-4 text-sky-600 dark:text-sky-400" />
-                <div class="mt-1.5 text-[14px] font-semibold">Board</div>
-                <p class="text-[12.5px] leading-relaxed text-muted-foreground">
-                    Where work waits and moves. You drag cards here.
-                </p>
-            </div>
-            <div class="rounded border border-border bg-card p-3.5">
-                <CalendarDays
-                    class="h-4 w-4 text-green-600 dark:text-green-400"
-                />
-                <div class="mt-1.5 text-[14px] font-semibold">Calendar</div>
-                <p class="text-[12.5px] leading-relaxed text-muted-foreground">
-                    What actually happened on each day. It fills itself in.
-                </p>
-            </div>
-            <div class="rounded border border-border bg-card p-3.5">
-                <ListChecks
-                    class="h-4 w-4 text-violet-600 dark:text-violet-400"
-                />
-                <div class="mt-1.5 text-[14px] font-semibold">Routine</div>
-                <p class="text-[12.5px] leading-relaxed text-muted-foreground">
-                    The few things you do every day. One click to tick them.
-                </p>
-            </div>
+            {#each copy.summary as part, index (part.title)}
+                {@const Icon = summaryIcons[index]}
+                <div class="rounded border border-border bg-card p-3.5">
+                    <Icon class="h-4 w-4 {summaryTones[index]}" />
+                    <div class="mt-1.5 text-[14px] font-semibold">
+                        {part.title}
+                    </div>
+                    <p
+                        class="text-[12.5px] leading-relaxed text-muted-foreground"
+                    >
+                        {part.body}
+                    </p>
+                </div>
+            {/each}
         </div>
 
         <nav
-            aria-label="On this page"
+            aria-label={copy.tocLabel}
             class="mt-7 flex flex-wrap items-center gap-x-1 gap-y-1 border-y border-border py-2"
         >
             {#each toc as item (item.id)}
@@ -244,14 +239,12 @@
                 id="board"
                 class="scroll-mt-24 border-t border-border pt-7 first:border-t-0 first:pt-0"
             >
-                {@render heading('01', 'The board')}
+                {@render heading('01', copy.board.title)}
 
                 <p
                     class="mt-2 text-[14.5px] leading-relaxed text-muted-foreground"
                 >
-                    The board is where work moves. Each column is a stage; cards
-                    travel left to right as work gets closer to done. A card
-                    belongs to one person, and only that person moves it.
+                    {copy.board.intro}
                 </p>
 
                 <div class="mt-4 grid gap-2 sm:grid-cols-2">
@@ -280,54 +273,34 @@
                     {/each}
                 </div>
 
-                <h3 class="mt-6 text-[15px] font-semibold">Moving work</h3>
+                <h3 class="mt-6 text-[15px] font-semibold">
+                    {copy.board.movingTitle}
+                </h3>
                 <ol
                     class="mt-1.5 flex flex-col gap-1 text-[14px] leading-relaxed"
                 >
-                    <li>
-                        <span class="font-medium">Drag</span> a card to another column.
-                        The change saves as soon as you drop it.
-                    </li>
-                    <li>
-                        <span class="font-medium">Hover</span> a card in Backlog or
-                        Todo and use the ↑ ↓ buttons to set your own order inside
-                        the column.
-                    </li>
-                    <li>
-                        <span class="font-medium">Click</span> a card to open it,
-                        edit the details, or delete it. Other people’s cards open
-                        read-only.
-                    </li>
+                    {#each copy.board.moving as item, index (index)}
+                        <li>{@render line(item, 'font-medium')}</li>
+                    {/each}
                 </ol>
 
-                <h3 class="mt-6 text-[15px] font-semibold">Adding a task</h3>
+                <h3 class="mt-6 text-[15px] font-semibold">
+                    {copy.board.addingTitle}
+                </h3>
                 <p
                     class="mt-1 text-[14px] leading-relaxed text-muted-foreground"
                 >
-                    Use the New Task button at the top right. Only the title is
-                    required.
+                    {copy.board.addingIntro}
                 </p>
                 <ul
                     class="mt-2 flex flex-col gap-1.5 text-[14px] leading-relaxed"
                 >
-                    <li>
-                        <span class="font-medium">Title</span> — the outcome, not
-                        the activity. “Ship the login fix”, not “Look at login”.
-                    </li>
-                    <li>
-                        <span class="font-medium">Reference</span> — the ticket number
-                        if there is one, such as JIRA-123. It appears on the card
-                        and in the calendar.
-                    </li>
-                    <li>
-                        <span class="font-medium">Planned for</span> — an optional
-                        future date, for when you intend to start. It does not push
-                        the card into Today, and past dates are disabled.
-                    </li>
-                    <li>
-                        <span class="font-medium">Description</span> — any detail
-                        your future self will need.
-                    </li>
+                    {#each copy.board.fields as field (field.label)}
+                        <li>
+                            <span class="font-medium">{field.label}</span>
+                            — {field.text}
+                        </li>
+                    {/each}
                 </ul>
 
                 <div
@@ -337,14 +310,14 @@
                         class="mt-0.5 h-4 w-4 shrink-0 text-sky-600 dark:text-sky-400"
                         aria-hidden="true"
                     />
-                    <p class="text-[13px] leading-relaxed">
-                        <span class="font-semibold"
-                            >Every night at midnight (Jakarta time)</span
-                        >
-                        the app moves whatever is left in Today back to Todo. That
-                        keeps Today meaningful, and the calendar records the move
-                        so you can see what slipped.
-                    </p>
+                    <div class="min-w-0">
+                        <p class="text-[13px] font-semibold">
+                            {copy.board.resetTitle}
+                        </p>
+                        <p class="mt-0.5 text-[13px] leading-relaxed">
+                            {copy.board.resetBody}
+                        </p>
+                    </div>
                 </div>
             </section>
 
@@ -352,20 +325,18 @@
                 id="cards"
                 class="scroll-mt-24 border-t border-border pt-7"
             >
-                {@render heading('02', 'Reading a card')}
+                {@render heading('02', copy.cards.title)}
 
                 <p
                     class="mt-2 text-[14.5px] leading-relaxed text-muted-foreground"
                 >
-                    Small chips tell you why a card is worth a look. A card
-                    shows at most two of them. Hover a chip for the exact
-                    numbers.
+                    {copy.cards.intro}
                 </p>
 
                 <div
                     class="mt-3 flex flex-col divide-y divide-border rounded border border-border"
                 >
-                    {#each badges as badge (badge.chip)}
+                    {#each legend as badge (badge.chip)}
                         <div
                             class="flex flex-col gap-1 px-3 py-2.5 sm:flex-row sm:items-baseline sm:gap-4"
                         >
@@ -384,9 +355,7 @@
                 </div>
 
                 <p class="mt-2 text-[12.5px] text-muted-foreground">
-                    “Stale” counts days without a change. “Delayed” counts trips
-                    through Today and slip-backs — currently 3 visits or 2
-                    slip-backs.
+                    {copy.cards.footnote}
                 </p>
             </section>
 
@@ -394,91 +363,55 @@
                 id="calendar"
                 class="scroll-mt-24 border-t border-border pt-7"
             >
-                {@render heading('03', 'The calendar')}
+                {@render heading('03', copy.calendar.title)}
 
                 <p
                     class="mt-2 text-[14.5px] leading-relaxed text-muted-foreground"
                 >
-                    The calendar is written by the board, so you never maintain
-                    it twice. Move cards and tick routines; the days fill
-                    themselves in. Switch to it with the Board / Calendar toggle
-                    at the top right of the Tasks page.
+                    {copy.calendar.intro}
                 </p>
 
-                <h3 class="mt-5 text-[15px] font-semibold">Reading a month</h3>
+                <h3 class="mt-5 text-[15px] font-semibold">
+                    {copy.calendar.monthTitle}
+                </h3>
                 <ul
                     class="mt-1.5 flex flex-col gap-1 text-[14px] leading-relaxed"
                 >
-                    <li>
-                        Weeks start on Monday. Today is highlighted and weekends
-                        are tinted.
-                    </li>
-                    <li>
-                        A day shows up to three entries: a blue bar means the
-                        card entered Today, green means completed, a dashed ◇
-                        means planned. The small number is how many entries that
-                        day has.
-                    </li>
-                    <li>
-                        A red edge on top plus “↩ n rolled back” means work
-                        slipped back to Todo that day.
-                    </li>
-                    <li>
-                        The violet line at the bottom is that day’s routine
-                        progress.
-                    </li>
+                    {#each copy.calendar.month as item, index (index)}
+                        <li>{item}</li>
+                    {/each}
                 </ul>
 
-                <h3 class="mt-5 text-[15px] font-semibold">Opening one day</h3>
+                <h3 class="mt-5 text-[15px] font-semibold">
+                    {copy.calendar.dayTitle}
+                </h3>
                 <p
                     class="mt-1 text-[14px] leading-relaxed text-muted-foreground"
                 >
-                    Click a day to open Day detail on the right. It groups the
-                    day into Today entries, Completed, Planned, and Rolled back,
-                    with names, initials, references, and times. Deleted tasks
-                    stay visible, struck through and marked “(deleted)”. If the
-                    day has routine activity, it appears at the top with each
-                    item and the day’s note.
+                    {copy.calendar.day}
                 </p>
 
                 <div class="mt-3 grid gap-2 sm:grid-cols-2">
-                    <div
-                        class="rounded border border-border bg-card px-3 py-2.5"
-                    >
-                        <div class="text-[13px] font-semibold">
-                            The four numbers
-                        </div>
-                        <p
-                            class="mt-1 text-[12.5px] leading-relaxed text-muted-foreground"
+                    {#each copy.calendar.boxes as box (box.title)}
+                        <div
+                            class="rounded border border-border bg-card px-3 py-2.5"
                         >
-                            Completed this month, Today entries, Rolled back,
-                            and Most delayed — a one-line health check of the
-                            month, not a scoreboard.
-                        </p>
-                    </div>
-                    <div
-                        class="rounded border border-border bg-card px-3 py-2.5"
-                    >
-                        <div class="text-[13px] font-semibold">
-                            Moving around
+                            <div class="text-[13px] font-semibold">
+                                {box.title}
+                            </div>
+                            <p
+                                class="mt-1 text-[12.5px] leading-relaxed text-muted-foreground"
+                            >
+                                {box.body}
+                            </p>
                         </div>
-                        <p
-                            class="mt-1 text-[12.5px] leading-relaxed text-muted-foreground"
-                        >
-                            Use the arrows for the previous or next month, and
-                            Today to jump back. With a day focused, the arrow
-                            keys walk the grid.
-                        </p>
-                    </div>
+                    {/each}
                 </div>
 
                 <p
                     class="mt-3 text-[13px] leading-relaxed text-muted-foreground"
                 >
-                    On a phone, the grid is replaced by an Agenda list of the
-                    same days, in order. Nothing on this page is editable — it
-                    is a record. If something looks wrong, fix the card on the
-                    board.
+                    {copy.calendar.footer}
                 </p>
             </section>
 
@@ -486,139 +419,55 @@
                 id="routine"
                 class="scroll-mt-24 border-t border-border pt-7"
             >
-                {@render heading('04', 'Your routine')}
+                {@render heading('04', copy.routine.title)}
 
                 <p
                     class="mt-2 text-[14.5px] leading-relaxed text-muted-foreground"
                 >
-                    Routine is the short list of things you do every day:
-                    standup, review a pull request, check alerts, write your
-                    update. The same list every day, one click to tick. It lives
-                    in the violet bar at the top of the calendar page and always
-                    shows today, whichever month you are browsing.
+                    {copy.routine.intro}
                 </p>
 
                 <div class="mt-4 flex flex-col gap-2">
-                    <div
-                        class="rounded border border-border bg-card px-3 py-2.5"
-                    >
-                        <div class="text-[13.5px] font-semibold">
-                            Tick and untick
-                        </div>
-                        <p
-                            class="mt-0.5 text-[13px] leading-relaxed text-muted-foreground"
+                    {#each copy.routine.blocks as block (block.title)}
+                        <div
+                            class="rounded border border-border bg-card px-3 py-2.5"
                         >
-                            One click marks it done. Click the same box again
-                            and it goes back to pending.
-                        </p>
-                    </div>
-                    <div
-                        class="rounded border border-border bg-card px-3 py-2.5"
-                    >
-                        <div class="text-[13.5px] font-semibold">
-                            Skip a day it does not apply
+                            <div class="text-[13.5px] font-semibold">
+                                {block.title}
+                            </div>
+                            <p
+                                class="mt-0.5 text-[13px] leading-relaxed text-muted-foreground"
+                            >
+                                {block.body}
+                            </p>
                         </div>
-                        <p
-                            class="mt-0.5 text-[13px] leading-relaxed text-muted-foreground"
-                        >
-                            Open ⋯ and choose Skip — for leave, a holiday, or a
-                            day you were blocked. It is counted as handled,
-                            tagged “skipped”, and it does not break your streak.
-                        </p>
-                    </div>
-                    <div
-                        class="rounded border border-border bg-card px-3 py-2.5"
-                    >
-                        <div class="text-[13.5px] font-semibold">
-                            Leave one note for the day
-                        </div>
-                        <p
-                            class="mt-0.5 text-[13px] leading-relaxed text-muted-foreground"
-                        >
-                            Use Note for the thing that got in the way. One line
-                            per day, shown in the bar and on that day in the
-                            calendar — so “blocked on staging” is visible months
-                            later.
-                        </p>
-                    </div>
-                    <div
-                        class="rounded border border-border bg-card px-3 py-2.5"
-                    >
-                        <div class="text-[13.5px] font-semibold">
-                            Add, rename, reorder, archive
-                        </div>
-                        <p
-                            class="mt-0.5 text-[13px] leading-relaxed text-muted-foreground"
-                        >
-                            Add routine sits at the bottom of the bar and starts
-                            counting today. ⋯ lets you edit the name, move it up
-                            or down, or archive it. Archiving hides it from
-                            today onward and keeps its history; there is no
-                            un-archive in this version.
-                        </p>
-                    </div>
+                    {/each}
                 </div>
 
                 <div
                     class="mt-3 flex flex-col gap-1 text-[13.5px] leading-relaxed text-muted-foreground"
                 >
-                    <p>
-                        <span class="font-medium text-foreground"
-                            >🔥 streak</span
-                        >
-                        counts days in a row where everything active that day was
-                        done or skipped. Today does not break it while the day is
-                        still going.
-                    </p>
-                    <p>
-                        <span class="font-medium text-foreground">n/m</span>
-                        is handled out of total. Untouched routines count as pending,
-                        which is why a fresh day starts at 0.
-                    </p>
-                    <p>
-                        The bar only checks today; past days are a record. And
-                        routines never appear on the board — habits are not
-                        tickets.
-                    </p>
+                    {#each copy.routine.footnotes as note, index (index)}
+                        <p>{@render line(note, 'font-medium')}</p>
+                    {/each}
                 </div>
             </section>
 
             <section id="team" class="scroll-mt-24 border-t border-border pt-7">
-                {@render heading('05', 'Working as a team')}
+                {@render heading('05', copy.team.title)}
 
                 <p
                     class="mt-2 text-[14.5px] leading-relaxed text-muted-foreground"
                 >
-                    The filter at the top right switches between All users and
-                    one person. On the board it hides everyone else’s cards; on
-                    the calendar it narrows the days, the numbers, and the
-                    routine bar.
+                    {copy.team.intro}
                 </p>
 
                 <ul
                     class="mt-3 flex flex-col gap-2 text-[14px] leading-relaxed"
                 >
-                    <li>
-                        <span class="font-medium">Heads</span> also see each developer’s
-                        routine progress next to their name, and can open someone
-                        else’s routine to read it. That view is locked: heads cannot
-                        tick boxes for other people, so the record stays honest.
-                    </li>
-                    <li>
-                        <span class="font-medium">Everyone else</span> can filter
-                        what they are looking at, but the routine bar stays their
-                        own.
-                    </li>
-                    <li>
-                        <span class="font-medium">Reports</span> shows completed work
-                        per person and the average time from picking a task up to
-                        finishing it, for the last 7 to 90 days.
-                    </li>
-                    <li>
-                        <span class="font-medium">Feature Requests</span> is a separate
-                        list for requests coming from other divisions, with its own
-                        priorities and deadlines. It is not part of your daily board.
-                    </li>
+                    {#each copy.team.items as item, index (index)}
+                        <li>{@render line(item, 'font-medium')}</li>
+                    {/each}
                 </ul>
             </section>
 
@@ -626,25 +475,23 @@
                 id="habits"
                 class="scroll-mt-24 border-t border-border pt-7"
             >
-                {@render heading('06', 'Habits that help')}
+                {@render heading('06', copy.habits.title)}
 
                 <p
                     class="mt-2 text-[14.5px] leading-relaxed text-muted-foreground"
                 >
-                    The app is simple on purpose. These six habits are what make
-                    it useful instead of just another tab.
+                    {copy.habits.intro}
                 </p>
 
                 <ol class="mt-3 flex flex-col gap-2.5">
-                    {#each habits as habit, index (habit.lead)}
+                    {#each copy.habits.items as habit, index (habit.lead)}
                         <li class="flex gap-2.5">
                             <span
                                 class="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-muted font-mono text-[11px] text-muted-foreground"
                                 >{index + 1}</span
                             >
                             <p class="text-[14px] leading-relaxed">
-                                <span class="font-semibold">{habit.lead}</span>
-                                {habit.body}
+                                {@render line(habit, 'font-semibold')}
                             </p>
                         </li>
                     {/each}
@@ -655,10 +502,10 @@
                 id="questions"
                 class="scroll-mt-24 border-t border-border pt-7"
             >
-                {@render heading('07', 'Quick answers')}
+                {@render heading('07', copy.questions.title)}
 
                 <div class="mt-3 flex flex-col gap-1.5">
-                    {#each questions as item (item.q)}
+                    {#each copy.questions.items as item (item.q)}
                         <details
                             class="group rounded border border-border bg-card px-3 py-2"
                         >
@@ -690,9 +537,7 @@
                     <p
                         class="text-[13px] leading-relaxed text-muted-foreground"
                     >
-                        Still unsure about something? Ask in the team chat, or
-                        open the board and look at a real card — most answers
-                        are visible there.
+                        {copy.questions.outro}
                     </p>
                 </div>
             </section>
