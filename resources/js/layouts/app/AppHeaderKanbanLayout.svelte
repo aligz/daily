@@ -188,7 +188,7 @@
                                             />
                                         {/if}
                                         <AvatarFallback
-                                            class="rounded-lg bg-neutral-200 font-semibold text-black dark:bg-neutral-700 dark:text-white"
+                                            class="rounded-lg bg-muted font-semibold text-foreground"
                                         >
                                             {getInitials(auth.user?.name)}
                                         </AvatarFallback>

@@ -16,6 +16,7 @@
     import { Input } from '@/components/ui/input';
     import { Label } from '@/components/ui/label';
     import AppLayout from '@/layouts/AppLayout.svelte';
+    import { taskBoardHeaderStyles } from '@/lib/board-colors';
     import { todayInAppTimezone } from '@/lib/date';
     import { store, update, destroy } from '@/routes/tasks';
     import type {
@@ -264,7 +265,7 @@
                 {#if routine.total > 0}
                     <Link
                         href="/tasks/calendar"
-                        class="inline-flex items-center gap-1.5 rounded-sm border border-violet-500/40 bg-violet-500/10 px-2 py-1 text-xs text-violet-600 transition-colors hover:bg-violet-500/15 dark:text-violet-300"
+                        class="inline-flex items-center gap-1.5 rounded-sm border border-routine/40 bg-routine/10 px-2 py-1 text-xs text-routine transition-colors hover:bg-routine/15"
                         title="Open the calendar to check your routine"
                     >
                         <span aria-hidden="true">▣</span>
@@ -430,22 +431,15 @@
         <div class="flex flex-1 min-h-0 gap-6 overflow-x-auto pb-4">
             {#each boards as board (board)}
                 <div
-                    class="flex min-h-0 flex-1 min-w-[300px] max-w-[350px] flex-col rounded border border-muted/50 p-4 bg-muted/50"
+                    class="flex min-h-0 flex-1 min-w-[300px] max-w-[350px] flex-col rounded-md border border-muted/50 p-3 bg-muted/50"
                     role="region"
                     aria-label="{board} column"
                     ondrop={(e) => handleDrop(e, board)}
                     ondragover={handleDragOver}
                 >
                     <div
-                        class="mb-4 flex items-center justify-between px-4 py-2 rounded border
-                        {board === 'done'
-                            ? 'bg-neon-green/5  border-neon-green/20 text-neon-green'
-                            : board === 'today'
-                              ? 'bg-blue-100/50 border-blue-200 dark:bg-blue-900/20 dark:border-blue-800 text-blue-800'
-                              : board === 'todo'
-                                ? 'bg-orange-100/50 border-orange-200 dark:bg-orange-900/20 dark:border-orange-800 text-orange-800'
-                                : 'bg-muted/50'}
-                        "
+                        class="mb-3 flex items-center justify-between rounded-md border px-3 py-2
+                        {taskBoardHeaderStyles[board] ?? 'bg-muted/50'}"
                     >
                         <h3 class="font-semibold capitalize">
                             {board}

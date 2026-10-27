@@ -17,10 +17,10 @@
     };
 
     const styles = {
-        green: 'border-green-500/40 bg-green-500/10 text-green-700 dark:text-green-300',
+        green: 'border-success/40 bg-success/10 text-success',
         red: 'border-destructive/40 bg-destructive/10 text-destructive',
-        amber: 'border-amber-500/40 bg-amber-500/10 text-amber-700 dark:text-amber-300',
-        cyan: 'border-sky-500/40 bg-sky-500/10 text-sky-700 dark:text-sky-300',
+        amber: 'border-warning/40 bg-warning/10 text-warning',
+        cyan: 'border-info/40 bg-info/10 text-info',
         planned:
             'border-dashed border-muted-foreground/50 bg-transparent text-muted-foreground',
     };

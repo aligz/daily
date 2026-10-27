@@ -85,12 +85,12 @@
     --color-sidebar-ring: var(--sidebar-ring);
 
     /* Neon accent tokens */
-    --color-neon-cyan: #00FFD1;
-    --color-neon-purple: #A855F7;
-    --color-neon-green: #22C55E;
-    --color-neon-red: #EF4444;
-    --color-neon-yellow: #FACC15;
-    --color-neon-orange: #FB923C;
+    --color-neon-cyan: #00ffd1;
+    --color-neon-purple: #a855f7;
+    --color-neon-green: #22c55e;
+    --color-neon-red: #ef4444;
+    --color-neon-yellow: #facc15;
+    --color-neon-orange: #fb923c;
 }
 
 /*
@@ -110,8 +110,6 @@
         border-color: var(--color-gray-200, currentColor);
     }
 }
-
-
 
 /* Light-first theme variables for the terminal UI */
 :root {
@@ -179,20 +177,20 @@
     --warning: #fcd34d;
     --border: #1e1e2e;
     --input: #1e1e2e;
-    --ring: #00FFD1;
-    --chart-1: #00FFD1;
-    --chart-2: #22C55E;
-    --chart-3: #A855F7;
-    --chart-4: #FACC15;
-    --chart-5: #FB923C;
+    --ring: #00ffd1;
+    --chart-1: #00ffd1;
+    --chart-2: #22c55e;
+    --chart-3: #a855f7;
+    --chart-4: #facc15;
+    --chart-5: #fb923c;
     --sidebar-background: #0d0d14;
     --sidebar-foreground: #e2e8f0;
-    --sidebar-primary: #00FFD1;
+    --sidebar-primary: #00ffd1;
     --sidebar-primary-foreground: #0a0a0f;
     --sidebar-accent: #1a1a2e;
     --sidebar-accent-foreground: #e2e8f0;
     --sidebar-border: #1e1e2e;
-    --sidebar-ring: #00FFD1;
+    --sidebar-ring: #00ffd1;
     --sidebar: #0d0d14;
 }
 

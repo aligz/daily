@@ -74,13 +74,12 @@
 
     function getStatusColor(status: string): string {
         const colors: Record<string, string> = {
-            backlog:
-                'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200',
-            todo: 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200',
-            today: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
-            done: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
+            backlog: 'bg-muted text-muted-foreground',
+            todo: 'bg-warning/10 text-warning',
+            today: 'bg-info/10 text-info',
+            done: 'bg-success/10 text-success',
         };
-        return colors[status] || 'bg-gray-100 text-gray-800';
+        return colors[status] || 'bg-muted text-muted-foreground';
     }
 </script>
 

@@ -24,7 +24,7 @@
 </script>
 
 <nav
-    class="inline-flex items-center gap-0.5 rounded border border-border bg-card p-0.5"
+    class="inline-flex items-center gap-0.5 rounded-md border border-border bg-card p-0.5"
     aria-label="Task view"
 >
     <Link

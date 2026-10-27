@@ -41,7 +41,7 @@
 <div class="relative">
     <button
         type="button"
-        class="inline-flex h-8 items-center gap-2 rounded border border-border bg-card px-2 text-xs transition-colors hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+        class="inline-flex h-8 items-center gap-2 rounded-md border border-border bg-card px-2 text-xs transition-colors hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
         data-user-filter-trigger
         aria-haspopup="menu"
         aria-expanded={open}
@@ -64,7 +64,7 @@
 
     {#if open}
         <div
-            class="absolute right-0 z-50 mt-1 min-w-[210px] overflow-hidden rounded border border-border bg-popover p-1 text-popover-foreground shadow-md"
+            class="absolute right-0 z-50 mt-1 min-w-[210px] overflow-hidden rounded-md border border-border bg-popover p-1 text-popover-foreground shadow-md"
             data-user-filter-menu
             use:clickOutside={{
                 handler: () => (open = false),

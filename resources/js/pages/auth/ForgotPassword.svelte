@@ -20,9 +20,12 @@
 
 <AppHead title="Forgot password" />
 
-<AuthLayout title="Forgot password" description="Enter your email to receive a password reset link">
+<AuthLayout
+    title="Forgot password"
+    description="Enter your email to receive a password reset link"
+>
     {#if status}
-        <div class="mb-4 text-center text-sm font-medium text-green-600">
+        <div class="mb-4 text-center text-sm font-medium text-success">
             {status}
         </div>
     {/if}

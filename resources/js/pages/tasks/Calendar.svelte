@@ -139,7 +139,7 @@
 
         {#if summary.completed + summary.today_entries + summary.rollbacks + summary.planned === 0}
             <p
-                class="rounded border border-dashed border-border px-3 py-2 text-dense text-muted-foreground"
+                class="rounded-md border border-dashed border-border px-3 py-2 text-dense text-muted-foreground"
             >
                 No activity this month. Tasks appear here once they enter the
                 today board or are completed.

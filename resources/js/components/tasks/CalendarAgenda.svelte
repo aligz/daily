@@ -33,7 +33,7 @@
     );
 </script>
 
-<div class="rounded border border-border bg-card md:hidden">
+<div class="rounded-md border border-border bg-card md:hidden">
     <div
         class="border-b border-border px-3 py-2 text-xs uppercase tracking-[0.12em] text-muted-foreground"
     >
@@ -65,7 +65,7 @@
 
                 {#if checklistByDate[date]}
                     <div
-                        class="mb-1 flex items-center gap-1.5 text-xs text-violet-600 dark:text-violet-300"
+                        class="mb-1 flex items-center gap-1.5 text-xs text-routine"
                     >
                         <span aria-hidden="true">▣</span>
                         <span class="shrink-0 tabular-nums">
@@ -88,7 +88,7 @@
                     {#each day.today as event (event.at + event.id)}
                         <div class="flex items-center gap-1.5 text-dense">
                             <span
-                                class="h-1.5 w-1.5 shrink-0 rounded-full bg-sky-500"
+                                class="h-1.5 w-1.5 shrink-0 rounded-full bg-info"
                                 aria-hidden="true"
                             ></span>
                             <span class="truncate">{event.title}</span>
@@ -102,7 +102,7 @@
                     {#each day.done as event (event.at + event.id)}
                         <div class="flex items-center gap-1.5 text-dense">
                             <span
-                                class="h-1.5 w-1.5 shrink-0 rounded-full bg-green-500"
+                                class="h-1.5 w-1.5 shrink-0 rounded-full bg-success"
                                 aria-hidden="true"
                             ></span>
                             <span class="truncate">{event.title}</span>

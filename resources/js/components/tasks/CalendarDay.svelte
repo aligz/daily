@@ -65,8 +65,8 @@
 
     const chipClass = (kind: 'today' | 'done') =>
         kind === 'today'
-            ? 'border-sky-500/70 bg-sky-500/10 text-sky-700 dark:text-sky-300'
-            : 'border-green-500/70 bg-green-500/10 text-green-700 dark:text-green-300';
+            ? 'border-info/70 bg-info/10 text-info'
+            : 'border-success/70 bg-success/10 text-success';
 
     function handleKeydown(event: KeyboardEvent) {
         const steps: Record<string, number> = {
@@ -157,15 +157,15 @@
         <span class="mt-auto flex flex-col gap-0.5">
             {#if checklistDay}
                 <span
-                    class="flex items-center gap-1 text-2xs text-violet-600 dark:text-violet-300"
+                    class="flex items-center gap-1 text-2xs text-routine"
                     title={`Routine: ${checklistResolved} of ${checklistDay.total} done`}
                 >
                     <span aria-hidden="true">▣</span>
                     <span
-                        class="h-[3px] flex-1 overflow-hidden rounded bg-violet-500/20"
+                        class="h-[3px] flex-1 overflow-hidden rounded-full bg-routine/20"
                     >
                         <span
-                            class="block h-full bg-violet-500"
+                            class="block h-full bg-routine"
                             style={`width: ${checklistPercent}%`}
                         ></span>
                     </span>

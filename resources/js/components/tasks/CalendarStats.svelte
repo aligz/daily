@@ -5,7 +5,7 @@
 </script>
 
 <div class="grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
-    <div class="rounded border border-border bg-card px-3 py-3">
+    <div class="rounded-md border border-border bg-card px-3 py-3">
         <div class="text-xs uppercase tracking-[0.12em] text-muted-foreground">
             Completed this month
         </div>
@@ -15,7 +15,7 @@
         <div class="text-dense text-muted-foreground">Tasks marked done</div>
     </div>
 
-    <div class="rounded border border-border bg-card px-3 py-3">
+    <div class="rounded-md border border-border bg-card px-3 py-3">
         <div class="text-xs uppercase tracking-[0.12em] text-muted-foreground">
             Today entries
         </div>
@@ -27,7 +27,7 @@
         </div>
     </div>
 
-    <div class="rounded border border-border bg-card px-3 py-3">
+    <div class="rounded-md border border-border bg-card px-3 py-3">
         <div class="text-xs uppercase tracking-[0.12em] text-muted-foreground">
             Rolled back
         </div>
@@ -39,7 +39,7 @@
         </div>
     </div>
 
-    <div class="rounded border border-border bg-card px-3 py-3">
+    <div class="rounded-md border border-border bg-card px-3 py-3">
         <div class="text-xs uppercase tracking-[0.12em] text-muted-foreground">
             Most delayed
         </div>

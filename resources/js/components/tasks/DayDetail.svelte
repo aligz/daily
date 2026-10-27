@@ -57,13 +57,13 @@
             {
                 key: 'today',
                 label: 'Today entries',
-                dot: 'bg-sky-500',
+                dot: 'bg-info',
                 items: day.today,
             },
             {
                 key: 'done',
                 label: 'Completed',
-                dot: 'bg-green-500',
+                dot: 'bg-success',
                 items: day.done,
             },
             {
@@ -84,7 +84,9 @@
     });
 </script>
 
-<div class="flex flex-col overflow-hidden rounded border border-border bg-card">
+<div
+    class="flex flex-col overflow-hidden rounded-md border border-border bg-card"
+>
     <div class="border-b border-border px-3 py-3">
         <div class="text-2xs uppercase tracking-[0.14em] text-muted-foreground">
             Day detail
@@ -95,14 +97,14 @@
         <div class="mt-2 flex flex-wrap gap-1.5">
             {#if day.today.length > 0}
                 <span
-                    class="rounded-sm border border-sky-500/40 bg-sky-500/10 px-1.5 py-0.5 text-2xs text-sky-700 dark:text-sky-300"
+                    class="rounded-sm border border-info/40 bg-info/10 px-1.5 py-0.5 text-2xs text-info"
                 >
                     ▶ {day.today.length} today
                 </span>
             {/if}
             {#if day.done.length > 0}
                 <span
-                    class="rounded-sm border border-green-500/40 bg-green-500/10 px-1.5 py-0.5 text-2xs text-green-700 dark:text-green-300"
+                    class="rounded-sm border border-success/40 bg-success/10 px-1.5 py-0.5 text-2xs text-success"
                 >
                     ✓ {day.done.length} done
                 </span>
@@ -136,9 +138,7 @@
             <div
                 class="flex items-center gap-1.5 text-2xs uppercase tracking-[0.12em] text-muted-foreground"
             >
-                <i
-                    class="h-1.5 w-1.5 rounded-sm bg-violet-500"
-                    aria-hidden="true"
+                <i class="h-1.5 w-1.5 rounded-sm bg-routine" aria-hidden="true"
                 ></i>
                 Routine
                 <span
@@ -149,9 +149,9 @@
                 </span>
             </div>
 
-            <div class="mt-1.5 h-1 overflow-hidden rounded bg-violet-500/20">
+            <div class="mt-1.5 h-1 overflow-hidden rounded-full bg-routine/20">
                 <div
-                    class="h-full bg-violet-500"
+                    class="h-full bg-routine"
                     style={`width: ${checklistPercent}%`}
                 ></div>
             </div>
@@ -190,7 +190,7 @@
 
             {#if checklistDay.note}
                 <p
-                    class="mt-1.5 border-l-2 border-violet-500/40 pl-2 text-xs text-muted-foreground italic"
+                    class="mt-1.5 border-l-2 border-routine/40 pl-2 text-xs text-muted-foreground italic"
                 >
                     “{checklistDay.note}”
                 </p>

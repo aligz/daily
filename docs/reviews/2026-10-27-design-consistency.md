@@ -74,11 +74,26 @@ Radius terukur: nav 4px, tombol 4px, chip toggle 2px, kartu 4px, dialog 8px — 
 
 `lint:design` sekarang: **0 error**, 312 warning (272 palette, 40 `rounded` polos) → target batch 2–3.
 
+### Batch 2 — radius & spacing ✅
+
+- 40 `rounded` polos dipetakan per peran: chip/link/ikon → `rounded-sm` (2px), panel/menu/kolom → `rounded-md` (4px), bar progres → `rounded-full`.
+- Kolom board disamakan dengan board feature-requests: `p-4` → `p-3`, header `px-4 py-2` → `px-3 py-2`, `mb-4` → `mb-3`.
+
+### Batch 3 — warna ✅
+
+- 90 pemakaian palette di komponen status → token: `green` → `success`, `sky` → `info`, `violet` → `routine`, `amber` → `warning`, `red` → `destructive`, termasuk `dark:` ganda yang jadi redundan.
+- Priority badge (`low/medium/high/urgent`) → `muted/info/warning/destructive`.
+- Status task di halaman report (`backlog/todo/today/done`) → `muted/warning/info/success`.
+- `AppearanceTabs`, avatar fallback, "Saved." dan error text ikut token.
+- Warna identitas dikumpulkan di `resources/js/lib/board-colors.ts` (kolom board & badge status feature request) dan `lib/users.ts` (avatar per user) — keduanya dikecualikan di `lint:design` dengan alasan tertulis.
+- Helper warna duplikat di kedua halaman feature-requests dihapus, sekarang memakai `lib/users.ts` + `lib/initials.ts`.
+
+`lint:design`: **0 error, 0 warning**.
+
 ### Batch berikutnya
 
-- **2 — radius & spacing**: `rounded` polos (40) → `rounded-sm/md/lg` sesuai peran; padding kartu/panel diseragamkan.
-- **3 — warna**: ganti 272 pemakaian palette mentah ke `success/info/routine/warning/destructive` (kecuali kolom board yang dipertahankan), lalu naikkan `lint:design --strict` ke CI.
-- **4 — ukuran komponen**: tinggi kontrol 24/32/36/40, ikon 12/14/16/20.
+- **4 — ukuran komponen**: tinggi kontrol 24/32/36/40, ikon 12/14/16/20, serta cek tap target di mobile.
+- Housekeeping: hapus komponen mati (`AppHeader`, `NavFooter`, `PlaceholderPattern`, `AuthSplitLayout`, `AppSidebar`, `AppHeaderLayout`, `AppSidebarLayout`) supaya allowlist lint bisa menyusut.
 
 
 ---

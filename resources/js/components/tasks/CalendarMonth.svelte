@@ -61,7 +61,7 @@
 </script>
 
 <section
-    class="hidden overflow-hidden rounded border border-border bg-card md:block"
+    class="hidden overflow-hidden rounded-md border border-border bg-card md:block"
     aria-label="Task calendar"
 >
     <div
@@ -98,15 +98,13 @@
             class="ml-auto flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground"
         >
             <span class="flex items-center gap-1">
-                <i
-                    class="h-1.5 w-1.5 rounded-full bg-sky-500"
-                    aria-hidden="true"
+                <i class="h-1.5 w-1.5 rounded-full bg-info" aria-hidden="true"
                 ></i>
                 Today entries
             </span>
             <span class="flex items-center gap-1">
                 <i
-                    class="h-1.5 w-1.5 rounded-full bg-green-500"
+                    class="h-1.5 w-1.5 rounded-full bg-success"
                     aria-hidden="true"
                 ></i>
                 Completed
@@ -146,8 +144,8 @@
         class="flex flex-wrap items-center gap-2 px-3 py-2 text-xs text-muted-foreground"
     >
         <span
-            ><kbd class="rounded border border-border px-1">←</kbd>
-            <kbd class="rounded border border-border px-1">→</kbd> change month</span
+            ><kbd class="rounded-sm border border-border px-1">←</kbd>
+            <kbd class="rounded-sm border border-border px-1">→</kbd> change month</span
         >
         <span aria-hidden="true">·</span>
         <span>Click a day for details</span>

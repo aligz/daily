@@ -20,25 +20,21 @@
             dot: 'bg-muted-foreground/50',
             border: 'border-l-muted-foreground/40',
         },
-        { dot: 'bg-orange-500', border: 'border-l-orange-500/60' },
-        { dot: 'bg-sky-500', border: 'border-l-sky-500/60' },
-        { dot: 'bg-green-500', border: 'border-l-green-500/60' },
+        { dot: 'bg-warning', border: 'border-l-warning/60' },
+        { dot: 'bg-info', border: 'border-l-info/60' },
+        { dot: 'bg-success', border: 'border-l-success/60' },
     ];
 
     const legendStyles = [
-        'border-sky-500/50 bg-sky-500/10 text-sky-700 dark:text-sky-300',
+        'border-info/50 bg-info/10 text-info',
         'border-dashed border-muted-foreground/60 text-muted-foreground',
-        'border-amber-500/50 bg-amber-500/10 text-amber-700 dark:text-amber-300',
+        'border-warning/50 bg-warning/10 text-warning',
         'border-destructive/50 bg-destructive/10 text-destructive',
-        'border-green-500/50 bg-green-500/10 text-green-700 dark:text-green-300',
+        'border-success/50 bg-success/10 text-success',
     ];
 
     const summaryIcons = [LayoutGrid, CalendarDays, ListChecks];
-    const summaryTones = [
-        'text-sky-600 dark:text-sky-400',
-        'text-green-600 dark:text-green-400',
-        'text-violet-600 dark:text-violet-400',
-    ];
+    const summaryTones = ['text-info', 'text-success', 'text-routine'];
 
     let lang = $state<GuideLang>('en');
 
@@ -128,7 +124,7 @@
 {#snippet pill(href: string, label: string)}
     <Link
         {href}
-        class="inline-flex items-center gap-1.5 rounded border border-border bg-card px-2 py-1.5 text-dense transition-colors hover:bg-accent"
+        class="inline-flex items-center gap-1.5 rounded-sm border border-border bg-card px-2 py-1.5 text-dense transition-colors hover:bg-accent"
     >
         {label}
         <ArrowRight class="h-3.5 w-3.5 text-muted-foreground" />
@@ -159,7 +155,7 @@
                 </div>
 
                 <div
-                    class="flex shrink-0 items-center gap-0.5 rounded border border-border bg-card p-0.5"
+                    class="flex shrink-0 items-center gap-0.5 rounded-md border border-border bg-card p-0.5"
                     role="group"
                     aria-label={copy.languageLabel}
                 >
@@ -203,7 +199,7 @@
         <div class="mt-6 grid gap-4 sm:grid-cols-3">
             {#each copy.summary as part, index (part.title)}
                 {@const Icon = summaryIcons[index]}
-                <div class="rounded border border-border bg-card p-3">
+                <div class="rounded-md border border-border bg-card p-3">
                     <Icon class="h-4 w-4 {summaryTones[index]}" />
                     <div class="mt-1.5 text-sm font-semibold">
                         {part.title}
@@ -222,7 +218,7 @@
             {#each toc as item (item.id)}
                 <a
                     href={`#${item.id}`}
-                    class="inline-flex items-baseline gap-1.5 rounded px-1.5 py-1 text-xs text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+                    class="inline-flex items-baseline gap-1.5 rounded-sm px-1.5 py-1 text-xs text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
                 >
                     <span class="font-mono text-2xs tabular-nums"
                         >{item.number}</span
@@ -246,7 +242,7 @@
                 <div class="mt-4 grid gap-2 sm:grid-cols-2">
                     {#each columns as column (column.name)}
                         <div
-                            class="rounded border border-border border-l-2 bg-card px-3 py-2 {column.border}"
+                            class="rounded-md border border-border border-l-2 bg-card px-3 py-2 {column.border}"
                         >
                             <div class="flex items-center gap-1.5">
                                 <span
@@ -294,10 +290,10 @@
                 </ul>
 
                 <div
-                    class="mt-4 flex gap-2 rounded border border-border bg-sky-500/5 px-3 py-2"
+                    class="mt-4 flex gap-2 rounded-md border border-border bg-info/5 px-3 py-2"
                 >
                     <Moon
-                        class="mt-0.5 h-4 w-4 shrink-0 text-sky-600 dark:text-sky-400"
+                        class="mt-0.5 h-4 w-4 shrink-0 text-info"
                         aria-hidden="true"
                     />
                     <div class="min-w-0">
@@ -322,7 +318,7 @@
                 </p>
 
                 <div
-                    class="mt-3 flex flex-col divide-y divide-border rounded border border-border"
+                    class="mt-3 flex flex-col divide-y divide-border rounded-md border border-border"
                 >
                     {#each legend as badge (badge.chip)}
                         <div
@@ -376,7 +372,7 @@
                 <div class="mt-3 grid gap-2 sm:grid-cols-2">
                     {#each copy.calendar.boxes as box (box.title)}
                         <div
-                            class="rounded border border-border bg-card px-3 py-2"
+                            class="rounded-md border border-border bg-card px-3 py-2"
                         >
                             <div class="text-dense font-semibold">
                                 {box.title}
@@ -410,7 +406,7 @@
                 <div class="mt-4 flex flex-col gap-2">
                     {#each copy.routine.blocks as block (block.title)}
                         <div
-                            class="rounded border border-border bg-card px-3 py-2"
+                            class="rounded-md border border-border bg-card px-3 py-2"
                         >
                             <div class="text-dense font-semibold">
                                 {block.title}
@@ -481,7 +477,7 @@
                 <div class="mt-3 flex flex-col gap-1.5">
                     {#each copy.questions.items as item (item.q)}
                         <details
-                            class="group rounded border border-border bg-card px-3 py-2"
+                            class="group rounded-md border border-border bg-card px-3 py-2"
                         >
                             <summary
                                 class="flex cursor-pointer list-none items-center gap-2 text-dense font-medium select-none"
@@ -502,10 +498,10 @@
                 </div>
 
                 <div
-                    class="mt-4 flex items-center gap-2 rounded border border-dashed border-border px-3 py-2"
+                    class="mt-4 flex items-center gap-2 rounded-md border border-dashed border-border px-3 py-2"
                 >
                     <CircleCheckBig
-                        class="h-4 w-4 shrink-0 text-green-600 dark:text-green-400"
+                        class="h-4 w-4 shrink-0 text-success"
                         aria-hidden="true"
                     />
                     <p class="text-dense leading-relaxed text-muted-foreground">

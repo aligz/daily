@@ -174,7 +174,7 @@
 </script>
 
 <section
-    class="rounded border border-border bg-card"
+    class="rounded-md border border-border bg-card"
     aria-label="Daily routine"
 >
     <header
@@ -202,7 +202,7 @@
         <div class="ml-auto flex items-center gap-2" aria-live="polite">
             {#if checklist.stats.streak > 0}
                 <span
-                    class="rounded-sm border border-violet-500/40 bg-violet-500/10 px-1.5 py-0.5 text-xs text-violet-600 dark:text-violet-300"
+                    class="rounded-sm border border-routine/40 bg-routine/10 px-1.5 py-0.5 text-xs text-routine"
                     title={`${checklist.stats.streak}-day streak`}
                 >
                     🔥 {checklist.stats.streak}
@@ -212,14 +212,14 @@
                 {resolved}/{checklist.stats.total} done
             </span>
             <span
-                class="h-1 w-20 overflow-hidden rounded bg-muted"
+                class="h-1 w-20 overflow-hidden rounded-full bg-muted"
                 role="progressbar"
                 aria-valuemin={0}
                 aria-valuemax={100}
                 aria-valuenow={percent}
             >
                 <span
-                    class="block h-full bg-violet-500"
+                    class="block h-full bg-routine"
                     style={`width: ${percent}%`}
                 ></span>
             </span>
@@ -230,7 +230,7 @@
         <ul class="grid gap-x-6 px-2 py-1.5 sm:grid-cols-2">
             {#each displayItems as item, index (item.id)}
                 <li
-                    class="relative flex items-center gap-2 rounded px-1.5 py-1 hover:bg-accent/40"
+                    class="relative flex items-center gap-2 rounded-sm px-1.5 py-1 hover:bg-accent/40"
                 >
                     <input
                         id={`routine-${item.id}`}
@@ -263,7 +263,7 @@
                         <button
                             type="button"
                             data-routine-menu-trigger
-                            class="rounded p-0.5 text-muted-foreground opacity-60 hover:bg-accent hover:text-foreground focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none group-hover:opacity-100"
+                            class="rounded-sm p-0.5 text-muted-foreground opacity-60 hover:bg-accent hover:text-foreground focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none group-hover:opacity-100"
                             aria-haspopup="menu"
                             aria-expanded={menuOpen === item.id}
                             aria-label={`Actions for ${item.title}`}
@@ -276,7 +276,7 @@
 
                         {#if menuOpen === item.id}
                             <div
-                                class="absolute top-full right-0 z-20 mt-1 w-36 overflow-hidden rounded border border-border bg-card shadow-lg"
+                                class="absolute top-full right-0 z-20 mt-1 w-36 overflow-hidden rounded-md border border-border bg-card shadow-lg"
                                 role="menu"
                                 use:clickOutside={{
                                     handler: () => (menuOpen = null),
@@ -360,7 +360,7 @@
                 rows="2"
                 maxlength={2000}
                 placeholder="Anything blocking you today?"
-                class="mt-1 w-full resize-y rounded border border-border bg-background px-2 py-1.5 text-sm focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none"
+                class="mt-1 w-full resize-y rounded-md border border-border bg-background px-2 py-1.5 text-sm focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none"
             ></textarea>
             <div class="mt-1 flex justify-end gap-2">
                 <Button

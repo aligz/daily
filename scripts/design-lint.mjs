@@ -21,36 +21,58 @@ const ROOT = 'resources/js';
 const IGNORED_DIRS = ['components/ui'];
 const STRICT = process.argv.includes('--strict');
 
+/**
+ * Files where raw palette colours are intentional:
+ * - board-colors.ts: per-stage identity colours for the two kanban boards
+ * - users.ts: hashed avatar colours, one per user
+ * - the rest is dead code left over from the starter kit (no route renders it)
+ */
+const PALETTE_ALLOWED_FILES = new Set([
+    'resources/js/lib/board-colors.ts',
+    'resources/js/lib/users.ts',
+    'resources/js/components/AppHeader.svelte',
+    'resources/js/components/NavFooter.svelte',
+    'resources/js/components/PlaceholderPattern.svelte',
+    'resources/js/layouts/auth/AuthSplitLayout.svelte',
+]);
+
 const RULES = [
     {
         id: 'type-size',
         level: 'error',
-        message: 'arbitrary font size — use text-3xs / text-2xs / text-xs / text-dense / text-sm / text-base / text-xl / text-2xl / text-3xl',
+        message:
+            'arbitrary font size — use text-3xs / text-2xs / text-xs / text-dense / text-sm / text-base / text-xl / text-2xl / text-3xl',
         pattern: /text-\[[\d.]+px\]/g,
     },
     {
         id: 'spacing-step',
         level: 'error',
-        message: 'off-scale spacing — allowed steps are 0.5, 1, 1.5, 2, 3, 4, 6, 8, 10',
-        pattern: /(?<![\w-])(?:p|px|py|pt|pb|pl|pr|m|mx|my|mt|mb|ml|mr|gap|gap-x|gap-y|space-x|space-y)-(?:2\.5|3\.5|5)(?![\d.])/g,
+        message:
+            'off-scale spacing — allowed steps are 0.5, 1, 1.5, 2, 3, 4, 6, 8, 10',
+        pattern:
+            /(?<![\w-])(?:p|px|py|pt|pb|pl|pr|m|mx|my|mt|mb|ml|mr|gap|gap-x|gap-y|space-x|space-y)-(?:2\.5|3\.5|5)(?![\d.])/g,
     },
     {
         id: 'radius-xl',
         level: 'error',
-        message: 'rounded-xl is outside the radius scale — use rounded-lg (8px) for dialogs/sheets',
+        message:
+            'rounded-xl is outside the radius scale — use rounded-lg (8px) for dialogs/sheets',
         pattern: /rounded-xl/g,
     },
     {
         id: 'radius-bare',
         level: 'warn',
-        message: 'bare `rounded` — prefer rounded-sm (chip), rounded-md (panel) or rounded-lg (dialog)',
+        message:
+            'bare `rounded` — prefer rounded-sm (chip), rounded-md (panel) or rounded-lg (dialog)',
         pattern: /(?<![\w-])rounded(?![\w-])/g,
     },
     {
         id: 'palette-colour',
         level: 'warn',
-        message: 'raw palette colour — prefer the semantic token (success/info/routine/warning/destructive/muted)',
-        pattern: /(?<![\w-])(?:bg|text|border|ring|fill|stroke)-(?:red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose|slate|gray|zinc|neutral|stone)-\d{2,3}\b/g,
+        message:
+            'raw palette colour — prefer the semantic token (success/info/routine/warning/destructive/muted)',
+        pattern:
+            /(?<![\w-])(?:bg|text|border|ring|fill|stroke)-(?:red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose|slate|gray|zinc|neutral|stone)-\d{2,3}\b/g,
     },
 ];
 
@@ -62,12 +84,19 @@ function walk(dir) {
         const full = path.join(dir, entry.name);
 
         if (entry.isDirectory()) {
-            if (IGNORED_DIRS.some((ignored) => full.replaceAll('\\', '/').includes(ignored))) {
+            if (
+                IGNORED_DIRS.some((ignored) =>
+                    full.replaceAll('\\', '/').includes(ignored),
+                )
+            ) {
                 continue;
             }
 
             files.push(...walk(full));
-        } else if (entry.name.endsWith('.svelte') || entry.name.endsWith('.ts')) {
+        } else if (
+            entry.name.endsWith('.svelte') ||
+            entry.name.endsWith('.ts')
+        ) {
             files.push(full);
         }
     }
@@ -80,8 +109,15 @@ const findings = [];
 for (const file of walk(ROOT)) {
     const lines = fs.readFileSync(file, 'utf8').split('\n');
 
+    const paletteAllowed = PALETTE_ALLOWED_FILES.has(
+        file.replaceAll('\\', '/'),
+    );
+
     lines.forEach((line, index) => {
         for (const rule of RULES) {
+            if (rule.id === 'palette-colour' && paletteAllowed) {
+                continue;
+            }
             rule.pattern.lastIndex = 0;
 
             const matches = [...line.matchAll(rule.pattern)];
@@ -116,7 +152,9 @@ for (const [file, items] of [...byFile.entries()].sort()) {
 
     for (const item of items.sort((a, b) => a.line - b.line)) {
         const tag = item.rule.level === 'error' ? 'error' : 'warn ';
-        console.log(`  ${item.line}:${' '.repeat(0)} ${tag} ${item.match} — ${item.rule.message}`);
+        console.log(
+            `  ${item.line}:${' '.repeat(0)} ${tag} ${item.match} — ${item.rule.message}`,
+        );
     }
 }
 
@@ -126,7 +164,9 @@ for (const finding of findings) {
     summary.set(finding.rule.id, (summary.get(finding.rule.id) ?? 0) + 1);
 }
 
-console.log(`\n${errors.length} error(s), ${warnings.length} warning(s) in ${byFile.size} file(s)`);
+console.log(
+    `\n${errors.length} error(s), ${warnings.length} warning(s) in ${byFile.size} file(s)`,
+);
 
 for (const [id, count] of summary) {
     console.log(`  ${id}: ${count}`);

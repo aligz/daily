@@ -13,6 +13,9 @@
     } from '@/components/ui/card';
     import { Input } from '@/components/ui/input';
     import AppLayout from '@/layouts/AppLayout.svelte';
+    import { featureBoardHeaderStyles } from '@/lib/board-colors';
+    import { getInitials } from '@/lib/initials';
+    import { getUserColor } from '@/lib/users';
     import {
         create as featureRequestsCreate,
         show as featureRequestsShow,
@@ -59,6 +62,9 @@
     let selectedPriority = $state<string | null>(null);
 
     const boards = ['new', 'planning', 'development', 'done', 'released'];
+
+    const boardHeaderClass = (board: string) =>
+        featureBoardHeaderStyles[board] ?? 'bg-muted/50';
     const priorities = ['low', 'medium', 'high', 'urgent'];
 
     let filteredRequests = $derived.by(() => {
@@ -101,64 +107,12 @@
 
     function getPriorityBadgeColor(priority: string): string {
         const colors: Record<string, string> = {
-            low: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200',
-            medium: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
-            high: 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200',
-            urgent: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
+            low: 'bg-muted text-muted-foreground',
+            medium: 'bg-info/10 text-info',
+            high: 'bg-warning/10 text-warning',
+            urgent: 'bg-destructive/10 text-destructive',
         };
-        return colors[priority] || 'bg-gray-100 text-gray-800';
-    }
-
-    function getBoardHeaderStyle(board: string): string {
-        const styles: Record<string, string> = {
-            new: 'bg-blue-100/50 border-blue-200 dark:bg-blue-900/20 dark:border-blue-800 text-blue-800 dark:text-blue-200',
-            planning:
-                'bg-yellow-100/50 border-yellow-200 dark:bg-yellow-900/20 dark:border-yellow-800 text-yellow-800 dark:text-yellow-200',
-            development:
-                'bg-purple-100/50 border-purple-200 dark:bg-purple-900/20 dark:border-purple-800 text-purple-800 dark:text-purple-200',
-            done: 'bg-orange-100/50 border-orange-200 dark:bg-orange-900/20 dark:border-orange-800 text-orange-800 dark:text-orange-200',
-            released:
-                'bg-green-100/50 border-green-200 dark:bg-green-900/20 dark:border-green-800 text-green-800 dark:text-green-200',
-        };
-        return styles[board] || 'bg-muted/50';
-    }
-
-    const userColors = [
-        'bg-red-500 text-white',
-        'bg-orange-500 text-white',
-        'bg-amber-500 text-white',
-        'bg-yellow-500 text-black',
-        'bg-lime-500 text-black',
-        'bg-green-500 text-white',
-        'bg-emerald-500 text-white',
-        'bg-teal-500 text-white',
-        'bg-cyan-500 text-black',
-        'bg-sky-500 text-white',
-        'bg-blue-500 text-white',
-        'bg-indigo-500 text-white',
-        'bg-violet-500 text-white',
-        'bg-purple-500 text-white',
-        'bg-fuchsia-500 text-white',
-        'bg-pink-500 text-white',
-        'bg-rose-500 text-white',
-    ];
-
-    function getUserColor(name: string): string {
-        let hash = 0;
-        for (let i = 0; i < name.length; i++) {
-            hash = name.charCodeAt(i) + ((hash << 5) - hash);
-        }
-        const index = Math.abs(hash) % userColors.length;
-        return userColors[index];
-    }
-
-    function getInitials(name: string): string {
-        return name
-            .split(' ')
-            .map((n) => n[0])
-            .slice(0, 2)
-            .join('')
-            .toUpperCase();
+        return colors[priority] || 'bg-muted text-muted-foreground';
     }
 
     function isOverdue(deadline: string, status: string): boolean {
@@ -285,14 +239,14 @@
         <div class="flex flex-1 min-h-0 gap-4 overflow-x-auto pb-4">
             {#each boards as board (board)}
                 <div
-                    class="flex min-h-0 flex-1 min-w-[280px] max-w-[350px] flex-col rounded border border-muted/50 p-3 bg-muted/30"
+                    class="flex min-h-0 flex-1 min-w-[280px] max-w-[350px] flex-col rounded-md border border-muted/50 p-3 bg-muted/30"
                     role="region"
                     aria-label="{board} column"
                     ondrop={auth.user ? (e) => handleDrop(e, board) : undefined}
                     ondragover={auth.user ? handleDragOver : undefined}
                 >
                     <div
-                        class="mb-3 flex items-center justify-between px-3 py-2 rounded border {getBoardHeaderStyle(
+                        class="mb-3 flex items-center justify-between rounded-md border px-3 py-2 {boardHeaderClass(
                             board,
                         )}"
                     >
@@ -373,7 +327,7 @@
 
                                         {#if request.status === 'released' && request.released_at}
                                             <div
-                                                class="flex items-center gap-1.5 text-xs text-green-600 dark:text-green-400"
+                                                class="flex items-center gap-1.5 text-xs text-success"
                                             >
                                                 <svg
                                                     class="h-3 w-3 shrink-0"

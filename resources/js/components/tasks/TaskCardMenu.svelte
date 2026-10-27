@@ -112,7 +112,7 @@
     <button
         type="button"
         bind:this={trigger}
-        class="flex h-6 w-6 items-center justify-center rounded text-muted-foreground opacity-70 transition-colors hover:bg-accent hover:text-foreground hover:opacity-100 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+        class="flex h-6 w-6 items-center justify-center rounded-sm text-muted-foreground opacity-70 transition-colors hover:bg-accent hover:text-foreground hover:opacity-100 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
         aria-haspopup="menu"
         aria-expanded={open}
         aria-label={`Actions for ${task.title}`}
@@ -140,7 +140,7 @@
     {#if open}
         <div
             bind:this={menu}
-            class="absolute top-full right-0 z-20 mt-1 w-44 overflow-hidden rounded border border-border bg-popover p-1 text-popover-foreground shadow-lg"
+            class="absolute top-full right-0 z-20 mt-1 w-44 overflow-hidden rounded-md border border-border bg-popover p-1 text-popover-foreground shadow-lg"
             role="menu"
             aria-label={`Actions for ${task.title}`}
             tabindex="-1"
