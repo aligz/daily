@@ -77,17 +77,14 @@
                     </CardTitle>
                     <Avatar class="h-5 w-5 shrink-0">
                         <AvatarFallback
-                            class="text-[9px] {getUserColor(task.user.name)}"
+                            class="text-3xs {getUserColor(task.user.name)}"
                         >
                             {getInitials(task.user.name)}
                         </AvatarFallback>
                     </Avatar>
                 </div>
                 {#if task.reference}
-                    <CardDescription
-                        class="text-[10px] font-mono"
-                        translate="no"
-                    >
+                    <CardDescription class="text-3xs font-mono" translate="no">
                         {task.reference}
                     </CardDescription>
                 {/if}
@@ -95,7 +92,7 @@
 
             {#if task.description}
                 <CardContent class="p-3 pt-1">
-                    <p class="text-[11px] text-muted-foreground line-clamp-2">
+                    <p class="text-2xs text-muted-foreground line-clamp-2">
                         {task.description}
                     </p>
                 </CardContent>

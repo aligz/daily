@@ -35,7 +35,7 @@
 
 <div class="rounded border border-border bg-card md:hidden">
     <div
-        class="border-b border-border px-3 py-2 text-[12.5px] uppercase tracking-[0.12em] text-muted-foreground"
+        class="border-b border-border px-3 py-2 text-xs uppercase tracking-[0.12em] text-muted-foreground"
     >
         Agenda · {formatMonth(month)}
     </div>
@@ -52,12 +52,12 @@
                         {formatDateShort(date)}
                     </span>
                     <span
-                        class="text-[11px] uppercase tracking-[0.1em] text-muted-foreground"
+                        class="text-2xs uppercase tracking-[0.1em] text-muted-foreground"
                     >
                         {formatWeekday(date)}
                     </span>
                     {#if day.rollback.length > 0}
-                        <span class="ml-auto text-[11px] text-destructive">
+                        <span class="ml-auto text-2xs text-destructive">
                             ↩ {day.rollback.length}
                         </span>
                     {/if}
@@ -65,7 +65,7 @@
 
                 {#if checklistByDate[date]}
                     <div
-                        class="mb-1 flex items-center gap-1.5 text-[12px] text-violet-600 dark:text-violet-300"
+                        class="mb-1 flex items-center gap-1.5 text-xs text-violet-600 dark:text-violet-300"
                     >
                         <span aria-hidden="true">▣</span>
                         <span class="shrink-0 tabular-nums">
@@ -76,7 +76,7 @@
                         </span>
                         {#if checklistByDate[date].note}
                             <span
-                                class="min-w-0 truncate text-[11px] text-muted-foreground italic"
+                                class="min-w-0 truncate text-2xs text-muted-foreground italic"
                             >
                                 “{checklistByDate[date].note}”
                             </span>
@@ -86,28 +86,28 @@
 
                 <div class="flex flex-col gap-1">
                     {#each day.today as event (event.at + event.id)}
-                        <div class="flex items-center gap-1.5 text-[13.5px]">
+                        <div class="flex items-center gap-1.5 text-dense">
                             <span
                                 class="h-1.5 w-1.5 shrink-0 rounded-full bg-sky-500"
                                 aria-hidden="true"
                             ></span>
                             <span class="truncate">{event.title}</span>
                             <span
-                                class="ml-auto shrink-0 text-[11px] tabular-nums text-muted-foreground"
+                                class="ml-auto shrink-0 text-2xs tabular-nums text-muted-foreground"
                             >
                                 {formatTime(event.at)}
                             </span>
                         </div>
                     {/each}
                     {#each day.done as event (event.at + event.id)}
-                        <div class="flex items-center gap-1.5 text-[13.5px]">
+                        <div class="flex items-center gap-1.5 text-dense">
                             <span
                                 class="h-1.5 w-1.5 shrink-0 rounded-full bg-green-500"
                                 aria-hidden="true"
                             ></span>
                             <span class="truncate">{event.title}</span>
                             <span
-                                class="ml-auto shrink-0 text-[11px] tabular-nums text-muted-foreground"
+                                class="ml-auto shrink-0 text-2xs tabular-nums text-muted-foreground"
                             >
                                 {formatTime(event.at)}
                             </span>
@@ -115,12 +115,12 @@
                     {/each}
                     {#each day.planned as event (event.at + event.id)}
                         <div
-                            class="flex items-center gap-1.5 text-[13.5px] text-muted-foreground"
+                            class="flex items-center gap-1.5 text-dense text-muted-foreground"
                         >
                             <span class="shrink-0" aria-hidden="true">◇</span>
                             <span class="truncate">{event.title}</span>
                             <span
-                                class="ml-auto shrink-0 text-[11px] text-muted-foreground"
+                                class="ml-auto shrink-0 text-2xs text-muted-foreground"
                             >
                                 planned
                             </span>
@@ -128,12 +128,12 @@
                     {/each}
                     {#each day.rollback as event (event.at + event.id)}
                         <div
-                            class="flex items-center gap-1.5 text-[13.5px] text-destructive"
+                            class="flex items-center gap-1.5 text-dense text-destructive"
                         >
                             <span class="shrink-0" aria-hidden="true">↩</span>
                             <span class="truncate">{event.title}</span>
                             <span
-                                class="ml-auto shrink-0 text-[11px] tabular-nums"
+                                class="ml-auto shrink-0 text-2xs tabular-nums"
                             >
                                 {formatTime(event.at)}
                             </span>

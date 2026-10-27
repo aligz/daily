@@ -41,7 +41,7 @@
 <div class="relative">
     <button
         type="button"
-        class="inline-flex h-8 items-center gap-2 rounded border border-border bg-card px-2 text-[12.5px] transition-colors hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+        class="inline-flex h-8 items-center gap-2 rounded border border-border bg-card px-2 text-xs transition-colors hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
         data-user-filter-trigger
         aria-haspopup="menu"
         aria-expanded={open}
@@ -50,7 +50,7 @@
     >
         {#if selected}
             <Avatar class="h-5 w-5">
-                <AvatarFallback class="text-[10.5px] {getUserColor(selected.name)}">
+                <AvatarFallback class="text-2xs {getUserColor(selected.name)}">
                     {getInitials(selected.name)}
                 </AvatarFallback>
             </Avatar>
@@ -73,7 +73,7 @@
         >
             <button
                 type="button"
-                class="flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-left text-[12.5px] hover:bg-accent"
+                class="flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-left text-xs hover:bg-accent"
                 onclick={() => pick(null)}
             >
                 <span class="text-muted-foreground">All users</span>
@@ -84,24 +84,28 @@
             {#each users as user (user.id)}
                 <button
                     type="button"
-                    class="flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-left text-[12.5px] hover:bg-accent {selectedId ===
+                    class="flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-left text-xs hover:bg-accent {selectedId ===
                     user.id
                         ? 'bg-accent'
                         : ''}"
                     onclick={() => pick(user.id)}
                 >
                     <Avatar class="h-5 w-5">
-                        <AvatarFallback class="text-[10.5px] {getUserColor(user.name)}">
+                        <AvatarFallback
+                            class="text-2xs {getUserColor(user.name)}"
+                        >
                             {getInitials(user.name)}
                         </AvatarFallback>
                     </Avatar>
                     <span class="truncate">{user.name}</span>
 
                     {#if progress[user.id]}
-                        <span class="ml-auto shrink-0 text-[11px] tabular-nums text-muted-foreground">
-                            {progress[user.id].done + progress[user.id].skipped}/{progress[
-                                user.id
-                            ].total}
+                        <span
+                            class="ml-auto shrink-0 text-2xs tabular-nums text-muted-foreground"
+                        >
+                            {progress[user.id].done +
+                                progress[user.id].skipped}/{progress[user.id]
+                                .total}
                         </span>
                     {/if}
                 </button>

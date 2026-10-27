@@ -264,7 +264,7 @@
                 {#if routine.total > 0}
                     <Link
                         href="/tasks/calendar"
-                        class="inline-flex items-center gap-1.5 rounded-sm border border-violet-500/40 bg-violet-500/10 px-2 py-1 text-[12.5px] text-violet-600 transition-colors hover:bg-violet-500/15 dark:text-violet-300"
+                        class="inline-flex items-center gap-1.5 rounded-sm border border-violet-500/40 bg-violet-500/10 px-2 py-1 text-xs text-violet-600 transition-colors hover:bg-violet-500/15 dark:text-violet-300"
                         title="Open the calendar to check your routine"
                     >
                         <span aria-hidden="true">▣</span>

@@ -156,7 +156,7 @@
                     role="menuitem"
                     tabindex="-1"
                     disabled={!canMoveUp}
-                    class="block w-full rounded-sm px-2 py-1.5 text-left text-[13px] hover:bg-accent focus-visible:bg-accent focus-visible:outline-none disabled:opacity-40"
+                    class="block w-full rounded-sm px-2 py-1.5 text-left text-dense hover:bg-accent focus-visible:bg-accent focus-visible:outline-none disabled:opacity-40"
                     onclick={(event) => {
                         event.stopPropagation();
                         closeMenu();
@@ -170,7 +170,7 @@
                     role="menuitem"
                     tabindex="-1"
                     disabled={!canMoveDown}
-                    class="block w-full rounded-sm px-2 py-1.5 text-left text-[13px] hover:bg-accent focus-visible:bg-accent focus-visible:outline-none disabled:opacity-40"
+                    class="block w-full rounded-sm px-2 py-1.5 text-left text-dense hover:bg-accent focus-visible:bg-accent focus-visible:outline-none disabled:opacity-40"
                     onclick={(event) => {
                         event.stopPropagation();
                         closeMenu();
@@ -188,7 +188,7 @@
                     type="button"
                     role="menuitem"
                     tabindex="-1"
-                    class="block w-full rounded-sm px-2 py-1.5 text-left text-[13px] hover:bg-accent focus-visible:bg-accent focus-visible:outline-none"
+                    class="block w-full rounded-sm px-2 py-1.5 text-left text-dense hover:bg-accent focus-visible:bg-accent focus-visible:outline-none"
                     onclick={(event) => move(target.value, event)}
                 >
                     Move to {target.label}
@@ -201,7 +201,7 @@
                 type="button"
                 role="menuitem"
                 tabindex="-1"
-                class="block w-full rounded-sm px-2 py-1.5 text-left text-[13px] hover:bg-accent focus-visible:bg-accent focus-visible:outline-none"
+                class="block w-full rounded-sm px-2 py-1.5 text-left text-dense hover:bg-accent focus-visible:bg-accent focus-visible:outline-none"
                 onclick={(event) => {
                     event.stopPropagation();
                     closeMenu(false);

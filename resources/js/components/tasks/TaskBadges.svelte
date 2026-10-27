@@ -86,7 +86,7 @@
     <div class="flex flex-wrap gap-1 px-3 pb-2">
         {#each badges as badge (badge.label)}
             <span
-                class="inline-flex items-center rounded-sm border px-1 py-0.5 text-[9px] leading-none {badge.className}"
+                class="inline-flex items-center rounded-sm border px-1 py-0.5 text-3xs leading-none {badge.className}"
                 title={badge.title}
             >
                 {badge.label}

@@ -58,14 +58,15 @@
         planned: [],
     });
     const dayFor = (date: string): CalendarDayData => days[date] ?? emptyDay();
-
 </script>
 
 <section
     class="hidden overflow-hidden rounded border border-border bg-card md:block"
     aria-label="Task calendar"
 >
-    <div class="flex flex-wrap items-center gap-2 border-b border-border px-3 py-2">
+    <div
+        class="flex flex-wrap items-center gap-2 border-b border-border px-3 py-2"
+    >
         <button
             type="button"
             class="inline-flex h-6 w-6 items-center justify-center rounded-sm border border-border text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
@@ -87,21 +88,27 @@
         </button>
         <button
             type="button"
-            class="rounded-sm border border-primary/40 bg-primary/10 px-2 py-0.5 text-[12.5px] text-primary transition-colors hover:bg-primary/15"
+            class="rounded-sm border border-primary/40 bg-primary/10 px-2 py-0.5 text-xs text-primary transition-colors hover:bg-primary/15"
             onclick={onToday}
         >
             Today
         </button>
 
         <div
-            class="ml-auto flex flex-wrap items-center gap-x-3 gap-y-1 text-[12px] text-muted-foreground"
+            class="ml-auto flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground"
         >
             <span class="flex items-center gap-1">
-                <i class="h-1.5 w-1.5 rounded-full bg-sky-500" aria-hidden="true"></i>
+                <i
+                    class="h-1.5 w-1.5 rounded-full bg-sky-500"
+                    aria-hidden="true"
+                ></i>
                 Today entries
             </span>
             <span class="flex items-center gap-1">
-                <i class="h-1.5 w-1.5 rounded-full bg-green-500" aria-hidden="true"></i>
+                <i
+                    class="h-1.5 w-1.5 rounded-full bg-green-500"
+                    aria-hidden="true"
+                ></i>
                 Completed
             </span>
             <span class="flex items-center gap-1">
@@ -114,7 +121,7 @@
     <div class="grid grid-cols-7 border-b border-border">
         {#each weekdays as weekday}
             <div
-                class="border-r border-border px-2 py-2 text-[11px] uppercase tracking-[0.1em] text-muted-foreground last:border-r-0"
+                class="border-r border-border px-2 py-2 text-2xs uppercase tracking-[0.1em] text-muted-foreground last:border-r-0"
             >
                 {weekday}
             </div>
@@ -135,8 +142,13 @@
         {/each}
     </div>
 
-    <div class="flex flex-wrap items-center gap-2 px-3 py-2 text-[12.5px] text-muted-foreground">
-        <span><kbd class="rounded border border-border px-1">←</kbd> <kbd class="rounded border border-border px-1">→</kbd> change month</span>
+    <div
+        class="flex flex-wrap items-center gap-2 px-3 py-2 text-xs text-muted-foreground"
+    >
+        <span
+            ><kbd class="rounded border border-border px-1">←</kbd>
+            <kbd class="rounded border border-border px-1">→</kbd> change month</span
+        >
         <span aria-hidden="true">·</span>
         <span>Click a day for details</span>
         <span class="ml-auto">Timezone: Asia/Jakarta</span>

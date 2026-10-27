@@ -139,7 +139,7 @@
 
         {#if summary.completed + summary.today_entries + summary.rollbacks + summary.planned === 0}
             <p
-                class="rounded border border-dashed border-border px-3 py-2 text-[13.5px] text-muted-foreground"
+                class="rounded border border-dashed border-border px-3 py-2 text-dense text-muted-foreground"
             >
                 No activity this month. Tasks appear here once they enter the
                 today board or are completed.
@@ -172,7 +172,7 @@
 
         <CalendarAgenda {month} {days} checklistByDate={checklist_by_date} />
 
-        <p class="flex items-center gap-1.5 text-[12.5px] text-muted-foreground">
+        <p class="flex items-center gap-1.5 text-xs text-muted-foreground">
             <span aria-hidden="true">i</span>
             “Rolled back” is counted from history entries where a task moved from
             today to todo, including the nightly reset.

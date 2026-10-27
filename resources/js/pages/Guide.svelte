@@ -117,18 +117,18 @@
 </script>
 
 {#snippet heading(number: string, title: string)}
-    <div class="flex items-baseline gap-2.5">
-        <span class="font-mono text-[12px] tabular-nums text-muted-foreground"
+    <div class="flex items-baseline gap-2">
+        <span class="font-mono text-xs tabular-nums text-muted-foreground"
             >{number}</span
         >
-        <h2 class="text-[22px] font-semibold tracking-tight">{title}</h2>
+        <h2 class="text-xl font-semibold tracking-tight">{title}</h2>
     </div>
 {/snippet}
 
 {#snippet pill(href: string, label: string)}
     <Link
         {href}
-        class="inline-flex items-center gap-1.5 rounded border border-border bg-card px-2.5 py-1.5 text-[13px] transition-colors hover:bg-accent"
+        class="inline-flex items-center gap-1.5 rounded border border-border bg-card px-2 py-1.5 text-dense transition-colors hover:bg-accent"
     >
         {label}
         <ArrowRight class="h-3.5 w-3.5 text-muted-foreground" />
@@ -149,7 +149,7 @@
             <div class="flex items-start justify-between gap-4">
                 <div class="min-w-0">
                     <p
-                        class="text-[11px] uppercase tracking-[0.16em] text-muted-foreground"
+                        class="text-2xs uppercase tracking-[0.16em] text-muted-foreground"
                     >
                         {copy.eyebrow}
                     </p>
@@ -167,7 +167,7 @@
                         type="button"
                         aria-pressed={lang === 'id'}
                         onclick={() => choose('id')}
-                        class="rounded-sm px-2 py-0.5 text-[12px] font-semibold transition-colors {lang ===
+                        class="rounded-sm px-2 py-0.5 text-xs font-semibold transition-colors {lang ===
                         'id'
                             ? 'bg-foreground text-background'
                             : 'text-muted-foreground hover:bg-accent hover:text-foreground'}"
@@ -178,7 +178,7 @@
                         type="button"
                         aria-pressed={lang === 'en'}
                         onclick={() => choose('en')}
-                        class="rounded-sm px-2 py-0.5 text-[12px] font-semibold transition-colors {lang ===
+                        class="rounded-sm px-2 py-0.5 text-xs font-semibold transition-colors {lang ===
                         'en'
                             ? 'bg-foreground text-background'
                             : 'text-muted-foreground hover:bg-accent hover:text-foreground'}"
@@ -189,7 +189,7 @@
             </div>
 
             <p
-                class="mt-2 max-w-2xl text-[15px] leading-relaxed text-muted-foreground"
+                class="mt-2 max-w-2xl text-base leading-relaxed text-muted-foreground"
             >
                 {copy.intro}
             </p>
@@ -203,14 +203,12 @@
         <div class="mt-6 grid gap-4 sm:grid-cols-3">
             {#each copy.summary as part, index (part.title)}
                 {@const Icon = summaryIcons[index]}
-                <div class="rounded border border-border bg-card p-3.5">
+                <div class="rounded border border-border bg-card p-3">
                     <Icon class="h-4 w-4 {summaryTones[index]}" />
-                    <div class="mt-1.5 text-[14px] font-semibold">
+                    <div class="mt-1.5 text-sm font-semibold">
                         {part.title}
                     </div>
-                    <p
-                        class="text-[12.5px] leading-relaxed text-muted-foreground"
-                    >
+                    <p class="text-xs leading-relaxed text-muted-foreground">
                         {part.body}
                     </p>
                 </div>
@@ -224,9 +222,9 @@
             {#each toc as item (item.id)}
                 <a
                     href={`#${item.id}`}
-                    class="inline-flex items-baseline gap-1.5 rounded px-1.5 py-1 text-[12.5px] text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+                    class="inline-flex items-baseline gap-1.5 rounded px-1.5 py-1 text-xs text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
                 >
-                    <span class="font-mono text-[10.5px] tabular-nums"
+                    <span class="font-mono text-2xs tabular-nums"
                         >{item.number}</span
                     >
                     {item.title}
@@ -241,31 +239,29 @@
             >
                 {@render heading('01', copy.board.title)}
 
-                <p
-                    class="mt-2 text-[14.5px] leading-relaxed text-muted-foreground"
-                >
+                <p class="mt-2 text-sm leading-relaxed text-muted-foreground">
                     {copy.board.intro}
                 </p>
 
                 <div class="mt-4 grid gap-2 sm:grid-cols-2">
                     {#each columns as column (column.name)}
                         <div
-                            class="rounded border border-border border-l-2 bg-card px-3 py-2.5 {column.border}"
+                            class="rounded border border-border border-l-2 bg-card px-3 py-2 {column.border}"
                         >
                             <div class="flex items-center gap-1.5">
                                 <span
                                     class="h-1.5 w-1.5 rounded-sm {column.dot}"
                                     aria-hidden="true"
                                 ></span>
-                                <span class="text-[14px] font-semibold"
+                                <span class="text-sm font-semibold"
                                     >{column.name}</span
                                 >
                             </div>
-                            <p class="mt-1 text-[13px] leading-relaxed">
+                            <p class="mt-1 text-dense leading-relaxed">
                                 {column.what}
                             </p>
                             <p
-                                class="mt-1 text-[12.5px] leading-relaxed text-muted-foreground"
+                                class="mt-1 text-xs leading-relaxed text-muted-foreground"
                             >
                                 {column.how}
                             </p>
@@ -273,28 +269,22 @@
                     {/each}
                 </div>
 
-                <h3 class="mt-6 text-[15px] font-semibold">
+                <h3 class="mt-6 text-base font-semibold">
                     {copy.board.movingTitle}
                 </h3>
-                <ol
-                    class="mt-1.5 flex flex-col gap-1 text-[14px] leading-relaxed"
-                >
+                <ol class="mt-1.5 flex flex-col gap-1 text-sm leading-relaxed">
                     {#each copy.board.moving as item, index (index)}
                         <li>{@render line(item, 'font-medium')}</li>
                     {/each}
                 </ol>
 
-                <h3 class="mt-6 text-[15px] font-semibold">
+                <h3 class="mt-6 text-base font-semibold">
                     {copy.board.addingTitle}
                 </h3>
-                <p
-                    class="mt-1 text-[14px] leading-relaxed text-muted-foreground"
-                >
+                <p class="mt-1 text-sm leading-relaxed text-muted-foreground">
                     {copy.board.addingIntro}
                 </p>
-                <ul
-                    class="mt-2 flex flex-col gap-1.5 text-[14px] leading-relaxed"
-                >
+                <ul class="mt-2 flex flex-col gap-1.5 text-sm leading-relaxed">
                     {#each copy.board.fields as field (field.label)}
                         <li>
                             <span class="font-medium">{field.label}</span>
@@ -304,17 +294,17 @@
                 </ul>
 
                 <div
-                    class="mt-4 flex gap-2.5 rounded border border-border bg-sky-500/5 px-3 py-2.5"
+                    class="mt-4 flex gap-2 rounded border border-border bg-sky-500/5 px-3 py-2"
                 >
                     <Moon
                         class="mt-0.5 h-4 w-4 shrink-0 text-sky-600 dark:text-sky-400"
                         aria-hidden="true"
                     />
                     <div class="min-w-0">
-                        <p class="text-[13px] font-semibold">
+                        <p class="text-dense font-semibold">
                             {copy.board.resetTitle}
                         </p>
-                        <p class="mt-0.5 text-[13px] leading-relaxed">
+                        <p class="mt-0.5 text-dense leading-relaxed">
                             {copy.board.resetBody}
                         </p>
                     </div>
@@ -327,9 +317,7 @@
             >
                 {@render heading('02', copy.cards.title)}
 
-                <p
-                    class="mt-2 text-[14.5px] leading-relaxed text-muted-foreground"
-                >
+                <p class="mt-2 text-sm leading-relaxed text-muted-foreground">
                     {copy.cards.intro}
                 </p>
 
@@ -338,15 +326,15 @@
                 >
                     {#each legend as badge (badge.chip)}
                         <div
-                            class="flex flex-col gap-1 px-3 py-2.5 sm:flex-row sm:items-baseline sm:gap-4"
+                            class="flex flex-col gap-1 px-3 py-2 sm:flex-row sm:items-baseline sm:gap-4"
                         >
                             <span
-                                class="w-fit shrink-0 rounded-sm border px-1.5 py-0.5 text-[11px] leading-none {badge.chipClass}"
+                                class="w-fit shrink-0 rounded-sm border px-1.5 py-0.5 text-2xs leading-none {badge.chipClass}"
                             >
                                 {badge.chip}
                             </span>
                             <span
-                                class="text-[13px] leading-relaxed text-muted-foreground"
+                                class="text-dense leading-relaxed text-muted-foreground"
                             >
                                 {badge.meaning}
                             </span>
@@ -354,7 +342,7 @@
                     {/each}
                 </div>
 
-                <p class="mt-2 text-[12.5px] text-muted-foreground">
+                <p class="mt-2 text-xs text-muted-foreground">
                     {copy.cards.footnote}
                 </p>
             </section>
@@ -365,42 +353,36 @@
             >
                 {@render heading('03', copy.calendar.title)}
 
-                <p
-                    class="mt-2 text-[14.5px] leading-relaxed text-muted-foreground"
-                >
+                <p class="mt-2 text-sm leading-relaxed text-muted-foreground">
                     {copy.calendar.intro}
                 </p>
 
-                <h3 class="mt-5 text-[15px] font-semibold">
+                <h3 class="mt-4 text-base font-semibold">
                     {copy.calendar.monthTitle}
                 </h3>
-                <ul
-                    class="mt-1.5 flex flex-col gap-1 text-[14px] leading-relaxed"
-                >
+                <ul class="mt-1.5 flex flex-col gap-1 text-sm leading-relaxed">
                     {#each copy.calendar.month as item, index (index)}
                         <li>{item}</li>
                     {/each}
                 </ul>
 
-                <h3 class="mt-5 text-[15px] font-semibold">
+                <h3 class="mt-4 text-base font-semibold">
                     {copy.calendar.dayTitle}
                 </h3>
-                <p
-                    class="mt-1 text-[14px] leading-relaxed text-muted-foreground"
-                >
+                <p class="mt-1 text-sm leading-relaxed text-muted-foreground">
                     {copy.calendar.day}
                 </p>
 
                 <div class="mt-3 grid gap-2 sm:grid-cols-2">
                     {#each copy.calendar.boxes as box (box.title)}
                         <div
-                            class="rounded border border-border bg-card px-3 py-2.5"
+                            class="rounded border border-border bg-card px-3 py-2"
                         >
-                            <div class="text-[13px] font-semibold">
+                            <div class="text-dense font-semibold">
                                 {box.title}
                             </div>
                             <p
-                                class="mt-1 text-[12.5px] leading-relaxed text-muted-foreground"
+                                class="mt-1 text-xs leading-relaxed text-muted-foreground"
                             >
                                 {box.body}
                             </p>
@@ -409,7 +391,7 @@
                 </div>
 
                 <p
-                    class="mt-3 text-[13px] leading-relaxed text-muted-foreground"
+                    class="mt-3 text-dense leading-relaxed text-muted-foreground"
                 >
                     {copy.calendar.footer}
                 </p>
@@ -421,22 +403,20 @@
             >
                 {@render heading('04', copy.routine.title)}
 
-                <p
-                    class="mt-2 text-[14.5px] leading-relaxed text-muted-foreground"
-                >
+                <p class="mt-2 text-sm leading-relaxed text-muted-foreground">
                     {copy.routine.intro}
                 </p>
 
                 <div class="mt-4 flex flex-col gap-2">
                     {#each copy.routine.blocks as block (block.title)}
                         <div
-                            class="rounded border border-border bg-card px-3 py-2.5"
+                            class="rounded border border-border bg-card px-3 py-2"
                         >
-                            <div class="text-[13.5px] font-semibold">
+                            <div class="text-dense font-semibold">
                                 {block.title}
                             </div>
                             <p
-                                class="mt-0.5 text-[13px] leading-relaxed text-muted-foreground"
+                                class="mt-0.5 text-dense leading-relaxed text-muted-foreground"
                             >
                                 {block.body}
                             </p>
@@ -445,7 +425,7 @@
                 </div>
 
                 <div
-                    class="mt-3 flex flex-col gap-1 text-[13.5px] leading-relaxed text-muted-foreground"
+                    class="mt-3 flex flex-col gap-1 text-dense leading-relaxed text-muted-foreground"
                 >
                     {#each copy.routine.footnotes as note, index (index)}
                         <p>{@render line(note, 'font-medium')}</p>
@@ -456,15 +436,11 @@
             <section id="team" class="scroll-mt-24 border-t border-border pt-7">
                 {@render heading('05', copy.team.title)}
 
-                <p
-                    class="mt-2 text-[14.5px] leading-relaxed text-muted-foreground"
-                >
+                <p class="mt-2 text-sm leading-relaxed text-muted-foreground">
                     {copy.team.intro}
                 </p>
 
-                <ul
-                    class="mt-3 flex flex-col gap-2 text-[14px] leading-relaxed"
-                >
+                <ul class="mt-3 flex flex-col gap-2 text-sm leading-relaxed">
                     {#each copy.team.items as item, index (index)}
                         <li>{@render line(item, 'font-medium')}</li>
                     {/each}
@@ -477,20 +453,18 @@
             >
                 {@render heading('06', copy.habits.title)}
 
-                <p
-                    class="mt-2 text-[14.5px] leading-relaxed text-muted-foreground"
-                >
+                <p class="mt-2 text-sm leading-relaxed text-muted-foreground">
                     {copy.habits.intro}
                 </p>
 
-                <ol class="mt-3 flex flex-col gap-2.5">
+                <ol class="mt-3 flex flex-col gap-2">
                     {#each copy.habits.items as habit, index (habit.lead)}
-                        <li class="flex gap-2.5">
+                        <li class="flex gap-2">
                             <span
-                                class="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-muted font-mono text-[11px] text-muted-foreground"
+                                class="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-muted font-mono text-2xs text-muted-foreground"
                                 >{index + 1}</span
                             >
-                            <p class="text-[14px] leading-relaxed">
+                            <p class="text-sm leading-relaxed">
                                 {@render line(habit, 'font-semibold')}
                             </p>
                         </li>
@@ -510,7 +484,7 @@
                             class="group rounded border border-border bg-card px-3 py-2"
                         >
                             <summary
-                                class="flex cursor-pointer list-none items-center gap-2 text-[13.5px] font-medium select-none"
+                                class="flex cursor-pointer list-none items-center gap-2 text-dense font-medium select-none"
                             >
                                 <span
                                     class="text-muted-foreground transition-transform group-open:rotate-90"
@@ -519,7 +493,7 @@
                                 {item.q}
                             </summary>
                             <p
-                                class="mt-1.5 pl-4 text-[13px] leading-relaxed text-muted-foreground"
+                                class="mt-1.5 pl-4 text-dense leading-relaxed text-muted-foreground"
                             >
                                 {item.a}
                             </p>
@@ -528,15 +502,13 @@
                 </div>
 
                 <div
-                    class="mt-5 flex items-center gap-2 rounded border border-dashed border-border px-3 py-2.5"
+                    class="mt-4 flex items-center gap-2 rounded border border-dashed border-border px-3 py-2"
                 >
                     <CircleCheckBig
                         class="h-4 w-4 shrink-0 text-green-600 dark:text-green-400"
                         aria-hidden="true"
                     />
-                    <p
-                        class="text-[13px] leading-relaxed text-muted-foreground"
-                    >
+                    <p class="text-dense leading-relaxed text-muted-foreground">
                         {copy.questions.outro}
                     </p>
                 </div>

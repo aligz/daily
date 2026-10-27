@@ -32,7 +32,7 @@
 </script>
 
 <header class="mb-4">
-    <div class="text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+    <div class="text-3xs uppercase tracking-[0.14em] text-muted-foreground">
         {eyebrow}
     </div>
 

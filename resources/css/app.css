@@ -13,9 +13,28 @@
         'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
         'Noto Color Emoji';
 
-    --radius-lg: var(--radius);
-    --radius-md: calc(var(--radius) - 2px);
-    --radius-sm: calc(var(--radius) - 4px);
+    /*
+      Radius scale: chip 2px, panel/control 4px, dialog/sheet 8px.
+      Explicit values so `rounded-md` is never sharper than `rounded-sm`.
+    */
+    --radius-sm: 0.125rem;
+    --radius-md: 0.25rem;
+    --radius-lg: 0.5rem;
+
+    /*
+      Type scale. Named sizes (xs/sm/base/xl/2xl/3xl) keep Tailwind's
+      defaults; these three cover the steps Tailwind does not ship.
+      Line heights are part of the token so they cannot drift per usage.
+    */
+    --text-3xs: 0.625rem;
+    --text-3xs--line-height: 1.4;
+    --text-2xs: 0.6875rem;
+    --text-2xs--line-height: 1.45;
+    --text-dense: 0.8125rem;
+    --text-dense--line-height: 1.5;
+
+    --text-xs--line-height: 1.45;
+    --text-sm--line-height: 1.5;
 
     --color-background: var(--background);
     --color-foreground: var(--foreground);
@@ -40,6 +59,11 @@
 
     --color-destructive: var(--destructive);
     --color-destructive-foreground: var(--destructive-foreground);
+
+    --color-success: var(--success);
+    --color-info: var(--info);
+    --color-routine: var(--routine);
+    --color-warning: var(--warning);
 
     --color-border: var(--border);
     --color-input: var(--input);
@@ -87,14 +111,7 @@
     }
 }
 
-@layer utilities {
-    body,
-    html {
-        --font-sans:
-            'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, Menlo,
-            Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
-    }
-}
+
 
 /* Light-first theme variables for the terminal UI */
 :root {
@@ -114,6 +131,10 @@
     --accent-foreground: #0f172a;
     --destructive: #ef4444;
     --destructive-foreground: #f8fafc;
+    --success: #15803d;
+    --info: #0369a1;
+    --routine: #6d28d9;
+    --warning: #b45309;
     --border: #e2e8f0;
     --input: #e2e8f0;
     --ring: #0d9488;
@@ -142,7 +163,7 @@
     --card-foreground: #e2e8f0;
     --popover: #111118;
     --popover-foreground: #e2e8f0;
-    --primary: #00FFD1;
+    --primary: #2dd4bf;
     --primary-foreground: #0a0a0f;
     --secondary: #1a1a2e;
     --secondary-foreground: #e2e8f0;
@@ -152,6 +173,10 @@
     --accent-foreground: #e2e8f0;
     --destructive: #ef4444;
     --destructive-foreground: #fef2f2;
+    --success: #4ade80;
+    --info: #7dd3fc;
+    --routine: #a78bfa;
+    --warning: #fcd34d;
     --border: #1e1e2e;
     --input: #1e1e2e;
     --ring: #00FFD1;
