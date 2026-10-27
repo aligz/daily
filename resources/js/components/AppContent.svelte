@@ -19,7 +19,11 @@
         {@render children?.()}
     </SidebarInset>
 {:else}
-    <main class={cn('flex h-full w-full flex-1 flex-col gap-4', className)}>
+    <main
+        id="main"
+        tabindex="-1"
+        class={cn('flex h-full w-full flex-1 flex-col gap-4', className)}
+    >
         {@render children?.()}
     </main>
 {/if}

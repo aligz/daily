@@ -5,12 +5,14 @@
     let {
         class: className = '',
         children,
+        ...rest
     }: {
         class?: string;
         children?: Snippet;
+        [key: string]: unknown;
     } = $props();
 </script>
 
-<h3 data-slot="card-title" class={cn('leading-none font-semibold', className)}>
+<div data-slot="card-title" class={cn('leading-none font-semibold', className)} {...rest}>
     {@render children?.()}
-</h3>
+</div>

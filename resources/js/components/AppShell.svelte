@@ -18,7 +18,13 @@
 </script>
 
 {#if variant === 'header'}
-    <div class="flex min-h-screen w-full flex-col {className}">
+    <div class="flex min-h-svh w-full flex-col {className}">
+        <a
+            href="#main"
+            class="absolute top-[-80px] left-4 z-50 rounded border border-border bg-background px-3 py-2 text-sm text-foreground shadow-md focus:top-2"
+        >
+            Skip to content
+        </a>
         {@render children?.()}
     </div>
 {:else}

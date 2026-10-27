@@ -3,16 +3,20 @@
     import { getContext } from 'svelte';
     import X from 'lucide-svelte/icons/x';
     import { fly } from 'svelte/transition';
+    import { prefersReducedMotion } from '@/lib/motion';
+    import { overlay } from '@/lib/overlay';
     import { cn } from '@/lib/utils';
     import { SHEET_CONTEXT, type SheetContext } from './context';
 
     let {
         side = 'right',
         class: className = '',
+        label = 'Menu',
         children,
     }: {
         side?: 'right' | 'left' | 'top' | 'bottom';
         class?: string;
+        label?: string;
         children?: Snippet;
     } = $props();
 
@@ -35,6 +39,10 @@
     const close = () => setOpen(false);
 
     const panelTransition = () => {
+        if (prefersReducedMotion()) {
+            return { duration: 0 };
+        }
+
         const axis =
             side === 'left'
                 ? { x: -320, y: 0 }
@@ -53,29 +61,34 @@
         <button
             type="button"
             class="fixed inset-0 border-0 bg-black/50"
-            aria-label="Close"
+            tabindex="-1"
+            aria-label="Close menu"
             onclick={close}
         ></button>
         <div
             class={cn(
-                'fixed relative flex flex-col gap-4 overflow-y-auto border-none bg-background p-6 shadow-lg',
+                'fixed relative flex flex-col gap-4 overflow-y-auto overscroll-contain border-none bg-background p-6 shadow-lg',
                 sideClasses[side] ?? sideClasses.right,
                 sizeClasses[side] ?? sizeClasses.right,
                 className,
             )}
+            role="dialog"
+            aria-modal="true"
+            aria-label={label}
             in:fly={panelTransition()}
             out:fly={panelTransition()}
+            use:overlay={{ onEscape: close }}
         >
+            {@render children?.()}
             <button
                 type="button"
                 class="ring-offset-background focus-visible:ring-ring absolute top-4 right-4 rounded-xs opacity-70 transition-opacity hover:opacity-100 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-hidden disabled:pointer-events-none"
-                aria-label="Close"
+                aria-label="Close menu"
                 onclick={close}
             >
-                <X class="size-4" />
-                <span class="sr-only">Close</span>
+                <X class="size-4" aria-hidden="true" />
+                <span class="sr-only">Close menu</span>
             </button>
-            {@render children?.()}
         </div>
     </div>
 {/if}

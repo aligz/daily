@@ -4,7 +4,7 @@
     import type { BreadcrumbItem } from '@/types';
 
     let {
-        breadcrumbs = [],
+        breadcrumbs: _breadcrumbs = [],
         children,
     }: {
         breadcrumbs?: BreadcrumbItem[];
@@ -12,6 +12,6 @@
     } = $props();
 </script>
 
-<AppLayout {breadcrumbs}>
+<AppLayout>
     {@render children?.()}
 </AppLayout>
