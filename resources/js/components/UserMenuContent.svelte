@@ -1,5 +1,6 @@
 <script lang="ts">
     import { Link, router } from '@inertiajs/svelte';
+    import BookOpen from 'lucide-svelte/icons/book-open';
     import LogOut from 'lucide-svelte/icons/log-out';
     import Settings from 'lucide-svelte/icons/settings';
     import {
@@ -35,6 +36,14 @@
 </DropdownMenuLabel>
 <DropdownMenuSeparator />
 <DropdownMenuGroup>
+    <DropdownMenuItem asChild>
+        {#snippet children(props)}
+            <Link class={props.class} href="/guide" prefetch onclick={props.onClick}>
+                <BookOpen class="mr-2 h-4 w-4" />
+                Guide
+            </Link>
+        {/snippet}
+    </DropdownMenuItem>
     <DropdownMenuItem asChild>
         {#snippet children(props)}
             <Link class={props.class} href={toUrl(edit())} prefetch onclick={props.onClick}>

@@ -32,6 +32,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::put('checklist/note', [\App\Http\Controllers\ChecklistController::class, 'saveNote'])->name('checklist.note.update');
     Route::patch('checklist/{routine}', [\App\Http\Controllers\ChecklistController::class, 'check'])->name('checklist.check');
 
+    Route::get('guide', fn () => Inertia::render('Guide'))->name('guide');
+
     Route::get('reports', [\App\Http\Controllers\ReportController::class, 'index'])->name('reports.index');
     Route::resource('divisions', \App\Http\Controllers\DivisionController::class)->except(['create', 'show']);
     Route::get('feature-requests/create', [\App\Http\Controllers\FeatureRequestController::class, 'create'])->name('feature-requests.create');
