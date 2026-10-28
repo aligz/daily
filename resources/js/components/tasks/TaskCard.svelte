@@ -103,7 +103,9 @@
     </div>
 
     {#if mine}
-        <div class="absolute right-1 top-1 z-10">
+        <!-- No z-index here: it would create a stacking context that traps the
+             fixed menu below the next card's trigger. The menu carries z-50. -->
+        <div class="absolute right-1 top-1">
             <TaskCardMenu
                 {task}
                 {canMoveUp}
