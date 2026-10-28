@@ -238,7 +238,7 @@
         </TaskHeader>
 
         <Dialog bind:open={isOpen}>
-            <DialogContent class="sm:max-w-[425px]">
+            <DialogContent class="sm:max-w-2xl">
                 <DialogHeader>
                     <DialogTitle
                         >{editingTask
@@ -274,42 +274,47 @@
                             >
                         {/if}
                     </div>
-                    <div class="grid gap-2">
-                        <Label for="reference">Reference (Optional)</Label>
-                        <Input
-                            id="reference"
-                            bind:value={$form.reference}
-                            placeholder="e.g. JIRA-123"
-                            autocomplete="off"
-                            disabled={!isOwner}
-                        />
-                        {#if $form.errors.reference}
-                            <span class="text-sm text-destructive"
-                                >{$form.errors.reference}</span
+                    <div class="grid gap-4 sm:grid-cols-2">
+                        <div class="grid gap-2">
+                            <Label for="reference">Reference (Optional)</Label>
+                            <Input
+                                id="reference"
+                                bind:value={$form.reference}
+                                placeholder="e.g. JIRA-123"
+                                autocomplete="off"
+                                disabled={!isOwner}
+                            />
+                            {#if $form.errors.reference}
+                                <span class="text-sm text-destructive"
+                                    >{$form.errors.reference}</span
+                                >
+                            {/if}
+                        </div>
+                        <div class="grid gap-2">
+                            <Label for="planned_on"
+                                >Planned for (Optional)</Label
                             >
-                        {/if}
-                    </div>
-                    <div class="grid gap-2">
-                        <Label for="planned_on">Planned for (Optional)</Label>
-                        <Input
-                            id="planned_on"
-                            type="date"
-                            min={today}
-                            bind:value={$form.planned_on}
-                            disabled={!isOwner}
-                        />
-                        {#if $form.errors.planned_on}
-                            <span class="text-sm text-destructive"
-                                >{$form.errors.planned_on}</span
-                            >
-                        {/if}
+                            <Input
+                                id="planned_on"
+                                type="date"
+                                min={today}
+                                bind:value={$form.planned_on}
+                                disabled={!isOwner}
+                            />
+                            {#if $form.errors.planned_on}
+                                <span class="text-sm text-destructive"
+                                    >{$form.errors.planned_on}</span
+                                >
+                            {/if}
+                        </div>
                     </div>
                     <div class="grid gap-2">
                         <Label for="description">Description (Optional)</Label>
                         <textarea
                             id="description"
+                            rows="5"
                             bind:value={$form.description}
-                            class="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                            class="flex min-h-[140px] w-full resize-y rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                             placeholder="Task details..."
                             disabled={!isOwner}
                         ></textarea>

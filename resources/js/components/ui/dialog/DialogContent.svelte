@@ -22,7 +22,7 @@
 </script>
 
 {#if open()}
-    <div class="fixed inset-0 z-50 flex items-center justify-center">
+    <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
         <button
             type="button"
             class="fixed inset-0 bg-black/50"
