@@ -32,9 +32,14 @@
         columns.filter((column) => column.value !== task.status),
     );
 
+    const MENU_WIDTH = 176;
+    const GAP = 4;
+    const EDGE = 8;
+
     let open = $state(false);
     let trigger = $state<HTMLButtonElement | null>(null);
     let menu = $state<HTMLDivElement | null>(null);
+    let position = $state({ top: 0, left: 0 });
 
     function itemElements(): HTMLButtonElement[] {
         if (!menu) return [];
@@ -53,11 +58,66 @@
     }
 
     function openMenu() {
+        if (trigger) {
+            const rect = trigger.getBoundingClientRect();
+
+            position = {
+                // Right-aligned to the trigger, kept inside the viewport.
+                left: Math.max(
+                    EDGE,
+                    Math.min(
+                        rect.right - MENU_WIDTH,
+                        window.innerWidth - MENU_WIDTH - EDGE,
+                    ),
+                ),
+                top: rect.bottom + GAP,
+            };
+        }
+
         open = true;
 
         // Focus moves into the menu once it is in the DOM.
         queueMicrotask(() => focusItem(0));
     }
+
+    // The menu is fixed-positioned so it is never clipped by the column's
+    // scroll container nor painted under the next card's trigger.
+    $effect(() => {
+        if (!open || !menu || !trigger) return;
+
+        const menuHeight = menu.offsetHeight;
+        const rect = trigger.getBoundingClientRect();
+        const overflowsBelow =
+            rect.bottom + GAP + menuHeight > window.innerHeight - EDGE;
+
+        position = {
+            left: Math.max(
+                EDGE,
+                Math.min(
+                    rect.right - MENU_WIDTH,
+                    window.innerWidth - MENU_WIDTH - EDGE,
+                ),
+            ),
+            top: overflowsBelow
+                ? Math.max(EDGE, rect.top - GAP - menuHeight)
+                : rect.bottom + GAP,
+        };
+    });
+
+    // Scrolling invalidates the fixed coordinates, so close instead of drifting.
+    $effect(() => {
+        if (!open) return;
+
+        const close = () => closeMenu(false);
+
+        window.addEventListener('scroll', close, true);
+        window.addEventListener('resize', close);
+
+        return () => {
+            window.removeEventListener('scroll', close, true);
+            window.removeEventListener('resize', close);
+        };
+    });
 
     function closeMenu(returnFocus = true) {
         open = false;
@@ -140,7 +200,10 @@
     {#if open}
         <div
             bind:this={menu}
-            class="absolute top-full right-0 z-20 mt-1 w-44 overflow-hidden rounded-md border border-border bg-popover p-1 text-popover-foreground shadow-lg"
+            class="fixed z-50 overflow-hidden rounded-md border border-border bg-popover p-1 text-popover-foreground shadow-lg"
+            style:top={`${position.top}px`}
+            style:left={`${position.left}px`}
+            style:width={`${MENU_WIDTH}px`}
             role="menu"
             aria-label={`Actions for ${task.title}`}
             tabindex="-1"
