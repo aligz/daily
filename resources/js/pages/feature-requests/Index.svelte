@@ -279,7 +279,7 @@
                                     e.key === 'Enter' && goToDetail(request)}
                             >
                                 <Card
-                                    class="shadow-none hover:shadow-md transition-shadow py-2 gap-1 border-transparent"
+                                    class="hover:border-border transition-colors py-2 gap-1 border-transparent"
                                 >
                                     <CardHeader class="p-2 pb-0 space-y-0">
                                         <div

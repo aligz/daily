@@ -29,7 +29,7 @@
             onclick={() => handleAppearanceChange(value)}
             class="flex items-center rounded-md px-3 py-1.5 transition-colors {appearance.value ===
             value
-                ? 'bg-card text-foreground shadow-xs'
+                ? 'bg-card text-foreground'
                 : 'text-muted-foreground hover:bg-accent hover:text-foreground'}"
         >
             <Icon class="-ml-1 h-4 w-4" />

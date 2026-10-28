@@ -62,6 +62,12 @@ const RULES = [
         pattern: /(?<![\w-])rounded(?![\w-])/g,
     },
     {
+        id: 'low-shadow',
+        level: 'warn',
+        message: 'low elevation — content surfaces are flat; shadows are for overlays (shadow-md / shadow-lg)',
+        pattern: /(?<![\w-])shadow-(?:xs|sm|2xl)\b/g,
+    },
+    {
         id: 'palette-colour',
         level: 'warn',
         message:

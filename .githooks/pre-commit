@@ -1,0 +1,16 @@
+#!/usr/bin/env sh
+# Design system guard: blocks a commit that leaves the type, spacing, radius,
+# shadow or colour scales. Install once with:
+#
+#   git config core.hooksPath .githooks
+#
+# Skip with: git commit --no-verify
+
+set -e
+
+if ! command -v node >/dev/null 2>&1; then
+    echo "design-lint: node not found, skipping" >&2
+    exit 0
+fi
+
+exec node scripts/design-lint.mjs

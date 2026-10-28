@@ -65,7 +65,7 @@
         onkeydown={handleKeydown}
     >
         <Card
-            class="shadow-none hover:shadow-md transition-shadow border-transparent py-2 gap-0"
+            class="border-transparent transition-colors hover:border-border py-2 gap-0"
         >
             <CardHeader class="p-3 pb-1 pr-9 space-y-0">
                 <div class="flex items-start justify-between gap-2">

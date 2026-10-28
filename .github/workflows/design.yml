@@ -1,0 +1,21 @@
+name: Design system
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+
+jobs:
+  lint:
+    name: Scales and tokens
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      # The script only reads files, so no install step is required.
+      - name: Design lint
+        run: node scripts/design-lint.mjs

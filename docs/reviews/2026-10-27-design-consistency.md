@@ -114,6 +114,28 @@ Dihapus (tidak dipakai rute mana pun, dikonfirmasi lewat `svelte-check` + grep):
 
 Dampak: bundle CSS 107.3 → 104.3 kB, dan allowlist `lint:design` menyusut jadi 2 file (`board-colors.ts`, `users.ts`).
 
+### Permukaan datar (28 Okt)
+
+Shadow dihapus dari semua permukaan konten; elevation hanya untuk overlay:
+
+| Elemen | Sebelum | Sesudah |
+|---|---|---|
+| `Input` | `shadow-sm` | tanpa shadow (border + focus ring) |
+| `Checkbox`, `InputOTP` slot | `shadow-xs` | tanpa shadow |
+| `Card` | `shadow-sm` | rata, border saja |
+| `Button` (default/secondary/destructive) | `shadow` / `shadow-sm` | tanpa shadow |
+| `AppearanceTabs` (pilihan aktif) | `shadow-xs` | `bg-card` saja |
+| Kartu task & feature request | `hover:shadow-md` | `hover:border-border` |
+| Dialog, sheet, menu, popover, skip link | `shadow-md`/`lg` | tetap (punya fungsi elevasi) |
+
+Diverifikasi lewat computed style: `boxShadow` input/kartu/tombol = `none` (input hanya punya ring fokus saat aktif), di light maupun dark.
+
+### Penjaga otomatis
+
+- `.github/workflows/design.yml` — GitHub Actions menjalankan `node scripts/design-lint.mjs` di setiap push/PR. Tidak butuh `npm ci` karena skripnya cuma membaca file.
+- `.githooks/pre-commit` — hook lokal, aktif dengan `git config core.hooksPath .githooks` (sudah dijalankan di clone ini). Lewati dengan `git commit --no-verify`.
+- Aturan baru: `shadow-xs|sm|2xl` → warning ("konten rata, shadow hanya untuk overlay").
+
 ### Status akhir
 
 | Cek | Hasil |
@@ -125,6 +147,8 @@ Dampak: bundle CSS 107.3 → 104.3 kB, dan allowlist `lint:design` menyusut jadi
 | Radius | 2 / 4 / 8 (+ full), tanpa `rounded` polos atau `xl` |
 | Tinggi kontrol | 24 / 32 / 36 / 40 |
 | Warna palette mentah | 0 di luar `board-colors.ts` & `users.ts` |
+| Shadow konten | 0 (hanya overlay) |
+| CI/pre-commit | aktif |
 
 
 ---
