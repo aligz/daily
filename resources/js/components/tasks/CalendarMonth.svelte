@@ -88,7 +88,7 @@
         </button>
         <button
             type="button"
-            class="rounded-sm border border-primary/40 bg-primary/10 px-2 py-0.5 text-xs text-primary transition-colors hover:bg-primary/15"
+            class="inline-flex h-6 items-center rounded-sm border border-primary/40 bg-primary/10 px-2 text-xs text-primary transition-colors hover:bg-primary/15"
             onclick={onToday}
         >
             Today

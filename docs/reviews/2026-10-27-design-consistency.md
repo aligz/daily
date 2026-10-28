@@ -90,10 +90,41 @@ Radius terukur: nav 4px, tombol 4px, chip toggle 2px, kartu 4px, dialog 8px — 
 
 `lint:design`: **0 error, 0 warning**.
 
-### Batch berikutnya
+### Batch 4 — ukuran komponen ✅
 
-- **4 — ukuran komponen**: tinggi kontrol 24/32/36/40, ikon 12/14/16/20, serta cek tap target di mobile.
-- Housekeeping: hapus komponen mati (`AppHeader`, `NavFooter`, `PlaceholderPattern`, `AuthSplitLayout`, `AppSidebar`, `AppHeaderLayout`, `AppSidebarLayout`) supaya allowlist lint bisa menyusut.
+- Tinggi kontrol diseragamkan ke **24 / 32 / 36 / 40**:
+  - `RoutineBar` footer & dialog note `h-7` (28) → `h-8` (32)
+  - `TaskViewToggle`, `Guide` ID/EN toggle, tombol "Today" di kalender → `h-6` (24)
+  - filter rentang tanggal di `/reports` `py-2` (37) → `h-8` (32)
+- Ikon sudah di 12/14/16/20 — tidak perlu diubah.
+
+Hasil ukur (computed, `button` + `a[role=button]`):
+
+| Halaman | Sebelum | Sesudah |
+|---|---|---|
+| `/tasks` | 32, 40 | 32, 40 |
+| `/tasks/calendar` | 23, 24, 28, 32, 40 | **24, 32, 40** |
+| `/guide` | 21, 40 | **24, 40** |
+| `/reports` | 37, 40 | **32, 40** |
+| `/feature-requests`, `/divisions`, `/settings` | 36, 40 | 36, 40 |
+
+### Housekeeping ✅
+
+Dihapus (tidak dipakai rute mana pun, dikonfirmasi lewat `svelte-check` + grep): `AppHeader`, `AppHeaderLayout`, `AppSidebar`, `AppSidebarHeader`, `AppSidebarLayout`, `NavMain`, `NavUser`, `NavFooter`, `PlaceholderPattern`, `AuthSplitLayout`.
+
+Dampak: bundle CSS 107.3 → 104.3 kB, dan allowlist `lint:design` menyusut jadi 2 file (`board-colors.ts`, `users.ts`).
+
+### Status akhir
+
+| Cek | Hasil |
+|---|---|
+| `npm run lint:design` | 0 error, 0 warning |
+| `svelte-check` | 0 error (13 warning lama di halaman feature-request) |
+| Pest | 141 passed, 2 skipped |
+| Ukuran font per halaman | 6–7 (dari 8–11) |
+| Radius | 2 / 4 / 8 (+ full), tanpa `rounded` polos atau `xl` |
+| Tinggi kontrol | 24 / 32 / 36 / 40 |
+| Warna palette mentah | 0 di luar `board-colors.ts` & `users.ts` |
 
 
 ---

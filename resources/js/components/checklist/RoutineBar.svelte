@@ -366,14 +366,14 @@
                 <Button
                     variant="ghost"
                     size="sm"
-                    class="h-7 px-2 text-dense"
+                    class="h-8 px-2 text-dense"
                     onclick={() => (noteOpen = false)}
                 >
                     Cancel
                 </Button>
                 <Button
                     size="sm"
-                    class="h-7 px-2 text-dense"
+                    class="h-8 px-2 text-dense"
                     onclick={saveNote}
                 >
                     Save note
@@ -389,7 +389,7 @@
             <Button
                 variant="ghost"
                 size="sm"
-                class="h-7 px-2 text-dense"
+                class="h-8 px-2 text-dense"
                 onclick={openCreate}
             >
                 <Plus class="h-3 w-3" aria-hidden="true" />
@@ -398,7 +398,7 @@
             <Button
                 variant="ghost"
                 size="sm"
-                class="h-7 px-2 text-dense"
+                class="h-8 px-2 text-dense"
                 onclick={openNote}
             >
                 <Pencil class="h-3 w-3" aria-hidden="true" />

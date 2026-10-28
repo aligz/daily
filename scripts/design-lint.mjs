@@ -25,15 +25,10 @@ const STRICT = process.argv.includes('--strict');
  * Files where raw palette colours are intentional:
  * - board-colors.ts: per-stage identity colours for the two kanban boards
  * - users.ts: hashed avatar colours, one per user
- * - the rest is dead code left over from the starter kit (no route renders it)
  */
 const PALETTE_ALLOWED_FILES = new Set([
     'resources/js/lib/board-colors.ts',
     'resources/js/lib/users.ts',
-    'resources/js/components/AppHeader.svelte',
-    'resources/js/components/NavFooter.svelte',
-    'resources/js/components/PlaceholderPattern.svelte',
-    'resources/js/layouts/auth/AuthSplitLayout.svelte',
 ]);
 
 const RULES = [

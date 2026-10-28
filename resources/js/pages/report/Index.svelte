@@ -113,7 +113,7 @@
                 <div class="flex gap-2">
                     {#each dateRanges as days (days)}
                         <button
-                            class="px-4 py-2 rounded-md text-sm font-medium transition-colors {dateRange ===
+                            class="inline-flex h-8 items-center rounded-md px-3 text-sm font-medium transition-colors {dateRange ===
                             days
                                 ? 'bg-primary text-primary-foreground'
                                 : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'}"

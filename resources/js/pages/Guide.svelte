@@ -163,7 +163,7 @@
                         type="button"
                         aria-pressed={lang === 'id'}
                         onclick={() => choose('id')}
-                        class="rounded-sm px-2 py-0.5 text-xs font-semibold transition-colors {lang ===
+                        class="h-6 rounded-sm px-2 text-xs font-semibold transition-colors {lang ===
                         'id'
                             ? 'bg-foreground text-background'
                             : 'text-muted-foreground hover:bg-accent hover:text-foreground'}"
@@ -174,7 +174,7 @@
                         type="button"
                         aria-pressed={lang === 'en'}
                         onclick={() => choose('en')}
-                        class="rounded-sm px-2 py-0.5 text-xs font-semibold transition-colors {lang ===
+                        class="h-6 rounded-sm px-2 text-xs font-semibold transition-colors {lang ===
                         'en'
                             ? 'bg-foreground text-background'
                             : 'text-muted-foreground hover:bg-accent hover:text-foreground'}"

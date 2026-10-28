@@ -17,7 +17,7 @@
     } = $props();
 
     const base =
-        'inline-flex items-center gap-1.5 rounded-sm px-2 py-1 text-2xs transition-colors';
+        'inline-flex h-6 items-center gap-1.5 rounded-sm px-2 text-2xs transition-colors';
     const activeClasses =
         'bg-muted text-foreground shadow-[inset_0_0_0_1px_var(--border)]';
     const inactiveClasses = 'text-muted-foreground hover:text-foreground';
