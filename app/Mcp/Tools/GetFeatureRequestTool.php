@@ -34,7 +34,7 @@ class GetFeatureRequestTool extends Tool
             }
 
             $data = $request->toArray();
-            $data['is_overdue'] = $request->deadline->isPast() && $request->status !== 'released';
+            $data['is_overdue'] = (bool) $request->deadline?->isPast() && $request->status !== 'released';
 
             return Response::json($data);
         }
@@ -58,6 +58,8 @@ class GetFeatureRequestTool extends Tool
             $query->where(function ($q) use ($search): void {
                 $q->where('title', 'like', "%{$search}%")
                     ->orWhere('description', 'like', "%{$search}%")
+                    ->orWhere('change_reason', 'like', "%{$search}%")
+                    ->orWhere('proposed_action', 'like', "%{$search}%")
                     ->orWhere('requester_name', 'like', "%{$search}%");
             });
         }
@@ -76,7 +78,7 @@ class GetFeatureRequestTool extends Tool
             ->get()
             ->map(function ($item) {
                 $data = $item->toArray();
-                $data['is_overdue'] = $item->deadline->isPast() && $item->status !== 'released';
+                $data['is_overdue'] = (bool) $item->deadline?->isPast() && $item->status !== 'released';
 
                 return $data;
             });

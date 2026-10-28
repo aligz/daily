@@ -204,7 +204,7 @@ export const id: GuideCopy = {
             },
             {
                 lead: 'Feature Requests',
-                body: 'adalah daftar terpisah untuk permintaan dari divisi lain, dengan prioritas dan deadline sendiri. Bukan bagian dari board harianmu.',
+                body: 'adalah daftar terpisah untuk permintaan dari divisi lain. Siapa pun di jaringan kantor bisa menekan New Request, memilih divisinya, lalu mengirim tanpa akun. Prioritas dan deadline diisi tim setelahnya; sampai saat itu kartunya bertuliskan Unset dan No deadline.',
             },
         ],
     },

@@ -11,6 +11,7 @@
         Mail,
         Phone,
     } from 'lucide-svelte';
+    import { untrack } from 'svelte';
     import AppHead from '@/components/AppHead.svelte';
     import { Badge } from '@/components/ui/badge';
     import { Button } from '@/components/ui/button';
@@ -21,7 +22,9 @@
         CardHeader,
         CardTitle,
     } from '@/components/ui/card';
+    import { Input } from '@/components/ui/input';
     import { Label } from '@/components/ui/label';
+    import { Textarea } from '@/components/ui/textarea';
     import AppLayout from '@/layouts/AppLayout.svelte';
     import { featureStatusBadgeStyles } from '@/lib/board-colors';
     import {
@@ -44,30 +47,44 @@
         id: number;
         title: string;
         description: string | null;
+        change_reason: string | null;
+        proposed_action: string | null;
+        effect_on_organization: string | null;
+        effect_of_not_approving: string | null;
         requester_name: string;
         requester_email: string | null;
         requester_phone: string | null;
-        priority: 'low' | 'medium' | 'high' | 'urgent';
+        priority: 'low' | 'medium' | 'high' | 'urgent' | null;
         status: 'new' | 'planning' | 'development' | 'done' | 'released';
-        deadline: string;
+        deadline: string | null;
         notes: string | null;
         released_at: string | null;
         created_at: string;
         updated_at: string;
-        user: User;
+        user: User | null;
         division: Division;
     }
 
-    let { featureRequest }: { featureRequest: FeatureRequest } = $props();
+    let {
+        featureRequest,
+        isPublic,
+    }: { featureRequest: FeatureRequest; isPublic: boolean } = $props();
 
     const auth = $derived($page.props.auth);
 
     const statuses = ['new', 'planning', 'development', 'done', 'released'];
+    const priorities = ['low', 'medium', 'high', 'urgent'];
 
-    const form = useForm({
-        status: featureRequest.status,
-        notes: featureRequest.notes || '',
-    });
+    const form = useForm(
+        untrack(() => ({
+            status: featureRequest.status,
+            priority: featureRequest.priority ?? '',
+            deadline: featureRequest.deadline
+                ? featureRequest.deadline.split('T')[0]
+                : '',
+            notes: featureRequest.notes || '',
+        })),
+    );
 
     function submit() {
         $form.put(`/feature-requests/${featureRequest.id}`, {
@@ -118,8 +135,14 @@
         });
     }
 
-    function isOverdue(deadline: string): boolean {
-        return new Date(deadline) < new Date();
+    function isOverdue(deadline: string | null): boolean {
+        return Boolean(deadline) && new Date(deadline as string) < new Date();
+    }
+
+    function priorityLabel(priority: string | null): string {
+        return priority
+            ? priority.charAt(0).toUpperCase() + priority.slice(1)
+            : 'Not set';
     }
 </script>
 
@@ -143,9 +166,15 @@
                     {featureRequest.title}
                 </h1>
                 <p class="text-muted-foreground">
-                    Created by {featureRequest.user.name} on {formatDateTime(
-                        featureRequest.created_at,
-                    )}
+                    {#if featureRequest.user}
+                        Created by {featureRequest.user.name} on {formatDateTime(
+                            featureRequest.created_at,
+                        )}
+                    {:else}
+                        Submitted via public form on {formatDateTime(
+                            featureRequest.created_at,
+                        )}
+                    {/if}
                 </p>
             </div>
             <div class="flex gap-2">
@@ -217,13 +246,10 @@
                                     <Badge
                                         variant="secondary"
                                         class={getPriorityBadgeColor(
-                                            featureRequest.priority,
+                                            featureRequest.priority ?? '',
                                         )}
                                     >
-                                        {featureRequest.priority
-                                            .charAt(0)
-                                            .toUpperCase() +
-                                            featureRequest.priority.slice(1)}
+                                        {priorityLabel(featureRequest.priority)}
                                     </Badge>
                                 </div>
                             </div>
@@ -247,26 +273,80 @@
                                 <Label class="text-sm text-muted-foreground"
                                     >Deadline</Label
                                 >
-                                <p
-                                    class="font-medium flex items-center gap-2 {isOverdue(
-                                        featureRequest.deadline,
-                                    ) && featureRequest.status !== 'released'
-                                        ? 'text-destructive'
-                                        : ''}"
-                                >
-                                    <Calendar class="h-4 w-4" />
-                                    {formatDate(featureRequest.deadline)}
-                                    {#if isOverdue(featureRequest.deadline) && featureRequest.status !== 'released'}
-                                        <Badge
-                                            variant="destructive"
-                                            class="text-xs">Overdue</Badge
-                                        >
-                                    {/if}
-                                </p>
+                                {#if featureRequest.deadline}
+                                    <p
+                                        class="font-medium flex items-center gap-2 {isOverdue(
+                                            featureRequest.deadline,
+                                        ) &&
+                                        featureRequest.status !== 'released'
+                                            ? 'text-destructive'
+                                            : ''}"
+                                    >
+                                        <Calendar class="h-4 w-4" />
+                                        {formatDate(featureRequest.deadline)}
+                                        {#if isOverdue(featureRequest.deadline) && featureRequest.status !== 'released'}
+                                            <Badge
+                                                variant="destructive"
+                                                class="text-xs">Overdue</Badge
+                                            >
+                                        {/if}
+                                    </p>
+                                {:else}
+                                    <p
+                                        class="mt-1 text-sm text-muted-foreground"
+                                    >
+                                        Not set yet
+                                    </p>
+                                {/if}
                             </div>
                         </div>
                     </CardContent>
                 </Card>
+
+                <!-- Change Request -->
+                {#if featureRequest.change_reason || featureRequest.proposed_action || featureRequest.effect_on_organization || featureRequest.effect_of_not_approving}
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Change Request</CardTitle>
+                        </CardHeader>
+                        <CardContent class="space-y-4">
+                            <div>
+                                <Label class="text-sm text-muted-foreground"
+                                    >Change reason</Label
+                                >
+                                <p class="mt-1 whitespace-pre-wrap text-sm">
+                                    {featureRequest.change_reason ?? '—'}
+                                </p>
+                            </div>
+                            <div>
+                                <Label class="text-sm text-muted-foreground"
+                                    >Proposed action</Label
+                                >
+                                <p class="mt-1 whitespace-pre-wrap text-sm">
+                                    {featureRequest.proposed_action ?? '—'}
+                                </p>
+                            </div>
+                            <div>
+                                <Label class="text-sm text-muted-foreground"
+                                    >Effect on the organization</Label
+                                >
+                                <p class="mt-1 whitespace-pre-wrap text-sm">
+                                    {featureRequest.effect_on_organization ??
+                                        '—'}
+                                </p>
+                            </div>
+                            <div>
+                                <Label class="text-sm text-muted-foreground"
+                                    >Effect of NOT approving this change</Label
+                                >
+                                <p class="mt-1 whitespace-pre-wrap text-sm">
+                                    {featureRequest.effect_of_not_approving ??
+                                        '—'}
+                                </p>
+                            </div>
+                        </CardContent>
+                    </Card>
+                {/if}
 
                 <!-- PIC Information -->
                 <Card>
@@ -302,12 +382,13 @@
             <!-- Sidebar -->
             <div class="space-y-6">
                 {#if auth.user}
-                    <!-- Status Update -->
+                    <!-- Triage -->
                     <Card>
                         <CardHeader>
-                            <CardTitle>Update Status</CardTitle>
+                            <CardTitle>Triage</CardTitle>
                             <CardDescription
-                                >Change the status of this request</CardDescription
+                                >Set priority and deadline, then move the
+                                status.</CardDescription
                             >
                         </CardHeader>
                         <CardContent>
@@ -337,13 +418,51 @@
                                 </div>
 
                                 <div class="grid gap-2">
+                                    <Label for="priority">Priority</Label>
+                                    <select
+                                        id="priority"
+                                        bind:value={$form.priority}
+                                        class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                                    >
+                                        <option value="">Not set</option>
+                                        {#each priorities as priority (priority)}
+                                            <option value={priority}
+                                                >{priority
+                                                    .charAt(0)
+                                                    .toUpperCase() +
+                                                    priority.slice(1)}</option
+                                            >
+                                        {/each}
+                                    </select>
+                                    {#if $form.errors.priority}
+                                        <span class="text-sm text-destructive"
+                                            >{$form.errors.priority}</span
+                                        >
+                                    {/if}
+                                </div>
+
+                                <div class="grid gap-2">
+                                    <Label for="deadline">Deadline</Label>
+                                    <Input
+                                        id="deadline"
+                                        type="date"
+                                        bind:value={$form.deadline}
+                                    />
+                                    {#if $form.errors.deadline}
+                                        <span class="text-sm text-destructive"
+                                            >{$form.errors.deadline}</span
+                                        >
+                                    {/if}
+                                </div>
+
+                                <div class="grid gap-2">
                                     <Label for="notes">Notes</Label>
-                                    <textarea
+                                    <Textarea
                                         id="notes"
                                         bind:value={$form.notes}
-                                        class="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                        rows={3}
                                         placeholder="Add notes about this request..."
-                                    ></textarea>
+                                    />
                                 </div>
 
                                 <Button
@@ -352,7 +471,7 @@
                                     class="w-full"
                                 >
                                     <Save class="mr-2 h-4 w-4" />
-                                    Update Status
+                                    Save triage
                                 </Button>
                             </form>
                         </CardContent>
@@ -367,7 +486,11 @@
                     <CardContent class="space-y-3 text-sm">
                         <div class="flex justify-between">
                             <span class="text-muted-foreground">Reporter</span>
-                            <span>{featureRequest.user.name}</span>
+                            <span
+                                >{isPublic
+                                    ? 'Public form'
+                                    : (featureRequest.user?.name ?? '—')}</span
+                            >
                         </div>
                         <div class="flex justify-between">
                             <span class="text-muted-foreground">Created</span>

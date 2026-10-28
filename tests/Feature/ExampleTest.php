@@ -2,10 +2,9 @@
 
 use App\Models\User;
 
-test('returns a successful response for guest', function () {
-    $response = $this->get(route('home'));
-
-    $response->assertOk();
+test('redirects guests to the feature request board', function () {
+    $this->get(route('home'))
+        ->assertRedirect(route('feature-requests.index'));
 });
 
 test('redirects to tasks index for authenticated user', function () {

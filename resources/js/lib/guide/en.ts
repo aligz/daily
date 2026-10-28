@@ -204,7 +204,7 @@ export const en: GuideCopy = {
             },
             {
                 lead: 'Feature Requests',
-                body: 'is a separate list for requests coming from other divisions, with its own priorities and deadlines. It is not part of your daily board.',
+                body: 'is a separate list for requests coming from other divisions. Anyone on the office network can hit New Request, pick their division, and submit one without an account. Priority and deadline are set by the team afterwards; until then the card reads Unset and No deadline.',
             },
         ],
     },

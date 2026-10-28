@@ -11,11 +11,11 @@ class FeatureRequestController extends Controller
 {
     public function index()
     {
-        $featureRequests = FeatureRequest::with(['user', 'division'])
+        $featureRequests = FeatureRequest::with(['user:id,name', 'division:id,name'])
             ->latest()
             ->get();
 
-        $divisions = Division::all();
+        $divisions = Division::orderBy('name')->get(['id', 'name']);
 
         return Inertia::render('feature-requests/Index', [
             'featureRequests' => $featureRequests,
@@ -25,7 +25,7 @@ class FeatureRequestController extends Controller
 
     public function create()
     {
-        $divisions = Division::all();
+        $divisions = Division::orderBy('name')->get(['id', 'name']);
 
         return Inertia::render('feature-requests/Create', [
             'divisions' => $divisions,
@@ -34,38 +34,54 @@ class FeatureRequestController extends Controller
 
     public function store(Request $request)
     {
-        $validated = $request->validate([
+        $user = $request->user();
+
+        $rules = [
             'division_id' => 'required|exists:divisions,id',
             'requester_name' => 'required|string|max:255',
             'requester_email' => 'nullable|email|max:255',
             'requester_phone' => 'nullable|string|max:50',
             'title' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'priority' => 'required|in:low,medium,high,urgent',
-            'deadline' => 'required|date|after_or_equal:today',
-        ]);
+            'description' => 'required|string',
+            'change_reason' => 'required|string',
+            'proposed_action' => 'required|string',
+            'effect_on_organization' => 'required|string',
+            'effect_of_not_approving' => 'required|string',
+        ];
 
-        $validated['user_id'] = auth()->id();
+        // Only signed-in users triage the request; division users never see
+        // these fields, and anything they inject is ignored below.
+        if ($user) {
+            $rules['priority'] = 'required|in:low,medium,high,urgent';
+            $rules['deadline'] = 'required|date|after_or_equal:today';
+        }
+
+        $validated = $request->validate($rules);
+
+        $validated['user_id'] = $user?->id;
         $validated['status'] = 'new';
+        $validated['priority'] ??= null;
+        $validated['deadline'] ??= null;
 
-        FeatureRequest::create($validated);
+        $featureRequest = FeatureRequest::create($validated);
 
-        return redirect()->route('feature-requests.index');
+        return redirect()->route('feature-requests.show', $featureRequest);
     }
 
     public function show(FeatureRequest $featureRequest)
     {
-        $featureRequest->load(['user', 'division']);
+        $featureRequest->load(['user:id,name', 'division:id,name']);
 
         return Inertia::render('feature-requests/Show', [
             'featureRequest' => $featureRequest,
+            'isPublic' => $featureRequest->user_id === null,
         ]);
     }
 
     public function edit(FeatureRequest $featureRequest)
     {
         $featureRequest->load(['division']);
-        $divisions = Division::all();
+        $divisions = Division::orderBy('name')->get(['id', 'name']);
 
         return Inertia::render('feature-requests/Edit', [
             'featureRequest' => $featureRequest,
@@ -82,9 +98,13 @@ class FeatureRequestController extends Controller
             'requester_phone' => 'nullable|string|max:50',
             'title' => 'sometimes|string|max:255',
             'description' => 'nullable|string',
-            'priority' => 'sometimes|in:low,medium,high,urgent',
+            'change_reason' => 'nullable|string',
+            'proposed_action' => 'nullable|string',
+            'effect_on_organization' => 'nullable|string',
+            'effect_of_not_approving' => 'nullable|string',
+            'priority' => 'sometimes|nullable|in:low,medium,high,urgent',
             'status' => 'sometimes|in:new,planning,development,done,released',
-            'deadline' => 'sometimes|date|after_or_equal:today',
+            'deadline' => 'sometimes|nullable|date',
             'notes' => 'nullable|string',
             'released_at' => 'nullable|date',
         ]);

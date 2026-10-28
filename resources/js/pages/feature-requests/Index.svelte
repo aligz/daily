@@ -1,6 +1,13 @@
 <script lang="ts">
     import { page, router } from '@inertiajs/svelte';
-    import { Plus, Calendar, Building2, User as UserIcon } from 'lucide-svelte';
+    import {
+        Plus,
+        Calendar,
+        Building2,
+        Clock,
+        Globe,
+        User as UserIcon,
+    } from 'lucide-svelte';
     import AppHead from '@/components/AppHead.svelte';
     import { Avatar, AvatarFallback } from '@/components/ui/avatar';
     import { Badge } from '@/components/ui/badge';
@@ -40,13 +47,13 @@
         requester_name: string;
         requester_email: string | null;
         requester_phone: string | null;
-        priority: 'low' | 'medium' | 'high' | 'urgent';
+        priority: 'low' | 'medium' | 'high' | 'urgent' | null;
         status: 'new' | 'planning' | 'development' | 'done' | 'released';
-        deadline: string;
+        deadline: string | null;
         notes: string | null;
         released_at: string | null;
         created_at: string;
-        user: User;
+        user: User | null;
         division: Division;
     }
 
@@ -115,9 +122,15 @@
         return colors[priority] || 'bg-muted text-muted-foreground';
     }
 
-    function isOverdue(deadline: string, status: string): boolean {
-        if (status === 'released') return false;
+    function isOverdue(deadline: string | null, status: string): boolean {
+        if (!deadline || status === 'released') return false;
         return new Date(deadline) < new Date();
+    }
+
+    function priorityLabel(priority: string | null): string {
+        return priority
+            ? priority.charAt(0).toUpperCase() + priority.slice(1)
+            : 'Unset';
     }
 
     function formatDate(date: string): string {
@@ -174,14 +187,12 @@
             <h1 class="text-2xl font-bold tracking-tight">Feature Requests</h1>
 
             <div class="flex gap-4">
-                {#if auth.user}
-                    <a href={featureRequestsCreate.url()}>
-                        <Button>
-                            <Plus class="mr-2 h-4 w-4" />
-                            New Request
-                        </Button>
-                    </a>
-                {/if}
+                <a href={featureRequestsCreate.url()}>
+                    <Button>
+                        <Plus class="mr-2 h-4 w-4" />
+                        New Request
+                    </Button>
+                </a>
             </div>
         </div>
 
@@ -293,13 +304,12 @@
                                             <Badge
                                                 variant="secondary"
                                                 class="shrink-0 text-3xs {getPriorityBadgeColor(
-                                                    request.priority,
+                                                    request.priority ?? '',
                                                 )}"
                                             >
-                                                {request.priority
-                                                    .charAt(0)
-                                                    .toUpperCase() +
-                                                    request.priority.slice(1)}
+                                                {priorityLabel(
+                                                    request.priority,
+                                                )}
                                             </Badge>
                                         </div>
                                     </CardHeader>
@@ -349,50 +359,71 @@
                                                 >
                                             </div>
                                         {/if}
-                                        <div
-                                            class="flex items-center gap-1.5 text-xs {isOverdue(
-                                                request.deadline,
-                                                request.status,
-                                            )
-                                                ? 'text-destructive font-medium'
-                                                : 'text-muted-foreground'}"
-                                        >
-                                            <Calendar
-                                                class="h-3 w-3 shrink-0"
-                                            />
-                                            <span
-                                                >{formatDate(
+                                        {#if request.deadline}
+                                            <div
+                                                class="flex items-center gap-1.5 text-xs {isOverdue(
                                                     request.deadline,
-                                                )}</span
+                                                    request.status,
+                                                )
+                                                    ? 'text-destructive font-medium'
+                                                    : 'text-muted-foreground'}"
                                             >
-                                            {#if isOverdue(request.deadline, request.status)}
-                                                <Badge
-                                                    variant="destructive"
-                                                    class="text-3xs px-1 py-0"
-                                                    >Overdue</Badge
+                                                <Calendar
+                                                    class="h-3 w-3 shrink-0"
+                                                />
+                                                <span
+                                                    >{formatDate(
+                                                        request.deadline,
+                                                    )}</span
                                                 >
-                                            {/if}
-                                        </div>
+                                                {#if isOverdue(request.deadline, request.status)}
+                                                    <Badge
+                                                        variant="destructive"
+                                                        class="text-3xs px-1 py-0"
+                                                        >Overdue</Badge
+                                                    >
+                                                {/if}
+                                            </div>
+                                        {:else}
+                                            <div
+                                                class="flex items-center gap-1.5 text-xs text-muted-foreground"
+                                            >
+                                                <Clock
+                                                    class="h-3 w-3 shrink-0"
+                                                />
+                                                <span>No deadline</span>
+                                            </div>
+                                        {/if}
 
                                         <!-- Reporter -->
                                         <div
                                             class="flex items-center gap-1.5 pt-1 border-t border-border/50"
                                         >
-                                            <Avatar class="h-4 w-4">
-                                                <AvatarFallback
-                                                    class="text-3xs {getUserColor(
-                                                        request.user.name,
-                                                    )}"
+                                            {#if request.user}
+                                                <Avatar class="h-4 w-4">
+                                                    <AvatarFallback
+                                                        class="text-3xs {getUserColor(
+                                                            request.user.name,
+                                                        )}"
+                                                    >
+                                                        {getInitials(
+                                                            request.user.name,
+                                                        )}
+                                                    </AvatarFallback>
+                                                </Avatar>
+                                                <span
+                                                    class="text-3xs text-muted-foreground"
+                                                    >{request.user.name}</span
                                                 >
-                                                    {getInitials(
-                                                        request.user.name,
-                                                    )}
-                                                </AvatarFallback>
-                                            </Avatar>
-                                            <span
-                                                class="text-3xs text-muted-foreground"
-                                                >{request.user.name}</span
-                                            >
+                                            {:else}
+                                                <Globe
+                                                    class="h-3.5 w-3.5 shrink-0 text-muted-foreground"
+                                                />
+                                                <span
+                                                    class="text-3xs text-muted-foreground"
+                                                    >Public form</span
+                                                >
+                                            {/if}
                                         </div>
                                     </CardContent>
                                 </Card>
