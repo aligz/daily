@@ -18,23 +18,15 @@
         task,
         mine,
         metric,
-        canMoveUp = false,
-        canMoveDown = false,
         onOpen,
         onDragStart,
-        onMoveUp,
-        onMoveDown,
         onMove,
     }: {
         task: BoardTask;
         mine: boolean;
         metric?: TaskMetric;
-        canMoveUp?: boolean;
-        canMoveDown?: boolean;
         onOpen: (task: BoardTask) => void;
         onDragStart: (event: DragEvent, task: BoardTask) => void;
-        onMoveUp?: () => void;
-        onMoveDown?: () => void;
         onMove: (status: BoardTask['status']) => void;
     } = $props();
 
@@ -106,15 +98,7 @@
         <!-- No z-index here: it would create a stacking context that traps the
              fixed menu below the next card's trigger. The menu carries z-50. -->
         <div class="absolute right-1 top-1">
-            <TaskCardMenu
-                {task}
-                {canMoveUp}
-                {canMoveDown}
-                {onMoveUp}
-                {onMoveDown}
-                {onMove}
-                onEdit={() => onOpen(task)}
-            />
+            <TaskCardMenu {task} {onMove} onEdit={() => onOpen(task)} />
         </div>
     {/if}
 </article>

@@ -5,24 +5,16 @@
 
     let {
         task,
-        canMoveUp = false,
-        canMoveDown = false,
-        onMoveUp,
-        onMoveDown,
         onMove,
         onEdit,
     }: {
         task: BoardTask;
-        canMoveUp?: boolean;
-        canMoveDown?: boolean;
-        onMoveUp?: () => void;
-        onMoveDown?: () => void;
         onMove: (status: BoardTask['status']) => void;
         onEdit: () => void;
     } = $props();
 
     const columns: { value: BoardTask['status']; label: string }[] = [
-        { value: 'backlog', label: 'Backlog' },
+        { value: 'backlog', label: 'Planning' },
         { value: 'todo', label: 'Todo' },
         { value: 'today', label: 'Today' },
         { value: 'done', label: 'Done' },
@@ -213,39 +205,6 @@
             }}
             onkeydown={handleMenuKeydown}
         >
-            {#if onMoveUp || onMoveDown}
-                <button
-                    type="button"
-                    role="menuitem"
-                    tabindex="-1"
-                    disabled={!canMoveUp}
-                    class="block w-full rounded-sm px-2 py-1.5 text-left text-dense hover:bg-accent focus-visible:bg-accent focus-visible:outline-none disabled:opacity-40"
-                    onclick={(event) => {
-                        event.stopPropagation();
-                        closeMenu();
-                        onMoveUp?.();
-                    }}
-                >
-                    Move up
-                </button>
-                <button
-                    type="button"
-                    role="menuitem"
-                    tabindex="-1"
-                    disabled={!canMoveDown}
-                    class="block w-full rounded-sm px-2 py-1.5 text-left text-dense hover:bg-accent focus-visible:bg-accent focus-visible:outline-none disabled:opacity-40"
-                    onclick={(event) => {
-                        event.stopPropagation();
-                        closeMenu();
-                        onMoveDown?.();
-                    }}
-                >
-                    Move down
-                </button>
-
-                <div class="my-1 h-px bg-border" aria-hidden="true"></div>
-            {/if}
-
             {#each targets as target (target.value)}
                 <button
                     type="button"

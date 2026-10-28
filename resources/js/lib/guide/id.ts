@@ -36,7 +36,7 @@ export const id: GuideCopy = {
         intro: 'Board adalah tempat kerja bergerak. Tiap kolom adalah satu tahap; kartu berjalan dari kiri ke kanan makin dekat ke selesai. Satu kartu milik satu orang, dan hanya orang itu yang bisa memindahkannya.',
         columns: [
             {
-                name: 'Backlog',
+                name: 'Planning',
                 what: 'Hal yang layak dikerjakan, tapi belum dijanjikan.',
                 how: 'Simpan ide di sini tanpa harus berkomitmen.',
             },
@@ -63,8 +63,8 @@ export const id: GuideCopy = {
                 body: 'kartu ke kolom lain. Perubahan langsung tersimpan begitu kartunya dilepas.',
             },
             {
-                lead: 'Arahkan kursor',
-                body: 'ke kartu di Backlog atau Todo, lalu pakai tombol ↑ ↓ untuk mengatur urutanmu sendiri di kolom itu.',
+                lead: 'Urutan',
+                body: 'Planning dan Todo selalu diurutkan dari yang terbaru, jadi kartu yang baru kamu tambahkan langsung ada di paling atas.',
             },
             {
                 lead: 'Klik',

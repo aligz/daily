@@ -280,3 +280,41 @@ test('the board exposes the planned date for card badges', function () {
             ->where('tasks.todo.0.id', $task->id)
             ->where('tasks.todo.0.planned_on', '2026-10-30'));
 });
+
+test('planning and todo columns are ordered newest first', function () {
+    $user = User::factory()->create();
+
+    $oldest = Task::factory()->for($user)->create([
+        'status' => 'todo',
+        'title' => 'Oldest',
+        'created_at' => now()->subDays(3),
+    ]);
+    $middle = Task::factory()->for($user)->create([
+        'status' => 'todo',
+        'title' => 'Middle',
+        'created_at' => now()->subDay(),
+    ]);
+    $newest = Task::factory()->for($user)->create([
+        'status' => 'todo',
+        'title' => 'Newest',
+        'created_at' => now(),
+    ]);
+
+    actingAs($user)
+        ->get(route('tasks.index'))
+        ->assertInertia(fn ($page) => $page
+            ->where('tasks.todo.0.id', $newest->id)
+            ->where('tasks.todo.1.id', $middle->id)
+            ->where('tasks.todo.2.id', $oldest->id));
+});
+
+test('the board exposes every user so anyone can filter', function () {
+    $viewer = User::factory()->create();
+    $teammate = User::factory()->create();
+
+    actingAs($viewer)
+        ->get(route('tasks.index'))
+        ->assertInertia(fn ($page) => $page
+            ->where('users', fn ($users) => collect($users)->pluck('id')->contains($teammate->id))
+        );
+});

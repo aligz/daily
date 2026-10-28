@@ -36,7 +36,7 @@ export const en: GuideCopy = {
         intro: 'The board is where work moves. Each column is a stage; cards travel left to right as work gets closer to done. A card belongs to one person, and only that person moves it.',
         columns: [
             {
-                name: 'Backlog',
+                name: 'Planning',
                 what: 'Things worth doing, not yet promised.',
                 how: 'Park ideas here without committing to them.',
             },
@@ -63,8 +63,8 @@ export const en: GuideCopy = {
                 body: 'a card to another column. The change saves as soon as you drop it.',
             },
             {
-                lead: 'Hover',
-                body: 'a card in Backlog or Todo and use the ↑ ↓ buttons to set your own order inside the column.',
+                lead: 'Order',
+                body: 'Planning and Todo stay sorted newest first, so a card you just added is already at the top.',
             },
             {
                 lead: 'Click',

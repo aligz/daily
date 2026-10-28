@@ -38,10 +38,17 @@
     } = $props();
 
     const boards = ['backlog', 'todo', 'today', 'done'];
+    const boardLabels: Record<string, string> = {
+        backlog: 'Planning',
+        todo: 'Todo',
+        today: 'Today',
+        done: 'Done',
+    };
     const today = todayInAppTimezone();
+    const currentUserId = $page.props.auth.user.id;
 
-    // Filter State
-    let selectedUserId = $state<number | null>(null);
+    // Defaults to the signed-in user; "All users" is still one click away.
+    let selectedUserId = $state<number | null>(currentUserId);
 
     // Filtered Tasks
     let filteredTasks = $derived.by(() => {
@@ -57,23 +64,6 @@
         return filtered;
     });
 
-    const myTasksByBoard = $derived.by(() => {
-        const currentUserId = $page.props.auth.user.id;
-        const result: Record<string, Task[]> = {};
-
-        for (const board of ['backlog', 'todo']) {
-            result[board] = (filteredTasks[board] ?? [])
-                .filter((task) => task.user.id === currentUserId)
-                .slice()
-                .sort(
-                    (first, second) =>
-                        (first.position ?? 0) - (second.position ?? 0),
-                );
-        }
-
-        return result;
-    });
-
     // Move Task Logic
     function moveTask(task: Task, newStatus: string) {
         if (task.status === newStatus) return;
@@ -85,41 +75,6 @@
             {
                 preserveScroll: true,
             },
-        );
-    }
-
-    function reorderTask(task: Task, direction: 'up' | 'down') {
-        const board = task.status as 'backlog' | 'todo';
-        const myTasks = (filteredTasks[board] || [])
-            .filter((t) => t.user.id === $page.props.auth.user.id)
-            .slice()
-            .sort((a, b) => (a.position ?? 0) - (b.position ?? 0));
-
-        const idx = myTasks.findIndex((t) => t.id === task.id);
-        if (idx === -1) return;
-
-        let newPosition: number;
-
-        if (direction === 'up') {
-            if (idx === 0) return;
-            const prev = myTasks[idx - 1];
-            const prevPrev = myTasks[idx - 2];
-            newPosition = prevPrev
-                ? (prevPrev.position! + prev.position!) / 2
-                : prev.position! / 2;
-        } else {
-            if (idx === myTasks.length - 1) return;
-            const next = myTasks[idx + 1];
-            const nextNext = myTasks[idx + 2];
-            newPosition = nextNext
-                ? (next.position! + nextNext.position!) / 2
-                : next.position! + 1.0;
-        }
-
-        router.patch(
-            `/tasks/${task.id}/reorder`,
-            { position: newPosition },
-            { preserveScroll: true },
         );
     }
 
@@ -433,7 +388,7 @@
                 <div
                     class="flex min-h-0 flex-1 min-w-[300px] max-w-[350px] flex-col rounded-md border border-muted/50 p-3 bg-muted/50"
                     role="region"
-                    aria-label="{board} column"
+                    aria-label="{boardLabels[board] ?? board} column"
                     ondrop={(e) => handleDrop(e, board)}
                     ondragover={handleDragOver}
                 >
@@ -441,8 +396,8 @@
                         class="mb-3 flex items-center justify-between rounded-md border px-3 py-2
                         {taskBoardHeaderStyles[board] ?? 'bg-muted/50'}"
                     >
-                        <h3 class="font-semibold capitalize">
-                            {board}
+                        <h3 class="font-semibold">
+                            {boardLabels[board] ?? board}
                         </h3>
                         <span
                             class="rounded-full bg-background px-2 py-0.5 text-xs font-medium text-muted-foreground border"
@@ -464,8 +419,7 @@
                                 {#each groupTasks as task (task.id)}
                                     <TaskCard
                                         {task}
-                                        mine={task.user.id ===
-                                            $page.props.auth.user.id}
+                                        mine={task.user.id === currentUserId}
                                         metric={metrics[task.id]}
                                         onOpen={openDialog}
                                         onDragStart={handleDragStart}
@@ -475,24 +429,14 @@
                                 {/each}
                             {/each}
                         {:else}
-                            {@const myBoardTasks = myTasksByBoard[board] ?? []}
                             {#each filteredTasks[board] || [] as task (task.id)}
-                                {@const myIndex = myBoardTasks.findIndex(
-                                    (item) => item.id === task.id,
-                                )}
                                 <TaskCard
                                     {task}
-                                    mine={task.user.id ===
-                                        $page.props.auth.user.id}
+                                    mine={task.user.id === currentUserId}
                                     metric={metrics[task.id]}
-                                    canMoveUp={myIndex > 0}
-                                    canMoveDown={myIndex !== -1 &&
-                                        myIndex < myBoardTasks.length - 1}
                                     onOpen={openDialog}
                                     onDragStart={handleDragStart}
                                     onMove={(status) => moveTask(task, status)}
-                                    onMoveUp={() => reorderTask(task, 'up')}
-                                    onMoveDown={() => reorderTask(task, 'down')}
                                 />
                             {/each}
                         {/if}

@@ -297,7 +297,7 @@
                                                     'backlog',
                                                 )}
                                             >
-                                                Backlog: {report
+                                                Planning: {report
                                                     .status_breakdown.backlog}
                                             </Badge>
                                             <Badge

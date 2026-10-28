@@ -26,7 +26,8 @@ class TaskController extends Controller
             ->groupBy('status')
             ->map(function ($statusTasks, $status) {
                 if (in_array($status, ['backlog', 'todo'])) {
-                    return $statusTasks->sortBy('position')->values();
+                    // Newest first: the board reads top-down by recency.
+                    return $statusTasks->sortByDesc('created_at')->values();
                 }
 
                 return $statusTasks->sortByDesc(function ($task) {
