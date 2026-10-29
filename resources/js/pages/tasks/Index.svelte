@@ -44,6 +44,7 @@
         today: 'Today',
         done: 'Done',
     };
+    const DONE_LIMIT = 10;
     const today = todayInAppTimezone();
     const currentUserId = $page.props.auth.user.id;
 
@@ -63,6 +64,13 @@
         }
         return filtered;
     });
+
+    // Done grows forever; show the latest completions and let the user expand.
+    let showAllDone = $state(false);
+    const doneTasks = $derived(filteredTasks.done ?? []);
+    const visibleDone = $derived(
+        showAllDone ? doneTasks : doneTasks.slice(0, DONE_LIMIT),
+    );
 
     // Move Task Logic
     function moveTask(task: Task, newStatus: string) {
@@ -415,7 +423,7 @@
                         class="flex flex-1 flex-col gap-3 overflow-y-auto pr-1"
                     >
                         {#if board === 'done'}
-                            {#each Object.entries(groupTasksByDate(filteredTasks[board] || [])) as [date, groupTasks] (date)}
+                            {#each Object.entries(groupTasksByDate(visibleDone)) as [date, groupTasks] (date)}
                                 <div
                                     class="text-xs font-semibold text-muted-foreground mt-2 mb-1"
                                 >
@@ -433,6 +441,20 @@
                                     />
                                 {/each}
                             {/each}
+
+                            {#if doneTasks.length > DONE_LIMIT}
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    class="w-full"
+                                    aria-expanded={showAllDone}
+                                    onclick={() => (showAllDone = !showAllDone)}
+                                >
+                                    {showAllDone
+                                        ? 'Show fewer'
+                                        : `Show all ${doneTasks.length} done tasks`}
+                                </Button>
+                            {/if}
                         {:else}
                             {#each filteredTasks[board] || [] as task (task.id)}
                                 <TaskCard
