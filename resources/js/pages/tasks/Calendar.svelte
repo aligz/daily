@@ -2,6 +2,7 @@
     import { router } from '@inertiajs/svelte';
     import AppHead from '@/components/AppHead.svelte';
     import RoutineBar from '@/components/checklist/RoutineBar.svelte';
+    import TeamRoutinePanel from '@/components/checklist/TeamRoutinePanel.svelte';
     import CalendarAgenda from '@/components/tasks/CalendarAgenda.svelte';
     import CalendarMonth from '@/components/tasks/CalendarMonth.svelte';
     import CalendarStats from '@/components/tasks/CalendarStats.svelte';
@@ -134,6 +135,10 @@
         />
 
         <RoutineBar {checklist} />
+
+        {#if checklist_team.length > 0 && userId === null}
+            <TeamRoutinePanel members={checklist_team} onSelect={changeUser} />
+        {/if}
 
         <CalendarStats {summary} />
 
