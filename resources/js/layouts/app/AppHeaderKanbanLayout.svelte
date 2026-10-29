@@ -10,6 +10,7 @@
     import AppContent from '@/components/AppContent.svelte';
     import AppLogo from '@/components/AppLogo.svelte';
     import AppShell from '@/components/AppShell.svelte';
+    import ThemeToggle from '@/components/ThemeToggle.svelte';
     import {
         Avatar,
         AvatarFallback,
@@ -115,6 +116,8 @@
             </nav>
 
             <div class="ml-auto flex items-center gap-x-2">
+                <ThemeToggle />
+
                 {#if auth.user}
                     <Sheet bind:open={mobileNavOpen}>
                         <SheetTrigger asChild>
